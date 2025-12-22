@@ -44,7 +44,10 @@ export class ProductsService {
         ]);
 
         return {
-            products,
+            products: products.map((product) => ({
+                ...product,
+                price: product.price.toNumber(),
+            })),
             page,
             perPage: limit,
             count: products.length,
