@@ -7,8 +7,8 @@ import { PrismaService } from 'src/prisma.service';
 export class ProductsService {
     constructor(private prisma: PrismaService) {}
 
-    create(createProductDto: CreateProductDto) {
-        return 'This action adds a new product';
+    createProduct(data: CreateProductDto) {
+        return this.prisma.product.create({ data });
     }
 
     findAll() {
@@ -19,8 +19,11 @@ export class ProductsService {
         return `This action returns a #${id} product`;
     }
 
-    update(id: number, updateProductDto: UpdateProductDto) {
-        return `This action updates a #${id} product`;
+    update(id: string, data: UpdateProductDto) {
+        return this.prisma.product.update({
+            where: { id },
+            data,
+        });
     }
 
     remove(id: number) {
