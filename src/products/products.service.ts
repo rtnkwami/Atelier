@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -8,6 +8,8 @@ import { Prisma } from 'src/generated/prisma/client';
 @Injectable()
 export class ProductsService {
     constructor(private prisma: PrismaService) {}
+
+    /** Basic CRUD Functionality */
 
     createProduct(data: CreateProductDto) {
         return this.prisma.product.create({ data });
@@ -66,5 +68,20 @@ export class ProductsService {
 
     deleteProduct(id: string) {
         return this.prisma.product.delete({ where: { id } });
+    }
+
+    /** More advanced functions and business logic */
+
+    async ensureSufficientProductStock(id: string, desiredQuantity: number) {
+        const product = await this.prisma.product.findUniqueOrThrow({
+            where: { id },
+        });
+        const currentStock = product.stock;
+
+        if (currentStock < desiredQuantity) {
+            throw new BadRequestException(
+                `Insufficient stock for product ${product.name}. Available ${product.stock}, Requested: ${desiredQuantity}`,
+            );
+        }
     }
 }
