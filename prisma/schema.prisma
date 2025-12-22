@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Order {
+  id        String          @id @default(uuid()) @db.Uuid
+  status    OrderStatusEnum @default(pending)
+  userId    String          @db.VarChar
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  total     Decimal         @db.Decimal(10, 2)
+  user      User            @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_caabe91507b3379c7ba73637b84")
+  orderItem OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  quantity    Int
+  priceAtTime Decimal  @db.Decimal(10, 2)
+  orderId     String   @db.Uuid
+  productId   String   @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_073c85ed133e05241040bd70f02")
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_3fb066240db56c9558a91139431")
+}
+
+model Product {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String      @db.VarChar
+  description String?     @db.VarChar
+  category    String      @db.VarChar
+  price       Decimal     @db.Decimal(10, 2)
+  stock       Int
+  images      String[]
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime    @default(now()) @updatedAt @db.Timestamptz(6)
+  orderItem   OrderItem[]
+}
+
+model User {
+  id        String   @id @db.VarChar
+  name      String   @db.VarChar
+  email     String   @unique @db.VarChar
+  avatar    String?  @db.VarChar
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  order     Order[]
+}
+
+enum OrderStatusEnum {
+  pending
+  cancelled
+  completed
+}
