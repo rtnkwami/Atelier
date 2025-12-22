@@ -17,19 +17,19 @@ export class UsersService {
         return this.prisma.user.create({ data: user });
     }
 
-    findAll() {
-        return `This action returns all users`;
+    searchUsers() {
+        return this.prisma.user.findMany();
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} user`;
+    getUser(id: string) {
+        return this.prisma.user.findUnique({ where: { id } });
     }
 
     updateUserProfile(id: string, data: UpdateUserDto) {
         return this.prisma.user.update({ where: { id }, data });
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} user`;
+    async deleteUser(id: string) {
+        return this.prisma.user.delete({ where: { id } });
     }
 }
