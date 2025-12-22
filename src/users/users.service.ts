@@ -7,9 +7,9 @@ import { PrismaService } from 'src/prisma.service';
 export class UsersService {
     constructor(private prisma: PrismaService) {}
 
-    createUser(data: CreateUserDto) {
+    createUser(data: CreateUserDto, userId: string) {
         const user = {
-            id: data.sub,
+            id: userId,
             name: data.email,
             email: data.email,
             avatar: data.picture,
