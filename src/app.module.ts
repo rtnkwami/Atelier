@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from './env.validation';
+import { AuthMiddleware } from './middleware/auth.middleware';
 
 @Module({
     imports: [
@@ -14,4 +15,8 @@ import { validate } from './env.validation';
         UsersModule,
     ],
 })
-export class AppModule {}
+export class AppModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(AuthMiddleware).forRoutes('users');
+    }
+}
