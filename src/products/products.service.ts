@@ -19,7 +19,7 @@ export class ProductsService {
         return `This action returns a #${id} product`;
     }
 
-    update(id: string, data: UpdateProductDto) {
+    updateProduct(id: string, data: UpdateProductDto) {
         return this.prisma.product.update({
             where: { id },
             data,
