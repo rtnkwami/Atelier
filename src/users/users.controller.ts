@@ -33,13 +33,15 @@ export class UsersController {
         return this.usersService.getUser(id);
     }
 
-    @Patch(':id')
-    updateUserProfile(@Param('id') id: string, @Body() data: UpdateUserDto) {
-        return this.usersService.updateUserProfile(id, data);
+    @Patch()
+    updateUserProfile(@Req() request: Request, @Body() data: UpdateUserDto) {
+        const userId = request.auth?.payload.sub;
+        return this.usersService.updateUserProfile(userId!, data);
     }
 
-    @Delete(':id')
-    deleteUserAccount(@Param('id') id: string) {
-        return this.usersService.deleteUser(id);
+    @Delete()
+    deleteUserAccount(@Req() request: Request) {
+        const userId = request.auth?.payload.sub;
+        return this.usersService.deleteUser(userId!);
     }
 }
