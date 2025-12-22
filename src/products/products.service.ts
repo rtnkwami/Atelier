@@ -56,18 +56,15 @@ export class ProductsService {
         };
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} product`;
+    getProduct(id: string) {
+        return this.prisma.product.findUniqueOrThrow({ where: { id } });
     }
 
     updateProduct(id: string, data: UpdateProductDto) {
-        return this.prisma.product.update({
-            where: { id },
-            data,
-        });
+        return this.prisma.product.update({ where: { id }, data });
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} product`;
+    deleteProduct(id: string) {
+        return this.prisma.product.delete({ where: { id } });
     }
 }
