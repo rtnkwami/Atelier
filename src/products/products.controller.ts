@@ -6,23 +6,25 @@ import {
     Patch,
     Param,
     Delete,
+    Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { SearchProductDto } from './dto/search-product.dto';
 
 @Controller('products')
 export class ProductsController {
     constructor(private readonly productsService: ProductsService) {}
 
     @Post()
-    create(@Body() product: CreateProductDto) {
+    createProduct(@Body() product: CreateProductDto) {
         return this.productsService.createProduct(product);
     }
 
     @Get()
-    findAll() {
-        return this.productsService.findAll();
+    searchProducts(@Query() query: SearchProductDto) {
+        return this.productsService.searchProducts(query);
     }
 
     @Get(':id')
@@ -31,7 +33,7 @@ export class ProductsController {
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() data: UpdateProductDto) {
+    updateProduct(@Param('id') id: string, @Body() data: UpdateProductDto) {
         return this.productsService.updateProduct(id, data);
     }
 
