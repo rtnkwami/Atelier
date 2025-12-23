@@ -8,6 +8,7 @@ import { CartsModule } from './carts/carts.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { LoggerModule } from 'nestjs-pino';
 import { OrdersModule } from './orders/orders.module';
+import { AppController } from './app.controller';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { OrdersModule } from './orders/orders.module';
         CartsModule,
         OrdersModule,
     ],
+    controllers: [AppController],
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {
@@ -27,6 +29,7 @@ export class AppModule {
             .exclude(
                 { path: 'products', method: RequestMethod.GET },
                 { path: 'products/:id', method: RequestMethod.GET },
+                { path: 'health', method: RequestMethod.GET },
             )
             .forRoutes('*');
     }
