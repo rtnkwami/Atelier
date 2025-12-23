@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma.service';
 import { ProductsService } from 'src/products/products.service';
 import { CartsService } from 'src/carts/carts.service';
 import { OrderStatusEnum } from 'src/generated/prisma/enums';
+import { OrdersSearchDto } from './dto/search-orders.dto';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -74,8 +76,39 @@ export class OrdersService {
         });
     }
 
-    findAll() {
-        return `This action returns all orders`;
+    async searchOrders(
+        filters?: OrdersSearchDto,
+        userId?: string,
+        page: number = 1,
+        limit: number = 20,
+    ) {
+        const skip = (page - 1) * limit;
+
+        const where: Prisma.OrderWhereInput = {
+            userId,
+            status: filters?.status,
+            createdAt: filters?.dateRange && {
+                gte: filters.dateRange.from,
+                lte: filters.dateRange.to,
+            },
+        };
+
+        const [orders, totalOrders] = await Promise.all([
+            this.prisma.order.findMany({ where, skip, take: limit }),
+            this.prisma.order.count({ where }),
+        ]);
+
+        return {
+            orders: orders.map((order) => ({
+                ...order,
+                total: order.total.toNumber(),
+            })),
+            page,
+            perPage: limit,
+            count: orders.length,
+            total: totalOrders,
+            totalPages: Math.ceil(totalOrders / limit),
+        };
     }
 
     findOne(id: number) {
