@@ -21,22 +21,22 @@ export class OrdersService {
             );
         }
 
-        await Promise.all(
-            userCart.items.map(async (item) => {
-                const { hasStock, requestedStock, currentStock } =
-                    await this.productService.checkIfProductHasSufficentStock(
-                        item.id,
-                        item.quantity,
-                    );
-                if (!hasStock) {
-                    throw new BadRequestException(
-                        `Insufficient stock for product ${item.name}. Available ${currentStock}, Requested: ${requestedStock}`,
-                    );
-                }
-            }),
-        );
-
         return this.prisma.$transaction(async (tx) => {
+            await Promise.all(
+                userCart.items.map(async (item) => {
+                    const { hasStock, requestedStock, currentStock } =
+                        await this.productService.checkIfProductHasSufficentStock(
+                            item.id,
+                            item.quantity,
+                        );
+                    if (!hasStock) {
+                        throw new BadRequestException(
+                            `Insufficient stock for product ${item.name}. Available ${currentStock}, Requested: ${requestedStock}`,
+                        );
+                    }
+                }),
+            );
+
             // Array of product stock decrease promises for simultaneous execution
             await Promise.all(
                 userCart.items.map((item) =>
