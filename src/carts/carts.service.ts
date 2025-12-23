@@ -88,7 +88,7 @@ export class CartsService {
 
     getCart(id: string) {
         const cartKey = `cart-${id}`;
-        return this.cacheManager.get<CreateCartDto>(cartKey);
+        return this.cacheManager.get<CartDto>(cartKey);
     }
 
     clearCart(id: string) {
