@@ -5,10 +5,12 @@ import { ConfigModule } from '@nestjs/config';
 import { validate } from './env.validation';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { CartsModule } from './carts/carts.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, validate }),
+        CacheModule.register({ isGlobal: true }),
         ProductsModule,
         UsersModule,
         CartsModule,
