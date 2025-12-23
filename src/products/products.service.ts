@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -72,16 +72,23 @@ export class ProductsService {
 
     /** More advanced functions and business logic */
 
-    async ensureSufficientProductStock(id: string, desiredQuantity: number) {
+    async checkIfProductHasSufficentStock(id: string, desiredQuantity: number) {
         const product = await this.prisma.product.findUniqueOrThrow({
             where: { id },
         });
         const currentStock = product.stock;
 
         if (currentStock < desiredQuantity) {
-            throw new BadRequestException(
-                `Insufficient stock for product ${product.name}. Available ${product.stock}, Requested: ${desiredQuantity}`,
-            );
+            return {
+                hasStock: false,
+                requestedStock: desiredQuantity,
+                currentStock,
+            };
         }
+        return {
+            hasStock: true,
+            requestedStock: desiredQuantity,
+            currentStock,
+        };
     }
 }
