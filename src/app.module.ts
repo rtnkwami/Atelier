@@ -6,11 +6,13 @@ import { validate } from './env.validation';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { CartsModule } from './carts/carts.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, validate }),
         CacheModule.register({ isGlobal: true }),
+        LoggerModule.forRoot(),
         ProductsModule,
         UsersModule,
         CartsModule,
@@ -21,8 +23,8 @@ export class AppModule {
         consumer
             .apply(AuthMiddleware)
             .exclude(
-                { path: '/products', method: RequestMethod.GET },
-                { path: '/products/:id', method: RequestMethod.GET },
+                { path: 'products', method: RequestMethod.GET },
+                { path: 'products/:id', method: RequestMethod.GET },
             )
             .forRoutes('*');
     }
