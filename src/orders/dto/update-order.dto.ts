@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create-order.dto';
+import { IsEnum, IsNotEmpty } from 'class-validator';
+import { OrderStatusEnum } from 'src/generated/prisma/enums';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class UpdateOrderDto {
+    @IsNotEmpty()
+    @IsEnum(OrderStatusEnum)
+    status: OrderStatusEnum;
+}
