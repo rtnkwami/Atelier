@@ -13,7 +13,8 @@ export class OrdersService {
     ) {}
 
     async createOrder(userId: string) {
-        const userCart = await this.cartsService.getCart(`cart-${userId}`);
+        const cartKey = `cart-${userId}`;
+        const userCart = await this.cartsService.getCart(cartKey);
 
         if (!userCart) {
             throw new BadRequestException(
