@@ -21,7 +21,7 @@ export class OrdersController {
 
     @Get(':id')
     findOne(@Param('id') id: string) {
-        return this.ordersService.findOne(+id);
+        return this.ordersService.getOrder(id);
     }
 
     @Patch(':id')

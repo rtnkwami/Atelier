@@ -111,8 +111,42 @@ export class OrdersService {
         };
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} order`;
+    async getOrder(id: string) {
+        const order = await this.prisma.order.findUniqueOrThrow({
+            relationLoadStrategy: 'join',
+            where: { id },
+            include: {
+                orderItem: {
+                    select: {
+                        quantity: true,
+                        priceAtTime: true,
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                images: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        return {
+            id: order.id,
+            status: order.status,
+            userId: order.userId,
+            total: order.total.toNumber(),
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+            items: order.orderItem.map((item) => ({
+                id: item.product.id,
+                name: item.product.name,
+                images: item.product.images,
+                quantity: item.quantity,
+                price: item.priceAtTime.toNumber(),
+            })),
+        };
     }
 
     updateOrderStatus(id: string, status: OrderStatusEnum) {
