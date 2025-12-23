@@ -7,6 +7,7 @@ import { AuthMiddleware } from './middleware/auth.middleware';
 import { CartsModule } from './carts/carts.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { LoggerModule } from 'nestjs-pino';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { LoggerModule } from 'nestjs-pino';
         ProductsModule,
         UsersModule,
         CartsModule,
+        OrdersModule,
     ],
 })
 export class AppModule {
