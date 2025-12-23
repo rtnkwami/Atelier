@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ProductsService } from 'src/products/products.service';
 import { CartsService } from 'src/carts/carts.service';
+import { OrderStatusEnum } from 'src/generated/prisma/enums';
 
 @Injectable()
 export class OrdersService {
@@ -12,8 +12,8 @@ export class OrdersService {
         private cartsService: CartsService,
     ) {}
 
-    async createOrder(userId: string, cartKey: string) {
-        const userCart = await this.cartsService.getCart(cartKey);
+    async createOrder(userId: string) {
+        const userCart = await this.cartsService.getCart(`cart-${userId}`);
 
         if (!userCart) {
             throw new BadRequestException(
@@ -81,11 +81,11 @@ export class OrdersService {
         return `This action returns a #${id} order`;
     }
 
-    update(id: number, updateOrderDto: UpdateOrderDto) {
-        return `This action updates a #${id} order`;
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} order`;
+    updateOrderStatus(id: string, status: OrderStatusEnum) {
+        return this.prisma.order.update({
+            where: { id },
+            data: { status },
+            select: { id: true, status: true },
+        });
     }
 }
