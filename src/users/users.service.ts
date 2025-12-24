@@ -5,9 +5,9 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UsersService {
-    constructor(private prisma: PrismaService) {}
+    public constructor(private readonly prisma: PrismaService) {}
 
-    createUser(data: CreateUserDto, userId: string) {
+    public createUser(data: CreateUserDto, userId: string) {
         const user = {
             id: userId,
             name: data.email,
@@ -17,19 +17,19 @@ export class UsersService {
         return this.prisma.user.create({ data: user });
     }
 
-    searchUsers() {
+    public searchUsers() {
         return this.prisma.user.findMany();
     }
 
-    getUser(id: string) {
+    public getUser(id: string) {
         return this.prisma.user.findUnique({ where: { id } });
     }
 
-    updateUserProfile(id: string, data: UpdateUserDto) {
+    public updateUserProfile(id: string, data: UpdateUserDto) {
         return this.prisma.user.update({ where: { id }, data });
     }
 
-    async deleteUser(id: string) {
+    public async deleteUser(id: string) {
         return this.prisma.user.delete({ where: { id } });
     }
 }

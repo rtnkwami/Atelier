@@ -2,12 +2,12 @@ import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreateUserDto {
     @IsString()
-    sub: string;
+    public readonly sub: string;
 
     @IsString()
-    email: string;
+    public readonly email: string;
 
     @IsOptional()
     @IsUrl()
-    picture?: string;
+    public readonly picture?: string;
 }

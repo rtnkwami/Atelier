@@ -4,19 +4,19 @@ import { OrderStatusEnum } from 'src/generated/prisma/enums';
 
 class DateRangeDto {
     @IsString()
-    from: string;
+    public readonly from: string;
 
     @IsString()
-    to: string;
+    public readonly to: string;
 }
 
 export class OrdersSearchDto {
     @IsOptional()
     @ValidateNested()
     @Type(() => DateRangeDto)
-    dateRange?: DateRangeDto;
+    public readonly dateRange?: DateRangeDto;
 
     @IsOptional()
     @IsEnum(OrderStatusEnum)
-    status?: OrderStatusEnum;
+    public readonly status?: OrderStatusEnum;
 }

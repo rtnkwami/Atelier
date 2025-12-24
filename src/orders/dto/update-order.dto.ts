@@ -4,5 +4,5 @@ import { OrderStatusEnum } from 'src/generated/prisma/enums';
 export class UpdateOrderDto {
     @IsNotEmpty()
     @IsEnum(OrderStatusEnum)
-    status: OrderStatusEnum;
+    public readonly status: OrderStatusEnum;
 }

@@ -15,32 +15,35 @@ import { type Request } from 'express';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+    public constructor(private readonly usersService: UsersService) {}
 
     @Post()
-    createUser(@Body() data: CreateUserDto, @Req() request: Request) {
+    private createUser(@Body() data: CreateUserDto, @Req() request: Request) {
         const userId = request.auth?.payload.sub;
         return this.usersService.createUser(data, userId!);
     }
 
     @Get()
-    searchUsers() {
+    private searchUsers() {
         return this.usersService.searchUsers();
     }
 
     @Get(':id')
-    getUser(@Param('id') id: string) {
+    private getUser(@Param('id') id: string) {
         return this.usersService.getUser(id);
     }
 
     @Patch()
-    updateUserProfile(@Req() request: Request, @Body() data: UpdateUserDto) {
+    private updateUserProfile(
+        @Req() request: Request,
+        @Body() data: UpdateUserDto,
+    ) {
         const userId = request.auth?.payload.sub;
         return this.usersService.updateUserProfile(userId!, data);
     }
 
     @Delete()
-    deleteUserAccount(@Req() request: Request) {
+    private deleteUserAccount(@Req() request: Request) {
         const userId = request.auth?.payload.sub;
         return this.usersService.deleteUser(userId!);
     }
