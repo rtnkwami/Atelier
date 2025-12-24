@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Prisma
+prisma/migrations/
+prisma/generated/
+
+# Version control
+.git/
+.gitignore
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker
+compose.yaml
+Dockerfile*
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.DS_Store
+*.swp
+*.swo
