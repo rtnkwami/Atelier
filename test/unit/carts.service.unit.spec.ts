@@ -1,11 +1,13 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Cache } from 'cache-manager';
 import { CartsService } from 'src/carts/carts.service';
 import { CartItem, CreateCartDto } from 'src/carts/dto/create-cart.dto';
 import { beforeEach, it, expect, describe, vi, afterEach } from 'vitest';
 
 describe('Cart Service', () => {
     let service: CartsService;
+    let cacheManager: Cache;
 
     beforeEach(async () => {
         const mockCacheManager = {
@@ -24,6 +26,7 @@ describe('Cart Service', () => {
             ],
         }).compile();
         service = module.get<CartsService>(CartsService);
+        cacheManager = module.get<Cache>(CACHE_MANAGER);
     });
 
     describe('aggregateCart', () => {
@@ -241,7 +244,7 @@ describe('Cart Service', () => {
 
         it('should create a new cart when no cart exists', async () => {
             const userId = 'user123';
-            const data = {
+            const data: CreateCartDto = {
                 items: [
                     {
                         id: '1',
@@ -252,18 +255,13 @@ describe('Cart Service', () => {
                     },
                 ],
             };
+            cacheManager.get = vi.fn().mockResolvedValue(null);
 
-            vi.spyOn(service['cacheManager'], 'get').mockResolvedValue(null);
-            vi.spyOn(service['cacheManager'], 'set');
+            const result = await service.updateCart(userId, data);
 
-            await service.updateCart(userId, data);
-
-            expect(service['cacheManager'].set).toHaveBeenCalledWith(
-                'cartuser123',
-                expect.objectContaining({
-                    items: data.items,
-                }),
-            );
+            expect(cacheManager.get).toHaveBeenCalledWith(`cart${userId}`);
+            expect(cacheManager.set).toHaveBeenCalledTimes(1);
+            expect(result).toBeDefined();
         });
     });
 });

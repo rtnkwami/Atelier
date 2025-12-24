@@ -64,7 +64,8 @@ export class CartsService {
 
         if (!currentCart) {
             const cart = this.aggregateCart(data);
-            return this.cacheManager.set<CartDto>(cartKey, cart);
+            await this.cacheManager.set<CartDto>(cartKey, cart);
+            return cart;
         }
 
         const mergedCart = {
