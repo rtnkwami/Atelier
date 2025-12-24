@@ -62,6 +62,12 @@ export class CartsService {
         const cartKey = `cart${id}`;
         const currentCart = await this.cacheManager.get<CartDto>(cartKey);
 
+        if (!data.items.length) {
+            throw new InternalServerErrorException(
+                'Unable to add items to cart. Cart is empty',
+            );
+        }
+
         if (!currentCart) {
             const cart = this.aggregateCart(data);
             await this.cacheManager.set<CartDto>(cartKey, cart);
@@ -77,12 +83,6 @@ export class CartsService {
         const userCart = this.aggregateCart(mergedCart);
 
         await this.cacheManager.set<CreateCartDto>(cartKey, userCart);
-
-        if (!userCart) {
-            throw new InternalServerErrorException(
-                'Unable to add items to cart. Cart is empty',
-            );
-        }
 
         return userCart;
     }

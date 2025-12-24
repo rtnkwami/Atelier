@@ -1,4 +1,5 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
 import { CartsService } from 'src/carts/carts.service';
@@ -262,6 +263,15 @@ describe('Cart Service', () => {
             expect(cacheManager.get).toHaveBeenCalledWith(`cart${userId}`);
             expect(cacheManager.set).toHaveBeenCalledTimes(1);
             expect(result).toBeDefined();
+        });
+
+        it('should throw an error if cart is empty', async () => {
+            const userId = '123';
+            const data: CreateCartDto = { items: [] };
+
+            await expect(
+                service.updateCart(userId, data),
+            ).rejects.toBeInstanceOf(InternalServerErrorException);
         });
     });
 });
