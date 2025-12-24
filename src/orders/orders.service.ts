@@ -9,12 +9,12 @@ import { Prisma } from 'src/generated/prisma/client';
 @Injectable()
 export class OrdersService {
     constructor(
-        private prisma: PrismaService,
-        private productService: ProductsService,
-        private cartsService: CartsService,
+        private readonly prisma: PrismaService,
+        private readonly productService: ProductsService,
+        private readonly cartsService: CartsService,
     ) {}
 
-    async createOrder(userId: string) {
+    private async validateCart(userId: string) {
         const cartKey = `cart-${userId}`;
         const userCart = await this.cartsService.getCart(cartKey);
 
@@ -23,6 +23,11 @@ export class OrdersService {
                 'Cart is empty. No products to place an order',
             );
         }
+        return { userCart, cartKey };
+    }
+
+    public async createOrder(userId: string) {
+        const { userCart, cartKey } = await this.validateCart(userId);
 
         return this.prisma.$transaction(async (tx) => {
             await Promise.all(
@@ -76,7 +81,7 @@ export class OrdersService {
         });
     }
 
-    async searchOrders(
+    public async searchOrders(
         filters?: OrdersSearchDto,
         userId?: string,
         page: number = 1,
@@ -111,7 +116,7 @@ export class OrdersService {
         };
     }
 
-    async getOrder(id: string) {
+    public async getOrder(id: string) {
         const order = await this.prisma.order.findUniqueOrThrow({
             relationLoadStrategy: 'join',
             where: { id },
@@ -149,7 +154,7 @@ export class OrdersService {
         };
     }
 
-    updateOrderStatus(id: string, status: OrderStatusEnum) {
+    public updateOrderStatus(id: string, status: OrderStatusEnum) {
         return this.prisma.order.update({
             where: { id },
             data: { status },
