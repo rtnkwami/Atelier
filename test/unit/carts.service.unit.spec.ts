@@ -2,7 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CartsService } from 'src/carts/carts.service';
 import { CartItem, CreateCartDto } from 'src/carts/dto/create-cart.dto';
-import { beforeEach, it, expect, describe, vi } from 'vitest';
+import { beforeEach, it, expect, describe, vi, afterEach } from 'vitest';
 
 describe('Cart Service', () => {
     let service: CartsService;
@@ -231,6 +231,39 @@ describe('Cart Service', () => {
                     currentCart,
                 )[0].quantity,
             ).toBe(5);
+        });
+    });
+
+    describe('updateCart', () => {
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
+        it('should create a new cart when no cart exists', async () => {
+            const userId = 'user123';
+            const data = {
+                items: [
+                    {
+                        id: '1',
+                        name: 'Item 1',
+                        price: 10,
+                        quantity: 2,
+                        image: 'url1',
+                    },
+                ],
+            };
+
+            vi.spyOn(service['cacheManager'], 'get').mockResolvedValue(null);
+            vi.spyOn(service['cacheManager'], 'set');
+
+            await service.updateCart(userId, data);
+
+            expect(service['cacheManager'].set).toHaveBeenCalledWith(
+                'cartuser123',
+                expect.objectContaining({
+                    items: data.items,
+                }),
+            );
         });
     });
 });
