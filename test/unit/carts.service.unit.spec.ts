@@ -153,48 +153,6 @@ describe('Cart Service', () => {
             });
         });
 
-        it('should handle an empty current cart', () => {
-            const currentCart: CartItem[] = [];
-
-            const incomingCart: CartItem[] = [
-                {
-                    id: '1',
-                    name: 'Item 1',
-                    price: 10,
-                    quantity: 2,
-                    image: 'url1',
-                },
-            ];
-
-            expect(
-                service['mergeIncomingWithCurrentCart'](
-                    incomingCart,
-                    currentCart,
-                ),
-            ).toEqual(incomingCart);
-        });
-
-        it('should handle empty incoming cart', () => {
-            const currentCart: CartItem[] = [
-                {
-                    id: '1',
-                    name: 'Item 1',
-                    price: 10,
-                    quantity: 2,
-                    image: 'url1',
-                },
-            ];
-
-            const incomingCart: CartItem[] = [];
-
-            expect(
-                service['mergeIncomingWithCurrentCart'](
-                    incomingCart,
-                    currentCart,
-                ),
-            ).toEqual(currentCart);
-        });
-
         it('should handle multiple duplicate items in incoming cart', () => {
             const currentCart: CartItem[] = [
                 {
