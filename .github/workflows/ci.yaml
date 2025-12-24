@@ -69,7 +69,9 @@ jobs:
           base: ${{ github.ref_name }}
           filters: |
             changed:
-              - .
+              - src/**
+              - test/**
+              - Dockerfile
 
       - name: Set up pnpm
         if: steps.changes.outputs.changed == 'true'
