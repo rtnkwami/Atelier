@@ -29,7 +29,7 @@ export class ProductsController {
     }
 
     @Get(':id')
-    private findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    private getProduct(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.productsService.getProduct(id);
     }
 

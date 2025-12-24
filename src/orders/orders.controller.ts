@@ -20,7 +20,7 @@ export class OrdersController {
     }
 
     @Get(':id')
-    private findOne(@Param('id') id: string) {
+    private getOrder(@Param('id') id: string) {
         return this.ordersService.getOrder(id);
     }
 

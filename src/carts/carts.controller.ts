@@ -28,7 +28,7 @@ export class CartsController {
     }
 
     @Delete(':id')
-    private remove(@Param('id') id: string) {
+    private clearCart(@Param('id') id: string) {
         return this.cartsService.clearCart(id);
     }
 }
