@@ -12,44 +12,41 @@ on:
       - refactor/*
 
 jobs:
-#   tests:
-#     runs-on: ubuntu-latest
-#     name: Run ${{ matrix.test-type }} tests
+  tests:
+    runs-on: ubuntu-latest
+    name: Run ${{ matrix.test-type }} tests
 
-#     env:
-#       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-#       FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-#       FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-#       FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+    env:
+      DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+      ISSUER_BASE_URL: https://example.com
+      AUDIENCE: example
+
+
     
-#     strategy:
-#       matrix:
-#         test-type: [unit, integration, e2e]
+    strategy:
+      matrix:
+        test-type: [unit]
     
-#     steps:
-#       - uses: actions/checkout@v5
+    steps:
+      - uses: actions/checkout@v5
 
-#       - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-#       - uses: actions/setup-node@v6
-#         with:
-#           node-version: 24
-#           cache: pnpm
-#           cache-dependency-path: pnpm-lock.yaml
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-#       - name: Pull test images
-#         if: matrix.test-type == 'integration'
-#         run: docker pull postgres:18 && docker pull redis:8.4.0
+      - name: Generate Prisma client
+        working-directory: packages/api
+        run: pnpm prisma generate
 
-#       - name: Generate Prisma client
-#         working-directory: packages/api
-#         run: pnpm prisma generate
-
-#       - name: Run ${{ matrix.test-type }} tests
-#         run: pnpm test:api:${{ matrix.test-type }}
+      - name: Run tests
+        run: pnpm test
 
   build:
     # needs: [tests]
