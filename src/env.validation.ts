@@ -12,17 +12,17 @@ class EnvironmentVariables {
     @IsNumber()
     @Min(0)
     @Max(65535)
-    PORT: number;
+    public readonly PORT: number;
 
     @IsString()
-    DATABASE_URL: string;
+    public readonly DATABASE_URL: string;
 
     @IsString()
-    AUDIENCE: string;
+    public readonly AUDIENCE: string;
 
     @IsString()
     @IsUrl()
-    ISSUER_BASE_URL: string;
+    public readonly ISSUER_BASE_URL: string;
 }
 
 export function validate(config: Record<string, unknown>) {

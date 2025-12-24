@@ -8,7 +8,7 @@ import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class OrdersService {
-    constructor(
+    public constructor(
         private readonly prisma: PrismaService,
         private readonly productService: ProductsService,
         private readonly cartsService: CartsService,

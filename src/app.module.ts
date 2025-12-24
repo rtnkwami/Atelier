@@ -23,7 +23,7 @@ import { AppController } from './app.controller';
     controllers: [AppController],
 })
 export class AppModule {
-    configure(consumer: MiddlewareConsumer) {
+    private configure(consumer: MiddlewareConsumer) {
         consumer
             .apply(AuthMiddleware)
             .exclude(
