@@ -7,15 +7,15 @@ import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class ProductsService {
-    constructor(private prisma: PrismaService) {}
+    public constructor(private prisma: PrismaService) {}
 
     /** Basic CRUD Functionality */
 
-    createProduct(data: CreateProductDto) {
+    public createProduct(data: CreateProductDto) {
         return this.prisma.product.create({ data });
     }
 
-    async searchProducts(
+    public async searchProducts(
         filters?: SearchProductDto,
         page: number = 1,
         limit: number = 20,
@@ -58,21 +58,24 @@ export class ProductsService {
         };
     }
 
-    getProduct(id: string) {
+    public getProduct(id: string) {
         return this.prisma.product.findUniqueOrThrow({ where: { id } });
     }
 
-    updateProduct(id: string, data: UpdateProductDto) {
+    public updateProduct(id: string, data: UpdateProductDto) {
         return this.prisma.product.update({ where: { id }, data });
     }
 
-    deleteProduct(id: string) {
+    public deleteProduct(id: string) {
         return this.prisma.product.delete({ where: { id } });
     }
 
     /** More advanced functions and business logic */
 
-    async checkIfProductHasSufficentStock(id: string, desiredQuantity: number) {
+    public async checkIfProductHasSufficentStock(
+        id: string,
+        desiredQuantity: number,
+    ) {
         const product = await this.prisma.product.findUniqueOrThrow({
             where: { id },
         });

@@ -4,46 +4,46 @@ import { Type } from 'class-transformer';
 export class SearchProductDto {
     @IsOptional()
     @IsString()
-    name?: string;
+    public readonly name?: string;
 
     @IsOptional()
     @IsString()
-    category?: string;
+    public readonly category?: string;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(0)
-    minPrice?: number;
+    public readonly minPrice?: number;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(0)
-    maxPrice?: number;
+    public readonly maxPrice?: number;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(0)
-    minStock?: number;
+    public readonly minStock?: number;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(0)
-    maxStock?: number;
+    public readonly maxStock?: number;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(1)
-    page?: number = 1;
+    public readonly page?: number = 1;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     @Min(1)
     @Max(100)
-    limit?: number = 20;
+    public readonly limit?: number = 20;
 }

@@ -16,25 +16,25 @@ import { SearchProductDto } from './dto/search-product.dto';
 
 @Controller('products')
 export class ProductsController {
-    constructor(private readonly productsService: ProductsService) {}
+    public constructor(private readonly productsService: ProductsService) {}
 
     @Post()
-    createProduct(@Body() product: CreateProductDto) {
+    private createProduct(@Body() product: CreateProductDto) {
         return this.productsService.createProduct(product);
     }
 
     @Get()
-    searchProducts(@Query() query: SearchProductDto) {
+    private searchProducts(@Query() query: SearchProductDto) {
         return this.productsService.searchProducts(query);
     }
 
     @Get(':id')
-    findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    private findOne(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.productsService.getProduct(id);
     }
 
     @Patch(':id')
-    updateProduct(
+    private updateProduct(
         @Param('id', new ParseUUIDPipe()) id: string,
         @Body() data: UpdateProductDto,
     ) {
@@ -42,7 +42,7 @@ export class ProductsController {
     }
 
     @Delete(':id')
-    remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    private remove(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.productsService.deleteProduct(id);
     }
 }

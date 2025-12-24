@@ -11,26 +11,26 @@ import {
 
 export class CartItem {
     @IsUUID()
-    id: string;
+    public readonly id: string;
 
     @IsString()
-    name: string;
+    public readonly name: string;
 
     @IsNumber()
     @IsPositive()
-    price: number;
+    public readonly price: number;
 
     @IsNumber()
     @IsPositive()
-    quantity: number;
+    public readonly quantity: number;
 
     @IsUrl()
-    image: string;
+    public readonly image: string;
 }
 
 export class CreateCartDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CartItem)
-    items: CartItem[];
+    public readonly items: CartItem[];
 }

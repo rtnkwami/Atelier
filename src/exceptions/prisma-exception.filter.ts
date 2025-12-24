@@ -9,7 +9,10 @@ import { Prisma } from 'src/generated/prisma/client';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
-    catch(error: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
+    public catch(
+        error: Prisma.PrismaClientKnownRequestError,
+        host: ArgumentsHost,
+    ) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
 

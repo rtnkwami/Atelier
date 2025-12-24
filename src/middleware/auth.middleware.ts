@@ -5,9 +5,9 @@ import { auth } from 'express-oauth2-jwt-bearer';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-    constructor(private readonly configService: ConfigService) {}
+    public constructor(private readonly configService: ConfigService) {}
 
-    use(req: Request, res: Response, next: NextFunction) {
+    public use(req: Request, res: Response, next: NextFunction) {
         auth({
             audience: this.configService.get<string>('AUDIENCE'),
             issuerBaseURL: this.configService.get<string>('ISSUER_BASE_URL'),

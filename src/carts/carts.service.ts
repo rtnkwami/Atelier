@@ -15,9 +15,9 @@ type CartDto = {
 
 @Injectable()
 export class CartsService {
-    constructor(
+    public constructor(
         @Inject(CACHE_MANAGER)
-        private cacheManager: Cache,
+        private readonly cacheManager: Cache,
     ) {}
 
     private aggregateCart(data: CreateCartDto) {
@@ -58,7 +58,7 @@ export class CartsService {
         return Array.from(cart.values());
     }
 
-    async updateCart(id: string, data: CreateCartDto) {
+    public async updateCart(id: string, data: CreateCartDto) {
         const cartKey = `cart${id}`;
         const currentCart = await this.cacheManager.get<CartDto>(cartKey);
 
@@ -86,12 +86,12 @@ export class CartsService {
         return userCart;
     }
 
-    getCart(id: string) {
+    public getCart(id: string) {
         const cartKey = `cart-${id}`;
         return this.cacheManager.get<CartDto>(cartKey);
     }
 
-    clearCart(id: string) {
+    public clearCart(id: string) {
         const cartKey = `cart-${id}`;
         return this.cacheManager.del(cartKey);
     }

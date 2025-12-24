@@ -11,28 +11,28 @@ import {
 export class CreateProductDto {
     @IsNotEmpty()
     @IsString()
-    name: string;
+    public readonly name: string;
 
     @IsOptional()
     @IsString()
-    description: string;
+    public readonly description: string;
 
     @IsNotEmpty()
     @IsString()
-    category: string;
+    public readonly category: string;
 
     @IsNotEmpty()
     @IsNumber()
     @IsPositive()
-    price: number;
+    public readonly price: number;
 
     @IsNotEmpty()
     @IsNumber()
     @IsPositive()
-    stock: number;
+    public readonly stock: number;
 
     @IsOptional()
     @IsArray()
     @IsUrl({}, { each: true })
-    images?: string[];
+    public readonly images?: string[];
 }
