@@ -24,8 +24,21 @@ export class PrismaExceptionFilter implements ExceptionFilter {
                 });
                 return;
 
+            case 'P1001':
+            case 'ECONNREFUSED':
+                response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
+                    statusCode: 503,
+                    message: 'Service temporarily unavailable',
+                });
+                return;
+
             default:
-                throw error;
+                response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    statusCode: 500,
+                    message: 'Internal server error',
+                    error: error.code,
+                });
+                return;
         }
     }
 }
