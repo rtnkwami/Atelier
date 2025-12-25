@@ -59,7 +59,7 @@ export class CartsService {
     }
 
     public async updateCart(id: string, data: CreateCartDto) {
-        const cartKey = `cart${id}`;
+        const cartKey = `cart-${id}`;
         const currentCart = await this.cacheManager.get<CartDto>(cartKey);
 
         if (!data.items.length) {

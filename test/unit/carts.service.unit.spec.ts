@@ -218,7 +218,7 @@ describe('Cart Service', () => {
 
             const result = await service.updateCart(userId, data);
 
-            expect(cacheManager.get).toHaveBeenCalledWith(`cart${userId}`);
+            expect(cacheManager.get).toHaveBeenCalledWith(`cart-${userId}`);
             expect(cacheManager.set).toHaveBeenCalledTimes(1);
             expect(result).toBeDefined();
         });
