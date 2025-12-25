@@ -37,3 +37,9 @@ module "network" {
   resource_prefix = var.resource_prefix
   vpc_cidr_block = "10.16.0.0/16"
 }
+
+module "compute" {
+  source = "./compute"
+  resource_prefix = var.resource_prefix
+  project_name = var.project_name
+}
