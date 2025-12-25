@@ -31,5 +31,9 @@ locals {
 
 module "network" {
   source             = "./network"
+
   availability_zones = local.availability_zones
+  project_name = var.project_name
+  resource_prefix = var.resource_prefix
+  vpc_cidr_block = "10.16.0.0/16"
 }
