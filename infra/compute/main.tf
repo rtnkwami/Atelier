@@ -1,4 +1,4 @@
-resource "aws_ecs_cluster" "nexus_cluster" {
+resource "aws_ecs_cluster" "cluster" {
   name = "${var.resource_prefix}-ecs-cluster"
 
   tags = {
@@ -32,4 +32,17 @@ resource "aws_ecs_task_definition" "api_task" {
       ]
     }
   ])
+}
+
+resource "aws_ecs_service" "api_service" {
+  name = "${var.resource_prefix}-api-service"
+  cluster = aws_ecs_cluster.cluster.id
+  task_definition = aws_ecs_task_definition.api_task.arn
+  desired_count = 1
+  launch_type = "FARGATE"
+
+  network_configuration {
+    assign_public_ip = true
+    subnets = var.web_subnet_ids
+  }
 }

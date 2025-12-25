@@ -12,3 +12,8 @@ variable "api_image" {
   type = string
   description = "Container image URI for api service"
 }
+
+variable "web_subnet_ids" {
+  type = list(string)
+  description = "IDs of web subnets to deploy public tasks in"
+}

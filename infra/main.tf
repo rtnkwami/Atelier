@@ -43,4 +43,5 @@ module "compute" {
   resource_prefix = var.resource_prefix
   project_name = var.project_name
   api_image = var.api_image
+  web_subnet_ids = module.network.web_subnet_ids
 }
