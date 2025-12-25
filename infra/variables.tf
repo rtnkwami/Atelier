@@ -15,3 +15,20 @@ variable "api_image" {
   description = "Container image URI for api service"
   default = "docker.io/weaverofinfinity/atelier"
 }
+
+#----------------- Sensitive Variables ------------------#
+
+variable "database_url" {
+  type = string
+  sensitive = true
+}
+
+variable "issuer_base_url" {
+  type = string
+  sensitive = true
+}
+
+variable "audience" {
+  type = string
+  sensitive = true
+}

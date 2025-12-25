@@ -24,6 +24,11 @@ resource "aws_ecs_task_definition" "api_task" {
       name = "${var.resource_prefix}-api"
       image = var.api_image
       essential = true
+      environment = [
+        { "name": "DATABASE_URL", "value": var.database_url },
+        { "name": "ISSUER_BASE_URL", "value": var.issuer_base_url },
+        { "name": "AUDIENCE", "value": var.audience }
+      ]
       portMappings = [
         {
           containerPort = 5000,

@@ -41,9 +41,13 @@ module "network" {
 
 module "compute" {
   source = "./compute"
+  
   resource_prefix = var.resource_prefix
   project_name = var.project_name
   api_image = var.api_image
   web_subnet_ids = module.network.web_subnet_ids
   public_security_group_id = module.network.public_security_group_id
+  database_url = var.database_url
+  issuer_base_url = var.issuer_base_url
+  audience = var.audience
 }
