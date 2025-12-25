@@ -9,6 +9,7 @@ terraform {
   backend "s3" {
     bucket  = "niovial-sandbox-terraform-state"
     key     = "Sandbox/Atelier/terraform.tfstate"
+    encrypt = true
     region  = "us-east-1"
     profile = "sandbox"
   }
