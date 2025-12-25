@@ -1,4 +1,4 @@
-resource "aws_vpc" "nexus_vpc" {
+resource "aws_vpc" "vpc" {
   cidr_block                       = var.vpc_cidr_block
   assign_generated_ipv6_cidr_block = true
 
@@ -9,8 +9,8 @@ resource "aws_vpc" "nexus_vpc" {
   }
 }
 
-resource "aws_internet_gateway" "nexus_vpc_igw" {
-  vpc_id = aws_vpc.nexus_vpc.id
+resource "aws_internet_gateway" "vpc_igw" {
+  vpc_id = aws_vpc.vpc.id
 
   tags = {
     "Name"         = "${var.resource_prefix}-vpc-igw"
@@ -29,10 +29,10 @@ locals {
 resource "aws_subnet" "web_subnets" {
   for_each = local.availability_zones
 
-  vpc_id                          = aws_vpc.nexus_vpc.id
+  vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key))
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key))
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
   assign_ipv6_address_on_creation = true
   map_public_ip_on_launch         = true
 
@@ -45,16 +45,16 @@ resource "aws_subnet" "web_subnets" {
 
 # Make web subnet public
 resource "aws_route_table" "web_route_table" {
-  vpc_id = aws_vpc.nexus_vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.nexus_vpc_igw.id
+    gateway_id = aws_internet_gateway.vpc_igw.id
   }
 
   route {
     ipv6_cidr_block = "::/0"
-    gateway_id      = aws_internet_gateway.nexus_vpc_igw.id
+    gateway_id      = aws_internet_gateway.vpc_igw.id
   }
 
   tags = {
@@ -77,10 +77,10 @@ resource "aws_route_table_association" "web_subnet_rt_association" {
 resource "aws_subnet" "app_subnets" {
   for_each = local.availability_zones
 
-  vpc_id                          = aws_vpc.nexus_vpc.id
+  vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 3)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 3)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -93,10 +93,10 @@ resource "aws_subnet" "app_subnets" {
 resource "aws_subnet" "db_subnets" {
   for_each = local.availability_zones
 
-  vpc_id                          = aws_vpc.nexus_vpc.id
+  vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 6)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 6)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -109,10 +109,10 @@ resource "aws_subnet" "db_subnets" {
 resource "aws_subnet" "reserved_subnets" {
   for_each = local.availability_zones
 
-  vpc_id                          = aws_vpc.nexus_vpc.id
+  vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 9)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 9)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -151,7 +151,7 @@ resource "aws_subnet" "reserved_subnets" {
 # resource "aws_route_table" "private_subnet_route_table" {
 #   for_each = local.availability_zones
 
-#   vpc_id = aws_vpc.nexus_vpc.id
+#   vpc_id = aws_vpc.vpc.id
 
 #   route {
 #     cidr_block = "0.0.0.0/0"
@@ -185,3 +185,5 @@ resource "aws_subnet" "reserved_subnets" {
 #   subnet_id      = aws_subnet.reserved_subnets[each.key].id
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
 # }
+
+

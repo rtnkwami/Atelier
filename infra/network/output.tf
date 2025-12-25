@@ -1,5 +1,5 @@
 output "vpc_id" {
-  value = aws_vpc.nexus_vpc.id
+  value = aws_vpc.vpc.id
 }
 
 output "web_subnet_ids" {
