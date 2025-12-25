@@ -16,6 +16,11 @@ variable "api_image" {
   default     = "docker.io/weaverofinfinity/atelier"
 }
 
+variable "vpc_cidr_range" {
+  type = string
+  default = "10.16.0.0/16"
+}
+
 #----------------- Sensitive Variables ------------------#
 
 variable "database_url" {

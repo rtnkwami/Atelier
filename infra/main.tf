@@ -36,7 +36,7 @@ module "network" {
   availability_zones = local.availability_zones
   project_name       = var.project_name
   resource_prefix    = var.resource_prefix
-  vpc_cidr_block     = "10.16.0.0/16"
+  vpc_cidr_block     = var.vpc_cidr_range
 }
 
 module "compute" {
