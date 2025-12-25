@@ -19,5 +19,5 @@ output "db_subnet_ids" {
 
 output "reserved_subnet_ids" {
   description = "IDs of the private reserved subnets"
-  value = [for subnet in aws_aws_subnet.reserved_subnets : subnet.id]
+  value = [for subnet in aws_subnet.reserved_subnets : subnet.id]
 }
