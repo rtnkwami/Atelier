@@ -44,5 +44,6 @@ resource "aws_ecs_service" "api_service" {
   network_configuration {
     assign_public_ip = true
     subnets = var.web_subnet_ids
+    security_groups = [var.public_security_group_id]
   }
 }

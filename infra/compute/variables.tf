@@ -17,3 +17,8 @@ variable "web_subnet_ids" {
   type = list(string)
   description = "IDs of web subnets to deploy public tasks in"
 }
+
+variable "public_security_group_id" {
+  type = string
+  description = "ID of security group allowing public internet access to api"
+}
