@@ -20,16 +20,17 @@ resource "aws_internet_gateway" "nexus_vpc_igw" {
 }
 
 locals {
-  az_letters = toset(var.availability_zones)
+  availability_zones = toset(var.availability_zones)
 }
 
 # ========================================
 # PUBLIC SUBNETS
 # ========================================
 resource "aws_subnet" "web_subnets" {
-  for_each = local.az_letters
+  for_each = local.availability_zones
   
   vpc_id                          = aws_vpc.nexus_vpc.id
+  availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key))
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
   assign_ipv6_address_on_creation = true
@@ -64,7 +65,7 @@ resource "aws_route_table" "web_route_table" {
 }
 
 resource "aws_route_table_association" "web_subnet_rt_association" {
-  for_each = local.az_letters
+  for_each = local.availability_zones
 
   subnet_id      = aws_subnet.web_subnets[each.key].id
   route_table_id = aws_route_table.web_route_table.id
@@ -74,9 +75,10 @@ resource "aws_route_table_association" "web_subnet_rt_association" {
 # PRIVATE SUBNETS
 # ========================================
 resource "aws_subnet" "app_subnets" {
-  for_each =  local.az_letters
+  for_each =  local.availability_zones
   
   vpc_id                          = aws_vpc.nexus_vpc.id
+  availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 3)
   assign_ipv6_address_on_creation = true
@@ -89,9 +91,10 @@ resource "aws_subnet" "app_subnets" {
 }
 
 resource "aws_subnet" "db_subnets" {
-  for_each = local.az_letters
+  for_each = local.availability_zones
   
   vpc_id                          = aws_vpc.nexus_vpc.id
+  availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 6)
   assign_ipv6_address_on_creation = true
@@ -104,9 +107,10 @@ resource "aws_subnet" "db_subnets" {
 }
 
 resource "aws_subnet" "reserved_subnets" {
-  for_each = local.az_letters
+  for_each = local.availability_zones
   
   vpc_id                          = aws_vpc.nexus_vpc.id
+  availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 9)
   assign_ipv6_address_on_creation = true
@@ -121,7 +125,7 @@ resource "aws_subnet" "reserved_subnets" {
 # Very expensive resource make sure you exclude during apply unless you need it.
 # Uncomment this only if you really need internet connectivity for private instances
 # resource "aws_eip" "nat_gateway_eips" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
 #   domain = "vpc"
   
 #   tags = {
@@ -132,7 +136,7 @@ resource "aws_subnet" "reserved_subnets" {
 # }
 
 # resource "aws_nat_gateway" "nat_gateway" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
 
 #   allocation_id = aws_eip.nat_gateway_eips[each.key].id
 #   subnet_id = aws_subnet.web_subnets[each.key].id
@@ -145,7 +149,7 @@ resource "aws_subnet" "reserved_subnets" {
 # }
 
 # resource "aws_route_table" "private_subnet_route_table" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
   
 #   vpc_id = aws_vpc.nexus_vpc.id
 
@@ -162,21 +166,21 @@ resource "aws_subnet" "reserved_subnets" {
 # }
 
 # resource "aws_route_table_association" "app_subnet_rt_association" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
 
 #   subnet_id      = aws_subnet.app_subnets[each.key].id
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
 # }
 
 # resource "aws_route_table_association" "db_subnet_rt_association" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
 
 #   subnet_id      = aws_subnet.db_subnets[each.key].id
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
 # }
 
 # resource "aws_route_table_association" "reserved_subnet_rt_association" {
-#   for_each = local.az_letters
+#   for_each = local.availability_zones
 
 #   subnet_id      = aws_subnet.reserved_subnets[each.key].id
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id

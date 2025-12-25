@@ -5,7 +5,7 @@ terraform {
       version = "~> 6.0"
     }
   }
-  
+
   backend "s3" {
     bucket  = "niovial-sandbox-terraform-state"
     key     = "Sandbox/Atelier/terraform.tfstate"
@@ -21,8 +21,12 @@ provider "aws" {
 
 
 # ------------ Module Configuration -------------- #
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 locals {
-  availability_zones = ["a", "b", "c"]
+  availability_zones = slice(data.aws_availability_zones.available.names, 0, 3)
 }
 
 module "network" {

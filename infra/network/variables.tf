@@ -19,5 +19,4 @@ variable "resource_prefix" {
 variable "availability_zones" {
   type        = list(string)
   description = "List of availability zone suffixes"
-  default     = ["a", "b", "c"]
 }
