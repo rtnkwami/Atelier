@@ -17,8 +17,7 @@ RUN pnpm prisma generate
 
 RUN pnpm build
 
-RUN rm -rf node_modules
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm prune --prod
 
 
 FROM node:24-alpine AS production
