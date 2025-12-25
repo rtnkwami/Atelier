@@ -1,0 +1,183 @@
+resource "aws_vpc" "nexus_vpc" {
+  cidr_block                       = var.vpc_cidr_block
+  assign_generated_ipv6_cidr_block = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-vpc"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+resource "aws_internet_gateway" "nexus_vpc_igw" {
+  vpc_id = aws_vpc.nexus_vpc.id
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-vpc-igw"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+locals {
+  az_letters = toset(var.availability_zones)
+}
+
+# ========================================
+# PUBLIC SUBNETS
+# ========================================
+resource "aws_subnet" "web_subnets" {
+  for_each = local.az_letters
+  
+  vpc_id                          = aws_vpc.nexus_vpc.id
+  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key))
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
+  assign_ipv6_address_on_creation = true
+  map_public_ip_on_launch = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-sn-web-${each.key}"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+# Make web subnet public
+resource "aws_route_table" "web_route_table" {
+  vpc_id = aws_vpc.nexus_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.nexus_vpc_igw.id
+  }
+
+  route {
+    ipv6_cidr_block = "::/0"
+    gateway_id = aws_internet_gateway.nexus_vpc_igw.id
+  }
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-web-route-table"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+resource "aws_route_table_association" "web_subnet_rt_association" {
+  for_each = local.az_letters
+
+  subnet_id      = aws_subnet.web_subnets[each.key].id
+  route_table_id = aws_route_table.web_route_table.id
+}
+
+# ========================================
+# PRIVATE SUBNETS
+# ========================================
+resource "aws_subnet" "app_subnets" {
+  for_each =  local.az_letters
+  
+  vpc_id                          = aws_vpc.nexus_vpc.id
+  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 3)
+  assign_ipv6_address_on_creation = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-sn-app-${each.key}"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+resource "aws_subnet" "db_subnets" {
+  for_each = local.az_letters
+  
+  vpc_id                          = aws_vpc.nexus_vpc.id
+  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 6)
+  assign_ipv6_address_on_creation = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-sn-db-${each.key}"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+resource "aws_subnet" "reserved_subnets" {
+  for_each = local.az_letters
+  
+  vpc_id                          = aws_vpc.nexus_vpc.id
+  cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 9)
+  assign_ipv6_address_on_creation = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-sn-reserved-${each.key}"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
+
+# Very expensive resource make sure you exclude during apply unless you need it.
+# Uncomment this only if you really need internet connectivity for private instances
+# resource "aws_eip" "nat_gateway_eips" {
+#   for_each = local.az_letters
+#   domain = "vpc"
+  
+#   tags = {
+#     "Name" = "nexus-nat-gw-eip-${each.key}"
+#     "Project"      = "Nexus"
+#     "ResourceType" = "Networking"
+#   }
+# }
+
+# resource "aws_nat_gateway" "nat_gateway" {
+#   for_each = local.az_letters
+
+#   allocation_id = aws_eip.nat_gateway_eips[each.key].id
+#   subnet_id = aws_subnet.web_subnets[each.key].id
+  
+#   tags = {
+#     Name          = "nexus-nat-gw-${each.key}"
+#     Project       = "Nexus"
+#     ResourceType  = "Networking"
+#   }
+# }
+
+# resource "aws_route_table" "private_subnet_route_table" {
+#   for_each = local.az_letters
+  
+#   vpc_id = aws_vpc.nexus_vpc.id
+
+#   route {
+#     cidr_block = "0.0.0.0/0"
+#     nat_gateway_id = aws_nat_gateway.nat_gateway[each.key].id
+#   }
+
+#   tags = {
+#     "Name"         = "nexus-private-subnet-route-table"
+#     "Project"      = "Nexus"
+#     "ResourceType" = "Networking"
+#   }
+# }
+
+# resource "aws_route_table_association" "app_subnet_rt_association" {
+#   for_each = local.az_letters
+
+#   subnet_id      = aws_subnet.app_subnets[each.key].id
+#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
+# }
+
+# resource "aws_route_table_association" "db_subnet_rt_association" {
+#   for_each = local.az_letters
+
+#   subnet_id      = aws_subnet.db_subnets[each.key].id
+#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
+# }
+
+# resource "aws_route_table_association" "reserved_subnet_rt_association" {
+#   for_each = local.az_letters
+
+#   subnet_id      = aws_subnet.reserved_subnets[each.key].id
+#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
+# }
