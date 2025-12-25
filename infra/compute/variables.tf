@@ -9,33 +9,33 @@ variable "project_name" {
 }
 
 variable "api_image" {
-  type = string
+  type        = string
   description = "Container image URI for api service"
 }
 
 variable "web_subnet_ids" {
-  type = list(string)
+  type        = list(string)
   description = "IDs of web subnets to deploy public tasks in"
 }
 
 variable "public_security_group_id" {
-  type = string
+  type        = string
   description = "ID of security group allowing public internet access to api"
 }
 
 #----------------- Sensitive Variables ------------------#
 
 variable "database_url" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "issuer_base_url" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "audience" {
-  type = string
+  type      = string
   sensitive = true
 }

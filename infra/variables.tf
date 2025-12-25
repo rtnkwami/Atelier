@@ -1,34 +1,34 @@
 variable "project_name" {
   type        = string
   description = "Project name for resource tagging"
-  default = "Atelier"
+  default     = "Atelier"
 }
 
 variable "resource_prefix" {
   type        = string
   description = "Prefix for resource names"
-  default = "atelier"
+  default     = "atelier"
 }
 
 variable "api_image" {
-  type = string
+  type        = string
   description = "Container image URI for api service"
-  default = "docker.io/weaverofinfinity/atelier"
+  default     = "docker.io/weaverofinfinity/atelier"
 }
 
 #----------------- Sensitive Variables ------------------#
 
 variable "database_url" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "issuer_base_url" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "audience" {
-  type = string
+  type      = string
   sensitive = true
 }
