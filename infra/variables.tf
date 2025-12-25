@@ -9,3 +9,9 @@ variable "resource_prefix" {
   description = "Prefix for resource names"
   default = "atelier"
 }
+
+variable "api_image" {
+  type = string
+  description = "Container image URI for api service"
+  default = "docker.io/weaverofinfinity/atelier"
+}

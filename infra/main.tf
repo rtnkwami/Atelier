@@ -42,4 +42,5 @@ module "compute" {
   source = "./compute"
   resource_prefix = var.resource_prefix
   project_name = var.project_name
+  api_image = var.api_image
 }

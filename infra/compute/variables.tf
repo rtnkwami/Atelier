@@ -7,3 +7,8 @@ variable "project_name" {
   type        = string
   description = "Project name for resource tagging"
 }
+
+variable "api_image" {
+  type = string
+  description = "Container image URI for api service"
+}
