@@ -36,15 +36,18 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: api/pnpm-lock.yaml
 
       - name: Install dependencies
+        working-directory: api
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
+        working-directory: api
         run: pnpm prisma generate
 
       - name: Run tests
+        working-directory: api
         run: pnpm test
 
   build:
@@ -65,9 +68,9 @@ jobs:
           base: ${{ github.ref_name }}
           filters: |
             changed:
-              - src/**
-              - test/**
-              - Dockerfile
+              - api/src/**
+              - api/test/**
+              - api/Dockerfile
 
       - name: Set up pnpm
         if: steps.changes.outputs.changed == 'true'
@@ -81,10 +84,11 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: api/pnpm-lock.yaml
 
       - name: Install dependencies
         if: steps.changes.outputs.changed == 'true'
+        working-directory: api
         run: pnpm install
 
       - name: Login to Docker Hub
@@ -98,7 +102,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./api
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier:${{ github.sha }}
