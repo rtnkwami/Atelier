@@ -23,6 +23,6 @@ async function bootstrap() {
     );
 
     const port = configService.get<number>('PORT');
-    await app.listen(port ?? 5000);
+    await app.listen(port ?? 5000, '0.0.0.0');
 }
 void bootstrap();
