@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsPositive,
+    IsString,
+    ValidateNested,
+} from 'class-validator';
 import { OrderStatusEnum } from 'src/generated/prisma/enums';
 
 class DateRangeDto {
@@ -19,4 +26,14 @@ export class OrdersSearchDto {
     @IsOptional()
     @IsEnum(OrderStatusEnum)
     public readonly status?: OrderStatusEnum;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    public readonly page?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    public readonly limit?: number;
 }

@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Req } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Req,
+    Query,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 
 import type { Request } from 'express';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrdersSearchDto } from './dto/search-orders.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -15,8 +25,12 @@ export class OrdersController {
     }
 
     @Get()
-    private searchOrders() {
-        return this.ordersService.searchOrders();
+    private searchOrders(
+        @Query() query: OrdersSearchDto,
+        @Req() request: Request,
+    ) {
+        const userId = request.auth?.payload.sub;
+        return this.ordersService.searchOrders(query, userId);
     }
 
     @Get(':id')
