@@ -186,4 +186,32 @@ resource "aws_subnet" "reserved_subnets" {
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
 # }
 
+resource "aws_security_group" "allow_api_traffic" {
+  name = "${var.resource_prefix}-allow--all-api-traffic"
+  description = "Allow all traffic to and from api"
+  vpc_id = aws_vpc.vpc.id
+}
 
+resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv4" {
+  security_group_id = aws_security_group.allow_api_traffic.id
+  ip_protocol = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv6" {
+  security_group_id = aws_security_group.allow_api_traffic.id
+  ip_protocol = "-1"
+  cidr_ipv6 = "::/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv4" {
+  security_group_id = aws_security_group.allow_api_traffic.id
+  ip_protocol = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv6" {
+  security_group_id = aws_security_group.allow_api_traffic.id
+  ip_protocol = "-1"
+  cidr_ipv6 = "::/0"
+}

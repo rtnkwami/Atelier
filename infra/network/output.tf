@@ -21,3 +21,7 @@ output "reserved_subnet_ids" {
   description = "IDs of the private reserved subnets"
   value       = [for subnet in aws_subnet.reserved_subnets : subnet.id]
 }
+
+output "public_security_group_id" {
+  value = aws_security_group.allow_api_traffic.id
+}
