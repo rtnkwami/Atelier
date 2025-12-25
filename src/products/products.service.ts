@@ -70,7 +70,7 @@ export class ProductsService {
         return this.prisma.product.delete({ where: { id } });
     }
 
-    /** More advanced functions and business logic */
+    /** More advanced functions and business logic. */
 
     public async checkIfProductHasSufficentStock(
         id: string,
