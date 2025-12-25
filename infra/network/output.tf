@@ -1,3 +1,7 @@
+output "vpc_id" {
+  value = aws_vpc.nexus_vpc.id
+}
+
 output "web_subnet_ids" {
   description = "IDs of the public web subnets"
   value       = [for subnet in aws_subnet.web_subnets : subnet.id]
