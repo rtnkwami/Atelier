@@ -1,12 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Param,
-    Delete,
-    Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Req } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import type { Request } from 'express';
@@ -27,8 +19,9 @@ export class CartsController {
         return this.cartsService.getCart(userId!);
     }
 
-    @Delete(':id')
-    private clearCart(@Param('id') id: string) {
-        return this.cartsService.clearCart(id);
+    @Delete()
+    private clearCart(@Req() request: Request) {
+        const userId = request.auth?.payload.sub;
+        return this.cartsService.clearCart(userId!);
     }
 }
