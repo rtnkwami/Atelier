@@ -30,7 +30,6 @@ locals {
 }
 
 module "network" {
-  source = "./network"
-
+  source             = "./network"
   availability_zones = local.availability_zones
 }

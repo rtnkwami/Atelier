@@ -28,13 +28,13 @@ locals {
 # ========================================
 resource "aws_subnet" "web_subnets" {
   for_each = local.availability_zones
-  
+
   vpc_id                          = aws_vpc.nexus_vpc.id
   availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key))
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.nexus_vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
   assign_ipv6_address_on_creation = true
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch         = true
 
   tags = {
     "Name"         = "${var.resource_prefix}-sn-web-${each.key}"
@@ -54,7 +54,7 @@ resource "aws_route_table" "web_route_table" {
 
   route {
     ipv6_cidr_block = "::/0"
-    gateway_id = aws_internet_gateway.nexus_vpc_igw.id
+    gateway_id      = aws_internet_gateway.nexus_vpc_igw.id
   }
 
   tags = {
@@ -75,8 +75,8 @@ resource "aws_route_table_association" "web_subnet_rt_association" {
 # PRIVATE SUBNETS
 # ========================================
 resource "aws_subnet" "app_subnets" {
-  for_each =  local.availability_zones
-  
+  for_each = local.availability_zones
+
   vpc_id                          = aws_vpc.nexus_vpc.id
   availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
@@ -92,7 +92,7 @@ resource "aws_subnet" "app_subnets" {
 
 resource "aws_subnet" "db_subnets" {
   for_each = local.availability_zones
-  
+
   vpc_id                          = aws_vpc.nexus_vpc.id
   availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
@@ -108,7 +108,7 @@ resource "aws_subnet" "db_subnets" {
 
 resource "aws_subnet" "reserved_subnets" {
   for_each = local.availability_zones
-  
+
   vpc_id                          = aws_vpc.nexus_vpc.id
   availability_zone               = each.key
   cidr_block                      = cidrsubnet(aws_vpc.nexus_vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
@@ -127,7 +127,7 @@ resource "aws_subnet" "reserved_subnets" {
 # resource "aws_eip" "nat_gateway_eips" {
 #   for_each = local.availability_zones
 #   domain = "vpc"
-  
+
 #   tags = {
 #     "Name" = "nexus-nat-gw-eip-${each.key}"
 #     "Project"      = "Nexus"
@@ -140,7 +140,7 @@ resource "aws_subnet" "reserved_subnets" {
 
 #   allocation_id = aws_eip.nat_gateway_eips[each.key].id
 #   subnet_id = aws_subnet.web_subnets[each.key].id
-  
+
 #   tags = {
 #     Name          = "nexus-nat-gw-${each.key}"
 #     Project       = "Nexus"
@@ -150,7 +150,7 @@ resource "aws_subnet" "reserved_subnets" {
 
 # resource "aws_route_table" "private_subnet_route_table" {
 #   for_each = local.availability_zones
-  
+
 #   vpc_id = aws_vpc.nexus_vpc.id
 
 #   route {
