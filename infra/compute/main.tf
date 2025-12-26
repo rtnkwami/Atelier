@@ -11,8 +11,8 @@ resource "aws_ecs_cluster" "cluster" {
 resource "aws_ecs_task_definition" "api_task" {
   family                   = "${var.resource_prefix}-api"
   network_mode             = "awsvpc"
-  cpu                      = 512
-  memory                   = 1024
+  cpu                      = 256
+  memory                   = 512
   requires_compatibilities = ["FARGATE"]
 
   runtime_platform {
