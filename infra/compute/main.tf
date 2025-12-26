@@ -35,6 +35,9 @@ resource "aws_ecs_task_definition" "api_task" {
           hostPort      = 5000
         }
       ]
+      healthCheck = {
+        command = [ "CMD-SHELL", "curl -f http://localhost:5000/health || exit 1" ]
+      }
     }
   ])
 }
