@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
+import { UserSearchDto } from './dto/search-user.dto';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -17,8 +19,41 @@ export class UsersService {
         return this.prisma.user.create({ data: user });
     }
 
-    public searchUsers() {
-        return this.prisma.user.findMany();
+    public async searchUsers(filters?: UserSearchDto) {
+        const page = filters?.page ?? 1;
+        const limit = filters?.limit ?? 20;
+        const skip = (page - 1) * limit;
+
+        const where: Prisma.UserWhereInput = {
+            name: filters?.name && {
+                contains: filters.name,
+                mode: 'insensitive',
+            },
+
+            email: filters?.email && {
+                contains: filters.email,
+                mode: 'insensitive',
+            },
+
+            createdAt: filters?.dateRange && {
+                gte: filters.dateRange.from,
+                lte: filters.dateRange.to,
+            },
+        };
+
+        const [users, totalUsers] = await Promise.all([
+            this.prisma.user.findMany({ where, skip, take: limit }),
+            this.prisma.user.count({ where }),
+        ]);
+
+        return {
+            users,
+            page,
+            perPage: limit,
+            count: users.length,
+            total: totalUsers,
+            totalPages: Math.ceil(totalUsers / limit),
+        };
     }
 
     public getUser(id: string) {

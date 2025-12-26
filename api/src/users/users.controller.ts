@@ -7,11 +7,13 @@ import {
     Param,
     Delete,
     Req,
+    Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { type Request } from 'express';
+import { UserSearchDto } from './dto/search-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -24,8 +26,8 @@ export class UsersController {
     }
 
     @Get()
-    private searchUsers() {
-        return this.usersService.searchUsers();
+    private searchUsers(@Query() query: UserSearchDto) {
+        return this.usersService.searchUsers(query);
     }
 
     @Get(':id')
