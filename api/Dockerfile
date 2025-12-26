@@ -24,6 +24,8 @@ FROM node:24-alpine AS production
 
 WORKDIR /app
 
+RUN apk add curl
+
 COPY --from=builder /app/dist/ ./dist
 COPY --from=builder /app/node_modules/ ./node_modules
 COPY --from=builder /app/package.json ./
