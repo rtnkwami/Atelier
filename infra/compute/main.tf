@@ -40,6 +40,12 @@ resource "aws_ecs_task_definition" "api_task" {
       }
     }
   ])
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-api-task"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
 }
 
 resource "aws_ecs_service" "api_service" {
@@ -53,5 +59,11 @@ resource "aws_ecs_service" "api_service" {
     assign_public_ip = true
     subnets          = var.web_subnet_ids
     security_groups  = [var.public_security_group_id]
+  }
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-api-service"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
   }
 }
