@@ -186,24 +186,23 @@ resource "aws_subnet" "reserved_subnets" {
 #   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
 # }
 
+
+# --------------- API Security Group Rules ---------------------- #
+
 resource "aws_security_group" "api_security_group" {
   name = "${var.resource_prefix}-api-sg"
   description = "Allow all traffic to and from api"
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv4" {
+resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
   security_group_id = aws_security_group.api_security_group.id
   
-  ip_protocol = "-1"
-  cidr_ipv4 = "0.0.0.0/0"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv6" {
-  security_group_id = aws_security_group.api_security_group.id
-  
-  ip_protocol = "-1"
-  cidr_ipv6 = "::/0"
+  description = "Allow ingress only from api load balancer to api"
+  referenced_security_group_id = aws_security_group.api_lb_security_group.id
+  ip_protocol = "tcp"
+  from_port = 5000
+  to_port = 5000
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv4" {
@@ -220,16 +219,57 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv6" {
   cidr_ipv6 = "::/0"
 }
 
+# --------------- API Load Balancer Security Group Rules ---------------------- #
+
+resource "aws_security_group" "api_lb_security_group" {
+  name = "${var.resource_prefix}-api-lb-sg"
+  description = "Allow all traffic to and from api load balancer"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv4_rule" {
+  security_group_id = aws_security_group.api_lb_security_group.id
+
+  description = "Allow https traffic from the internet"
+  ip_protocol = "tcp"
+  # from_port = 443
+  # to_port = 443
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv6_rule" {
+  security_group_id = aws_security_group.api_lb_security_group.id
+
+  description = "Allow https traffic from the internet"
+  ip_protocol = "tcp"
+  # from_port = 443
+  # to_port = 443
+  cidr_ipv6 = "::/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "api_lb_egress_rule" {
+  security_group_id = aws_security_group.api_lb_security_group.id
+  
+  referenced_security_group_id = aws_security_group.api_security_group.id
+  ip_protocol = "tcp"
+  from_port = 5000
+  to_port = 5000
+}
+
+# --------------- Database Security Group Rules ---------------------- #
+
 resource "aws_security_group" "database_cluster_security_group" {
   name = "${var.resource_prefix}-database-cluster-sg"
   description = "Allow only traffic from the api to the database cluster"
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_traffic_from_api" {
+resource "aws_vpc_security_group_ingress_rule" "database_ingress_rule" {
   security_group_id = aws_security_group.database_cluster_security_group.id
   
   description = "Allow inbound connections from API to database cluster"
   referenced_security_group_id = aws_security_group.api_security_group.id
   ip_protocol = "tcp"
+  from_port = 5432
+  to_port = 5432
 }
