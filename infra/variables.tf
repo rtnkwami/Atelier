@@ -13,7 +13,6 @@ variable "resource_prefix" {
 variable "api_image" {
   type        = string
   description = "Container image URI for api service"
-  default     = "docker.io/weaverofinfinity/atelier"
 }
 
 variable "vpc_cidr_range" {
@@ -23,8 +22,18 @@ variable "vpc_cidr_range" {
 
 #----------------- Sensitive Variables ------------------#
 
-variable "database_url" {
-  type      = string
+variable "database_user" {
+  type = string
+  sensitive = true
+}
+
+variable "database_name" {
+  type = string
+  sensitive = true
+}
+
+variable "database_password" {
+  type = string
   sensitive = true
 }
 

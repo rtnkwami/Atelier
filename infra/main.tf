@@ -28,6 +28,7 @@ data "aws_availability_zones" "available" {
 
 locals {
   availability_zones = slice(data.aws_availability_zones.available.names, 0, 3)
+  database_url = "postgresql://${var.database_user}:${var.database_password}@${module.database.db_cluster_endpoint}/${var.database_name}?sslmode=no-verify"
 }
 
 module "network" {
@@ -39,6 +40,18 @@ module "network" {
   vpc_cidr_block     = var.vpc_cidr_range
 }
 
+module "database" {
+  source = "./database"
+  
+  database_user = var.database_user
+  database_name = var.database_name
+  database_password = var.database_password
+  resource_prefix = var.resource_prefix
+  project_name = var.project_name
+  db_subnet_ids = module.network.db_subnet_ids
+  database_cluster_security_group_id = module.network.database_cluster_security_group_id
+}
+
 module "compute" {
   source = "./compute"
 
@@ -47,7 +60,7 @@ module "compute" {
   api_image                = var.api_image
   web_subnet_ids           = module.network.web_subnet_ids
   public_security_group_id = module.network.public_security_group_id
-  database_url             = var.database_url
+  database_url             = local.database_url
   issuer_base_url          = var.issuer_base_url
   audience                 = var.audience
 }
