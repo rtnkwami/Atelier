@@ -215,6 +215,14 @@ resource "aws_vpc_security_group_egress_rule" "auth0_egress_rule" {
   to_port = 443
 }
 
+resource "aws_vpc_security_group_egress_rule" "db_cluster_egress_rule" {
+  security_group_id = aws_security_group.api_security_group.id
+
+  description = "Allow outbound connections from API to database cluster"
+  referenced_security_group_id = aws_security_group.database_cluster_security_group.id
+  ip_protocol = "tcp"
+}
+
 resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv4" {
   security_group_id = aws_security_group.api_security_group.id
   
@@ -252,8 +260,7 @@ resource "aws_security_group" "database_cluster_security_group" {
 resource "aws_vpc_security_group_ingress_rule" "allow_traffic_from_api" {
   security_group_id = aws_security_group.database_cluster_security_group.id
   
-  ip_protocol = "tcp"
-  from_port = 5432
-  to_port = 5432
+  description = "Allow inbound connections from API to database cluster"
   referenced_security_group_id = aws_security_group.api_security_group.id
+  ip_protocol = "tcp"
 }
