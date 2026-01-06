@@ -192,37 +192,6 @@ resource "aws_security_group" "api_security_group" {
   vpc_id = aws_vpc.vpc.id
 }
 
-# Allow outbound connections to auth0 (because it's a dependency)
-
-data "http" "auth0_ip_ranges" {
-  url = "https://cdn.auth0.com/ip-ranges.json"
-}
-
-locals {
-  auth0_data = jsondecode(data.http.auth0_ip_ranges.response_body)
-  # filter for USA IP ranges
-  us_ip_ranges = local.auth0_data.regions.US.ipv4_cidrs
-}
-
-resource "aws_vpc_security_group_egress_rule" "auth0_egress_rule" {
-  for_each = toset(local.us_ip_ranges)
-  
-  security_group_id = aws_security_group.api_security_group.id
-  description = "Allow outbound connections to whitelisted Auth0 IPs"
-  cidr_ipv4 = each.value
-  ip_protocol = "tcp"
-  from_port = 443
-  to_port = 443
-}
-
-resource "aws_vpc_security_group_egress_rule" "db_cluster_egress_rule" {
-  security_group_id = aws_security_group.api_security_group.id
-
-  description = "Allow outbound connections from API to database cluster"
-  referenced_security_group_id = aws_security_group.database_cluster_security_group.id
-  ip_protocol = "tcp"
-}
-
 resource "aws_vpc_security_group_ingress_rule" "allow_all_tcp_ingress_ipv4" {
   security_group_id = aws_security_group.api_security_group.id
   
