@@ -231,7 +231,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv4_rule" {
   security_group_id = aws_security_group.api_lb_security_group.id
 
   description = "Allow https traffic from the internet"
-  ip_protocol = "tcp"
+  ip_protocol = "-1"
   # from_port = 443
   # to_port = 443
   cidr_ipv4 = "0.0.0.0/0"
@@ -241,7 +241,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv6_rule" {
   security_group_id = aws_security_group.api_lb_security_group.id
 
   description = "Allow https traffic from the internet"
-  ip_protocol = "tcp"
+  ip_protocol = "-1"
   # from_port = 443
   # to_port = 443
   cidr_ipv6 = "::/0"

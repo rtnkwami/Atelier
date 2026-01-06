@@ -13,14 +13,27 @@ variable "api_image" {
   description = "Container image URI for api service"
 }
 
-variable "web_subnet_ids" {
-  type        = list(string)
-  description = "IDs of web subnets to deploy public tasks in"
+variable "vpc_id" {
+  type = string
 }
 
-variable "public_security_group_id" {
+variable "web_subnet_ids" {
+  type        = list(string)
+  description = "IDs of web subnets to deploy load balancers in"
+}
+
+variable "app_subnet_ids" {
+  type        = list(string)
+  description = "IDs of web subnets to deploy api tasks in"
+}
+
+variable "api_security_group_id" {
   type        = string
   description = "ID of security group allowing public internet access to api"
+}
+
+variable "api_lb_security_group_id" {
+  type = string
 }
 
 #----------------- Sensitive Variables ------------------#

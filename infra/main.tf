@@ -59,8 +59,11 @@ module "compute" {
   project_name             = var.project_name
   api_image                = var.api_image
   web_subnet_ids           = module.network.web_subnet_ids
-  public_security_group_id = module.network.public_security_group_id
+  app_subnet_ids           = module.network.app_subnet_ids
+  api_security_group_id     = module.network.api_security_group_id
   database_url             = local.database_url
   issuer_base_url          = var.issuer_base_url
   audience                 = var.audience
+  api_lb_security_group_id = module.network.api_lb_security_group_id
+  vpc_id = module.network.vpc_id
 }

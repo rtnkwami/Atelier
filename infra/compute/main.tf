@@ -57,12 +57,72 @@ resource "aws_ecs_service" "api_service" {
 
   network_configuration {
     assign_public_ip = true
-    subnets          = var.web_subnet_ids
-    security_groups  = [var.public_security_group_id]
+    subnets          = var.app_subnet_ids
+    security_groups  = [var.api_security_group_id]
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+    container_name = "${var.resource_prefix}-api"
+    container_port = 5000
   }
 
   tags = {
     "Name"         = "${var.resource_prefix}-api-service"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
+}
+
+
+resource "aws_lb" "api_load_balancer" {
+  name = "${var.resource_prefix}-api-lb"
+  load_balancer_type = "application"
+  security_groups = [var.api_lb_security_group_id]
+  subnets = var.web_subnet_ids
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-api-lb"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
+}
+
+resource "aws_lb_listener" "api_lb_http_listener" {
+  load_balancer_arn = aws_lb.api_load_balancer.arn
+  port = 80
+  protocol = "HTTP"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+  }
+}
+
+# resource "aws_lb_listener" "api_lb_http_listener" {
+#   load_balancer_arn = aws_lb.api_load_balancer.arn
+#   port = 443
+#   protocol = "HTTPS"
+
+#   default_action {
+#     type = "forward"
+#     target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+#   }
+# }
+
+resource "aws_lb_target_group" "api_lb_target_group" {
+  name = "${var.resource_prefix}-api-lb-tg"
+  port = 80
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = var.vpc_id
+
+  health_check {
+    path = "/health"
+  }
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-api-lb-tg"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }

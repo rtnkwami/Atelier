@@ -22,10 +22,14 @@ output "reserved_subnet_ids" {
   value       = [for subnet in aws_subnet.reserved_subnets : subnet.id]
 }
 
-output "public_security_group_id" {
+output "api_security_group_id" {
   value = aws_security_group.api_security_group.id
 }
 
 output "database_cluster_security_group_id" {
   value = aws_security_group.database_cluster_security_group.id
+}
+
+output "api_lb_security_group_id" {
+  value = aws_security_group.api_lb_security_group.id
 }
