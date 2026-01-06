@@ -2,5 +2,10 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  // Your custom configs here
+  {
+    rules: {
+        'indent': 'off',
+        '@typescript-eslint/indent': ['error', 4],
+    }
+  }
 )
