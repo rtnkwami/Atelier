@@ -23,5 +23,9 @@ output "reserved_subnet_ids" {
 }
 
 output "public_security_group_id" {
-  value = aws_security_group.allow_api_traffic.id
+  value = aws_security_group.api_security_group.id
+}
+
+output "database_cluster_security_group_id" {
+  value = aws_security_group.database_cluster_security_group.id
 }
