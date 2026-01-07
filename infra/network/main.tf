@@ -124,67 +124,67 @@ resource "aws_subnet" "reserved_subnets" {
 
 # Very expensive resource make sure you exclude during apply unless you need it.
 # Uncomment this only if you really need internet connectivity for private instances
-# resource "aws_eip" "nat_gateway_eips" {
-#   for_each = local.availability_zones
-#   domain = "vpc"
+resource "aws_eip" "nat_gateway_eip" {
+  domain = "vpc"
 
-#   tags = {
-#     "Name" = "nexus-nat-gw-eip-${each.key}"
-#     "Project"      = "Nexus"
-#     "ResourceType" = "Networking"
-#   }
-# }
+  tags = {
+    "Name"         = "${var.resource_prefix}-nat-gw-eip"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
 
-# resource "aws_nat_gateway" "nat_gateway" {
-#   for_each = local.availability_zones
+# Create single NAT gateway in one AZ
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.nat_gateway_eip.id
+  subnet_id     = aws_subnet.web_subnets[tolist(local.availability_zones)[0]].id
 
-#   allocation_id = aws_eip.nat_gateway_eips[each.key].id
-#   subnet_id = aws_subnet.web_subnets[each.key].id
+  tags = {
+    Name         = "${var.resource_prefix}-nat-gw"
+    Project      = var.project_name
+    ResourceType = "Networking"
+  }
+}
 
-#   tags = {
-#     Name          = "nexus-nat-gw-${each.key}"
-#     Project       = "Nexus"
-#     ResourceType  = "Networking"
-#   }
-# }
+# Create single private route table
+resource "aws_route_table" "private_subnet_route_table" {
+  vpc_id = aws_vpc.vpc.id
 
-# resource "aws_route_table" "private_subnet_route_table" {
-#   for_each = local.availability_zones
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+  }
 
-#   vpc_id = aws_vpc.vpc.id
+  tags = {
+    "Name"         = "${var.resource_prefix}-private-subnet-route-table"
+    "Project"      = var.project_name
+    "ResourceType" = "Networking"
+  }
+}
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     nat_gateway_id = aws_nat_gateway.nat_gateway[each.key].id
-#   }
+# Associate all app subnets to the single route table
+resource "aws_route_table_association" "app_subnet_rt_association" {
+  for_each = local.availability_zones
 
-#   tags = {
-#     "Name"         = "nexus-private-subnet-route-table"
-#     "Project"      = "Nexus"
-#     "ResourceType" = "Networking"
-#   }
-# }
+  subnet_id      = aws_subnet.app_subnets[each.key].id
+  route_table_id = aws_route_table.private_subnet_route_table.id
+}
 
-# resource "aws_route_table_association" "app_subnet_rt_association" {
-#   for_each = local.availability_zones
+# Associate all db subnets to the single route table
+resource "aws_route_table_association" "db_subnet_rt_association" {
+  for_each = local.availability_zones
 
-#   subnet_id      = aws_subnet.app_subnets[each.key].id
-#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
-# }
+  subnet_id      = aws_subnet.db_subnets[each.key].id
+  route_table_id = aws_route_table.private_subnet_route_table.id
+}
 
-# resource "aws_route_table_association" "db_subnet_rt_association" {
-#   for_each = local.availability_zones
+# Associate all reserved subnets to the single route table
+resource "aws_route_table_association" "reserved_subnet_rt_association" {
+  for_each = local.availability_zones
 
-#   subnet_id      = aws_subnet.db_subnets[each.key].id
-#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
-# }
-
-# resource "aws_route_table_association" "reserved_subnet_rt_association" {
-#   for_each = local.availability_zones
-
-#   subnet_id      = aws_subnet.reserved_subnets[each.key].id
-#   route_table_id = aws_route_table.private_subnet_route_table[each.key].id
-# }
+  subnet_id      = aws_subnet.reserved_subnets[each.key].id
+  route_table_id = aws_route_table.private_subnet_route_table.id
+}
 
 
 # --------------- API Security Group Rules ---------------------- #
