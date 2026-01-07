@@ -122,8 +122,7 @@ resource "aws_subnet" "reserved_subnets" {
   }
 }
 
-# Very expensive resource make sure you exclude during apply unless you need it.
-# Uncomment this only if you really need internet connectivity for private instances
+# Very expensive resource. Beware
 resource "aws_eip" "nat_gateway_eip" {
   domain = "vpc"
 
