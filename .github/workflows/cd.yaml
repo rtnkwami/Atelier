@@ -73,7 +73,7 @@ jobs:
               working-directory: infra
               run: |
                 CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
-                SERVICE_NAME=$(tofu output -raw ecs_service_name)
+                SERVICE_NAME=$(tofu output -raw api_service_name)
                 
                 aws ecs update-service \
                   --cluster $CLUSTER_NAME \
