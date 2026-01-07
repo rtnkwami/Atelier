@@ -1,8 +1,8 @@
 name: CI/CD Pipeline
 run-name: "CI/CD Run for ${{ github.event.head_commit.message }}"
 permissions:
-  contents: read
-  id-token: write
+    contents: read
+    id-token: write
 
 on:
   push:
@@ -57,21 +57,21 @@ jobs:
           changed: ${{ steps.changes.outputs.changed }}
       
       steps:
-          - name: Check out code
-            uses: actions/checkout@v5
-            with:
-                fetch-depth: 0
+        - name: Check out code
+          uses: actions/checkout@v5
+          with:
+            fetch-depth: 0
 
-          - name: Detect changes
-            uses: dorny/paths-filter@v3
-            id: changes
-            with:
-                base: main
-                filters: |
-                    changed:
-                        - api/src/**
-                        - api/test/**
-                        - api/Dockerfile
+        - name: Detect changes
+          uses: dorny/paths-filter@v3
+          id: changes
+          with:
+            base: main
+            filters: |
+              changed:
+                - api/src/**
+                - api/test/**
+                - api/Dockerfile
 
   build:
     needs: [tests, detect-changes]
