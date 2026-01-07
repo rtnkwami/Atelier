@@ -75,7 +75,7 @@ jobs:
 
   build:
     needs: [tests, detect-changes]
-    if: needs.detect-changes.outputs.changed == 'true' && github.ref_name == 'main'
+    if: needs.detect-changes.outputs.changed == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -114,3 +114,71 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier:latest
+
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    name: Deploy infrastructure
+
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v5
+          with:
+            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            aws-region: us-east-1
+
+        - name: Setup OpenTofu
+          uses: opentofu/setup-opentofu@v1
+          with:
+            tofu_version: 1.10.3
+
+        - name: Initialize OpenTofu
+          working-directory: infra
+          run: tofu init
+
+        - name: Deploy Infrastructure
+          working-directory: infra
+          env:
+            TF_VAR_issuer_base_url: ${{ secrets.ISSUER_BASE_URL }}
+            TF_VAR_audience: ${{ secrets.AUDIENCE }}
+            TF_VAR_database_user: ${{ secrets.DATABASE_USER }}
+            TF_VAR_database_password: ${{ secrets.DATABASE_PASSWORD }}
+            TF_VAR_database_name: ${{ secrets.DATABASE_NAME }}
+          run: tofu apply --auto-approve
+
+  deploy-application:
+    needs: [build, deploy-infrastructure]
+    runs-on: ubuntu-latest
+    name: Deploy Application Changes
+
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v5
+          with:
+            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            aws-region: us-east-1
+
+        - name: Setup OpenTofu
+          uses: opentofu/setup-opentofu@v1
+          with:
+            tofu_version: 1.10.3
+
+        - name: Initialize OpenTofu
+          working-directory: infra
+          run: tofu init
+
+        - name: Create New App Deployment
+          working-directory: infra
+          run: |
+            CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
+            SERVICE_NAME=$(tofu output -raw api_service_name)
+            
+            aws ecs update-service \
+              --cluster $CLUSTER_NAME \
+              --service $SERVICE_NAME \
+              --force-new-deployment
