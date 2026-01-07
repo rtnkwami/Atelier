@@ -13,6 +13,7 @@ variable "resource_prefix" {
 variable "api_image" {
   type        = string
   description = "Container image URI for api service"
+  default = "docker.io/weaverofinfinity/atelier"
 }
 
 variable "vpc_cidr_range" {
