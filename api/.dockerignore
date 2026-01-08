@@ -8,7 +8,6 @@ build/
 out/
 
 # Prisma
-prisma/migrations/
 prisma/generated/
 
 # Version control
