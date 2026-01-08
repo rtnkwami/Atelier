@@ -1,5 +1,5 @@
 name: Database Migration Pipeline
-run-name: Migration for ${{ github.event.workflow.head_commit.message }}
+run-name: Database Migration
 permissions:
     id-token: write
 
