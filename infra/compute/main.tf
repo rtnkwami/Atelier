@@ -64,6 +64,11 @@ resource "aws_lb_target_group" "api_lb_target_group" {
 
 # ------ Required Task Execution Role for Logs ----------- #
 
+resource "aws_cloudwatch_log_group" "ecs_task_logs" {
+  name              = "/ecs/${var.resource_prefix}-api"
+  retention_in_days = 7  # Adjust as needed
+}
+
 data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -128,7 +133,7 @@ resource "aws_ecs_task_definition" "api_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/${var.resource_prefix}-api"
+          "awslogs-group"         = "${aws_cloudwatch_log_group.ecs_task_logs.name}"
           "awslogs-region"        = "us-east-1"
           "awslogs-stream-prefix" = "ecs"
         }
