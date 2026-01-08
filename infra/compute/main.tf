@@ -61,12 +61,45 @@ resource "aws_lb_target_group" "api_lb_target_group" {
   }
 }
 
+
+# ------ Required Task Execution Role for Logs ----------- #
+
+data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name               = "ecs-task-execution-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_assume_role.json
+}
+
+data "aws_iam_policy" "ecs_task_execution_policy" {
+  name = "AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = data.aws_iam_policy.ecs_task_execution_policy.arn
+}
+
+# ------ Required Task Execution Role for Logs ----------- #
+
+
 resource "aws_ecs_task_definition" "api_task" {
   family                   = "${var.resource_prefix}-api"
   network_mode             = "awsvpc"
   cpu                      = 512
   memory                   = 1024
   requires_compatibilities = ["FARGATE"]
+  execution_role_arn = aws_iam_role_policy_attachment.ecs_task_execution_role_policy.policy_arn
 
   runtime_platform {
     operating_system_family = "LINUX"
