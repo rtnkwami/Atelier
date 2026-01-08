@@ -1,0 +1,52 @@
+name: Database Migration Pipeline
+run-name: Migration for ${{ github.event.workflow.head_commit.message }}
+permissions:
+    id-token: write
+
+on:
+    workflow_dispatch:
+
+jobs:
+    migrations:
+        runs-on: ubuntu-latest
+        name: Run Database Migrations
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v5
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.CI_CD_ROLE }}
+                aws-region: us-east-1
+
+            - name: Setup OpenTofu
+              uses: opentofu/setup-opentofu@v1
+              with:
+                tofu_version: 1.10.3
+
+            - name: Initialize OpenTofu
+              working-directory: infra
+              run: tofu init
+
+            - name: Get app cluster and service names
+              working-directory: infra
+              run: |
+                echo CLUSTER_NAME=$(tofu output -raw ecs_cluster_name) >> $GITHUB_ENV
+                echo SERVICE_NAME=$(tofu output -raw api_service_name) >> $GITHUB_ENV
+
+            - name: Setup Python
+              uses: actions/setup-python@v6
+              with:
+                python-version: '3.12'
+
+            - name: Install boto3
+              run: pip install boto3
+
+            - name: Run database migrations
+              env:
+                CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+                SERVICE_NAME: ${{ env.SERVICE_NAME }}
+              run: python scripts/migrate.py
+            
