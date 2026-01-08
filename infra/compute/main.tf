@@ -66,7 +66,7 @@ resource "aws_lb_target_group" "api_lb_target_group" {
 
 resource "aws_cloudwatch_log_group" "ecs_task_logs" {
   name              = "/ecs/${var.resource_prefix}-api"
-  retention_in_days = 7  # Adjust as needed
+  retention_in_days = 1
 }
 
 data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
