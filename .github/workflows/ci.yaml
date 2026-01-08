@@ -73,6 +73,7 @@ jobs:
                 - api/test/**
                 - api/Dockerfile
                 - api/.dockerignore
+                - api/pnpm*.yaml
 
   build:
     needs: [application-tests, detect-changes]
