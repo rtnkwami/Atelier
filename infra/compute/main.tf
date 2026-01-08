@@ -91,6 +91,15 @@ resource "aws_ecs_task_definition" "api_task" {
       healthCheck = {
         command = [ "CMD-SHELL", "curl -f http://localhost:5000/health || exit 1" ]
       }
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.resource_prefix}-api"
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
 
