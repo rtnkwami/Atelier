@@ -53,6 +53,7 @@ jobs:
 
   detect-changes:
       runs-on: ubuntu-latest
+      name: Detect Application Changes
       outputs:
           changed: ${{ steps.changes.outputs.changed }}
       
@@ -74,11 +75,14 @@ jobs:
                 - api/Dockerfile
                 - api/.dockerignore
                 - api/pnpm*.yaml
+                - api/prisma/**
+                - api/prisma.config.ts
 
   build:
     needs: [application-tests, detect-changes]
     if: needs.detect-changes.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    name: Docker Build & Push
 
     steps:
       - name: Check out code
@@ -119,7 +123,7 @@ jobs:
 
   deploy-infrastructure:
     runs-on: ubuntu-latest
-    name: Deploy infrastructure
+    name: Deploy Infrastructure
 
     steps:
         - name: Checkout Code
