@@ -90,6 +90,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Docker Build & Push
 
+    concurrency:
+        group: container-image-build
+        cancel-in-progress: false
+
     steps:
       - name: Check out code
         uses: actions/checkout@v5
@@ -162,6 +166,10 @@ jobs:
 
     runs-on: ubuntu-latest
     name: Deploy Infrastructure
+
+    concurrency:
+        group: infrastructure-deployment
+        cancel-in-progress: false
 
     steps:
         - name: Checkout Code
