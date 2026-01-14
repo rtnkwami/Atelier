@@ -1,6 +1,6 @@
 import { auth0 } from "@/lib/auth0";
-import LoginButton from "@/components/LoginButton";
-import LogoutButton from "@/components/LogoutButton";
+import LoginButton from "@/components/auth/LoginButton";
+import LogoutButton from "@/components/auth/LogoutButton";
 import Profile from "@/components/Profile";
 
 export default async function Home() {
