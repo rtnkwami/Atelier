@@ -1,32 +1,8 @@
-import { auth0 } from "@/lib/auth0";
-import LoginButton from "@/components/auth/LoginButton";
-import LogoutButton from "@/components/auth/LogoutButton";
-import Profile from "@/components/Profile";
-
 export default async function Home() {
-    const session = await auth0.getSession();
-    const user = session?.user;
 
     return (
       <div className="app-container">
-        <div className="main-card-wrapper">          
-          <div className="action-card">
-            {user ? (
-              <div className="logged-in-section">
-                <p className="logged-in-message">✅ Successfully logged in!</p>
-                <Profile />
-                <LogoutButton />
-              </div>
-            ) : (
-              <>
-                <p className="action-text">
-                  Welcome! Please log in to access your protected content.
-                </p>
-                <LoginButton />
-              </>
-            )}
-          </div>
-        </div>
+        
       </div>
     );
 }
