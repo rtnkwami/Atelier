@@ -170,40 +170,6 @@ resource "aws_route_table_association" "app_subnet_rt_association" {
 }
 
 
-# --------------- API Security Group Rules ---------------------- #
-
-resource "aws_security_group" "api_security_group" {
-  name = "${var.resource_prefix}-api-sg"
-  description = "Allow all traffic to and from api"
-  vpc_id = aws_vpc.vpc.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
-  security_group_id = aws_security_group.api_security_group.id
-  
-  description = "Allow ingress only from api load balancer to api"
-  referenced_security_group_id = aws_security_group.alb_security_group.id
-  ip_protocol = "tcp"
-  from_port = 5000
-  to_port = 5000
-}
-
-# Allow all egress traffic on API tasks because API needs to connect to both Docker Hub (which has no public IP ranges for whitelisting)
-# and Auth0
-resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv4" {
-  security_group_id = aws_security_group.api_security_group.id
-  
-  ip_protocol = "-1"
-  cidr_ipv4 = "0.0.0.0/0"
-}
-
-resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv6" {
-  security_group_id = aws_security_group.api_security_group.id
-  
-  ip_protocol = "-1"
-  cidr_ipv6 = "::/0"
-}
-
 # --------------- Load Balancer Security Group Rules ---------------------- #
 
 resource "aws_security_group" "alb_security_group" {
@@ -239,6 +205,74 @@ resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
   ip_protocol = "tcp"
   from_port = 5000
   to_port = 5000
+}
+
+#---------------- Frontend Security Group Rules ------------------#
+
+resource "aws_security_group" "frontend_security_group" {
+  name = "${var.resource_prefix}-web-sg"
+  description = "Allow traffic to and from web app"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "frontend_ingress" {
+  security_group_id = aws_security_group.frontend_security_group.id
+
+  description = "Allow ingress only from alb to web"
+  referenced_security_group_id = aws_security_group.alb_security_group.id
+  ip_protocol = "tcp"
+  from_port = 3000
+  to_port = 3000
+}
+
+# Allow all egress traffic on Web tasks because frontend needs to connect to both Docker Hub (which has no public IP ranges for whitelisting)
+# and Auth0
+resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv4" {
+  security_group_id = aws_security_group.frontend_security_group.id
+  
+  ip_protocol = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv6" {
+  security_group_id = aws_security_group.frontend_security_group.id
+  
+  ip_protocol = "-1"
+  cidr_ipv6 = "::/0"
+}
+
+# --------------- API Security Group Rules ---------------------- #
+
+resource "aws_security_group" "api_security_group" {
+  name = "${var.resource_prefix}-api-sg"
+  description = "Allow all traffic to and from api"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
+  security_group_id = aws_security_group.api_security_group.id
+  
+  description = "Allow ingress only from api load balancer to api"
+  referenced_security_group_id = aws_security_group.alb_security_group.id
+  ip_protocol = "tcp"
+  from_port = 5000
+  to_port = 5000
+}
+
+# Allow all egress traffic on API tasks because API needs to connect to both Docker Hub (which has no public IP ranges for whitelisting)
+# and Auth0
+resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv4" {
+  security_group_id = aws_security_group.api_security_group.id
+  
+  ip_protocol = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv6" {
+  security_group_id = aws_security_group.api_security_group.id
+  
+  ip_protocol = "-1"
+  cidr_ipv6 = "::/0"
 }
 
 # --------------- Database Security Group Rules ---------------------- #
