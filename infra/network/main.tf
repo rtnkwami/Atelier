@@ -169,14 +169,6 @@ resource "aws_route_table_association" "app_subnet_rt_association" {
   route_table_id = aws_route_table.private_subnet_route_table.id
 }
 
-# Associate all db subnets to the single route table
-resource "aws_route_table_association" "db_subnet_rt_association" {
-  for_each = local.availability_zones
-
-  subnet_id      = aws_subnet.db_subnets[each.key].id
-  route_table_id = aws_route_table.private_subnet_route_table.id
-}
-
 # Associate all reserved subnets to the single route table
 resource "aws_route_table_association" "reserved_subnet_rt_association" {
   for_each = local.availability_zones
