@@ -201,10 +201,10 @@ resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
 resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
   security_group_id = aws_security_group.alb_security_group.id
   
-  referenced_security_group_id = aws_security_group.api_security_group.id
+  referenced_security_group_id = aws_security_group.frontend_security_group.id
   ip_protocol = "tcp"
-  from_port = 5000
-  to_port = 5000
+  from_port = 3000
+  to_port = 3000
 }
 
 #---------------- Frontend Security Group Rules ------------------#
@@ -253,7 +253,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
   security_group_id = aws_security_group.api_security_group.id
   
   description = "Allow ingress only from api load balancer to api"
-  referenced_security_group_id = aws_security_group.alb_security_group.id
+  referenced_security_group_id = aws_security_group.frontend_security_group.id
   ip_protocol = "tcp"
   from_port = 5000
   to_port = 5000
