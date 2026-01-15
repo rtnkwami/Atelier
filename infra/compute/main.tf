@@ -9,42 +9,42 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 resource "aws_lb" "api_load_balancer" {
-  name = "${var.resource_prefix}-api-lb"
+  name = "${var.resource_prefix}-lb"
   load_balancer_type = "application"
-  security_groups = [var.api_lb_security_group_id]
+  security_groups = [var.alb_security_group_id]
   subnets = var.web_subnet_ids
 
   tags = {
-    "Name"         = "${var.resource_prefix}-api-lb"
+    "Name"         = "${var.resource_prefix}-lb"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }
 }
 
-resource "aws_lb_listener" "api_lb_http_listener" {
+resource "aws_lb_listener" "alb_http_listener" {
   load_balancer_arn = aws_lb.api_load_balancer.arn
   port = 80
   protocol = "HTTP"
 
   default_action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
   }
 }
 
-# resource "aws_lb_listener" "api_lb_http_listener" {
+# resource "aws_lb_listener" "alb_http_listener" {
 #   load_balancer_arn = aws_lb.api_load_balancer.arn
 #   port = 443
 #   protocol = "HTTPS"
 
 #   default_action {
 #     type = "forward"
-#     target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+#     target_group_arn = aws_lb_target_group.alb_target_group.arn
 #   }
 # }
 
-resource "aws_lb_target_group" "api_lb_target_group" {
-  name = "${var.resource_prefix}-api-lb-tg"
+resource "aws_lb_target_group" "alb_target_group" {
+  name = "${var.resource_prefix}-alb-tg"
   port = 80
   protocol = "HTTP"
   target_type = "ip"
@@ -55,7 +55,7 @@ resource "aws_lb_target_group" "api_lb_target_group" {
   }
 
   tags = {
-    "Name"         = "${var.resource_prefix}-api-lb-tg"
+    "Name"         = "${var.resource_prefix}-alb-tg"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }
@@ -162,7 +162,7 @@ resource "aws_ecs_service" "api_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.api_lb_target_group.arn
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
     container_name = "${var.resource_prefix}-api"
     container_port = 5000
   }

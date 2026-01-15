@@ -30,6 +30,6 @@ output "database_cluster_security_group_id" {
   value = aws_security_group.database_cluster_security_group.id
 }
 
-output "api_lb_security_group_id" {
-  value = aws_security_group.api_lb_security_group.id
+output "alb_security_group_id" {
+  value = aws_security_group.alb_security_group.id
 }

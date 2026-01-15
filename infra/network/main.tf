@@ -182,7 +182,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
   security_group_id = aws_security_group.api_security_group.id
   
   description = "Allow ingress only from api load balancer to api"
-  referenced_security_group_id = aws_security_group.api_lb_security_group.id
+  referenced_security_group_id = aws_security_group.alb_security_group.id
   ip_protocol = "tcp"
   from_port = 5000
   to_port = 5000
@@ -204,16 +204,16 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_tcp_egress_ipv6" {
   cidr_ipv6 = "::/0"
 }
 
-# --------------- API Load Balancer Security Group Rules ---------------------- #
+# --------------- Load Balancer Security Group Rules ---------------------- #
 
-resource "aws_security_group" "api_lb_security_group" {
+resource "aws_security_group" "alb_security_group" {
   name = "${var.resource_prefix}-api-lb-sg"
   description = "Allow all traffic to and from api load balancer"
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv4_rule" {
-  security_group_id = aws_security_group.api_lb_security_group.id
+resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv4_rule" {
+  security_group_id = aws_security_group.alb_security_group.id
 
   description = "Allow https traffic from the internet"
   ip_protocol = "-1"
@@ -222,8 +222,8 @@ resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv4_rule" {
   cidr_ipv4 = "0.0.0.0/0"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv6_rule" {
-  security_group_id = aws_security_group.api_lb_security_group.id
+resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
+  security_group_id = aws_security_group.alb_security_group.id
 
   description = "Allow https traffic from the internet"
   ip_protocol = "-1"
@@ -232,8 +232,8 @@ resource "aws_vpc_security_group_ingress_rule" "api_lb_ingress_ipv6_rule" {
   cidr_ipv6 = "::/0"
 }
 
-resource "aws_vpc_security_group_egress_rule" "api_lb_egress_rule" {
-  security_group_id = aws_security_group.api_lb_security_group.id
+resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
+  security_group_id = aws_security_group.alb_security_group.id
   
   referenced_security_group_id = aws_security_group.api_security_group.id
   ip_protocol = "tcp"

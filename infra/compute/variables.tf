@@ -32,7 +32,7 @@ variable "api_security_group_id" {
   description = "ID of security group allowing public internet access to api"
 }
 
-variable "api_lb_security_group_id" {
+variable "alb_security_group_id" {
   type = string
 }
 

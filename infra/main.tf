@@ -63,6 +63,6 @@ module "compute" {
   database_url             = local.database_url
   issuer_base_url          = var.issuer_base_url
   audience                 = var.audience
-  api_lb_security_group_id = module.network.api_lb_security_group_id
+  alb_security_group_id = module.network.alb_security_group_id
   vpc_id = module.network.vpc_id
 }
