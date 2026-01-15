@@ -46,6 +46,10 @@ variable "alb_security_group_id" {
   type = string
 }
 
+variable "cloudmap_namepsace" {
+  type = string
+}
+
 #----------------- Sensitive Variables ------------------#
 
 variable "database_url" {

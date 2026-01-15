@@ -27,6 +27,10 @@ variable "vpc_cidr_range" {
   default = "10.16.0.0/16"
 }
 
+variable "cloudmap_namepsace" {
+  type = string
+}
+
 #----------------- Sensitive Variables ------------------#
 
 variable "database_user" {
