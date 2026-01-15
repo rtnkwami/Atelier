@@ -57,12 +57,27 @@ module "compute" {
   resource_prefix          = var.resource_prefix
   project_name             = var.project_name
   api_image                = var.api_image
+  frontend_image           = var.frontend_image
+
+  # Required networking inputs
   web_subnet_ids           = module.network.web_subnet_ids
   app_subnet_ids           = module.network.app_subnet_ids
   api_security_group_id     = module.network.api_security_group_id
+  alb_security_group_id = module.network.alb_security_group_id
+  frontend_security_group_id = module.network.frontend_security_group_id
+  vpc_id = module.network.vpc_id
+
+  # Required api task variables
   database_url             = local.database_url
   issuer_base_url          = var.issuer_base_url
   audience                 = var.audience
-  alb_security_group_id = module.network.alb_security_group_id
-  vpc_id = module.network.vpc_id
+
+  # Required frontend task variables
+  auth0_audience = var.auth0_audience
+  auth0_client_id = var.auth0_client_id
+  auth0_client_secret = var.auth0_client_secret
+  auth0_domain = var.auth0_domain
+  auth0_secret = var.auth0_secret
+  app_base_url = var.app_base_url
+  backend_url = var.backend_url
 }

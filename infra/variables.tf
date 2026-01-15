@@ -13,7 +13,13 @@ variable "resource_prefix" {
 variable "api_image" {
   type        = string
   description = "Container image URI for api service"
-  default = "docker.io/weaverofinfinity/atelier"
+  default = "docker.io/weaverofinfinity/atelier-api"
+}
+
+variable "frontend_image" {
+  type        = string
+  description = "Container image URI for api service"
+  default = "docker.io/weaverofinfinity/atelier-web"
 }
 
 variable "vpc_cidr_range" {
@@ -46,4 +52,32 @@ variable "issuer_base_url" {
 variable "audience" {
   type      = string
   sensitive = true
+}
+
+variable "app_base_url" {
+  type = string
+}
+
+variable "backend_url" {
+  type = string
+}
+
+variable "auth0_domain" {
+  type = string
+}
+
+variable "auth0_client_id" {
+  type = string
+}
+
+variable "auth0_client_secret" {
+  type = string
+}
+
+variable "auth0_secret" {
+  type = string
+}
+
+variable "auth0_audience" {
+  type = string
 }

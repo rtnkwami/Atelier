@@ -26,6 +26,10 @@ output "api_security_group_id" {
   value = aws_security_group.api_security_group.id
 }
 
+output "frontend_security_group_id" {
+  value = aws_security_group.frontend_security_group.id
+}
+
 output "database_cluster_security_group_id" {
   value = aws_security_group.database_cluster_security_group.id
 }
