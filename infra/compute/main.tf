@@ -177,7 +177,6 @@ resource "aws_ecs_service" "api_service" {
 
   service_connect_configuration {
     enabled = true
-    namespace = aws_service_discovery_http_namespace.cloudmap_namepsace.arn
     
     service {
       # Name of one of the portMappings from all the containers in the task definition of this Amazon ECS service.
@@ -268,11 +267,10 @@ resource "aws_ecs_service" "frontend_service" {
 
   service_connect_configuration {
     enabled = true
-    namespace = aws_service_discovery_http_namespace.cloudmap_namepsace.arn
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.alb_target_group.arn
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
     container_name = "${var.resource_prefix}-web"
     container_port = 3000
   }
