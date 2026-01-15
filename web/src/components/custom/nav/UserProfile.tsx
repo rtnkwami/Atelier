@@ -18,7 +18,7 @@ export default function UserProfile() {
   if (isLoading || !user) {
     return (
       <Button asChild>
-        <Link href="/auth/login">Log In</Link>
+        <a href="/auth/login">Log In</a>
       </Button>
     );
   }
@@ -59,7 +59,7 @@ export default function UserProfile() {
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/auth/logout">Log Out</Link>
+          <a href="/auth/logout">Log Out</a>
         </DropdownMenuItem>
 
       </DropdownMenuContent>
