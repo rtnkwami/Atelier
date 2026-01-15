@@ -8,7 +8,7 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
-resource "aws_lb" "api_load_balancer" {
+resource "aws_lb" "app_load_balancer" {
   name = "${var.resource_prefix}-lb"
   load_balancer_type = "application"
   security_groups = [var.alb_security_group_id]
@@ -21,14 +21,32 @@ resource "aws_lb" "api_load_balancer" {
   }
 }
 
+resource "aws_lb_target_group" "frontend_target_group" {
+  name = "${var.resource_prefix}-alb-web-tg"
+  port = 80
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = var.vpc_id
+
+  health_check {
+    path = "/"
+  }
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-alb-web-tg"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
+}
+
 resource "aws_lb_listener" "alb_http_listener" {
-  load_balancer_arn = aws_lb.api_load_balancer.arn
+  load_balancer_arn = aws_lb.app_load_balancer.arn
   port = 80
   protocol = "HTTP"
 
   default_action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.alb_target_group.arn
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
   }
 }
 
@@ -42,24 +60,6 @@ resource "aws_lb_listener" "alb_http_listener" {
 #     target_group_arn = aws_lb_target_group.alb_target_group.arn
 #   }
 # }
-
-resource "aws_lb_target_group" "alb_target_group" {
-  name = "${var.resource_prefix}-alb-tg"
-  port = 80
-  protocol = "HTTP"
-  target_type = "ip"
-  vpc_id = var.vpc_id
-
-  health_check {
-    path = "/health"
-  }
-
-  tags = {
-    "Name"         = "${var.resource_prefix}-alb-tg"
-    "Project"      = var.project_name
-    "ResourceType" = "Compute"
-  }
-}
 
 
 # ------ Required Task Execution Role for Logs ----------- #
