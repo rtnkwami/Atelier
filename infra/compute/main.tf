@@ -18,21 +18,21 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
-resource "aws_lb" "app_load_balancer" {
-  name = "${var.resource_prefix}-lb"
+resource "aws_lb" "public_load_balancer" {
+  name = "${var.resource_prefix}-public-lb"
   load_balancer_type = "application"
-  security_groups = [var.alb_security_group_id]
+  security_groups = [var.public_alb_security_group_id]
   subnets = var.web_subnet_ids
 
   tags = {
-    "Name"         = "${var.resource_prefix}-lb"
+    "Name"         = "${var.resource_prefix}-public-lb"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }
 }
 
 resource "aws_lb_target_group" "frontend_target_group" {
-  name = "${var.resource_prefix}-alb-web-tg"
+  name = "${var.resource_prefix}-public-lb-web-tg"
   port = 80
   protocol = "HTTP"
   target_type = "ip"
@@ -43,14 +43,14 @@ resource "aws_lb_target_group" "frontend_target_group" {
   }
 
   tags = {
-    "Name"         = "${var.resource_prefix}-alb-web-tg"
+    "Name"         = "${var.resource_prefix}-public-lb-web-tg"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }
 }
 
-resource "aws_lb_listener" "alb_http_listener" {
-  load_balancer_arn = aws_lb.app_load_balancer.arn
+resource "aws_lb_listener" "frontend_http_listener" {
+  load_balancer_arn = aws_lb.public_load_balancer.arn
   port = 80
   protocol = "HTTP"
 

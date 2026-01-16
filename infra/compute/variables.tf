@@ -42,7 +42,7 @@ variable "frontend_security_group_id" {
   description = "ID of security group allowing ingress access to frontend"
 }
 
-variable "alb_security_group_id" {
+variable "public_alb_security_group_id" {
   type = string
 }
 

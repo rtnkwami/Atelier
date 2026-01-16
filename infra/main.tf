@@ -64,7 +64,7 @@ module "compute" {
   web_subnet_ids           = module.network.web_subnet_ids
   app_subnet_ids           = module.network.app_subnet_ids
   api_security_group_id     = module.network.api_security_group_id
-  alb_security_group_id = module.network.alb_security_group_id
+  public_alb_security_group_id = module.network.public_alb_security_group_id
   frontend_security_group_id = module.network.frontend_security_group_id
   vpc_id = module.network.vpc_id
 

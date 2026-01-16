@@ -170,16 +170,16 @@ resource "aws_route_table_association" "app_subnet_rt_association" {
 }
 
 
-# --------------- Load Balancer Security Group Rules ---------------------- #
+# --------------- Public Load Balancer Security Group Rules ---------------------- #
 
-resource "aws_security_group" "alb_security_group" {
+resource "aws_security_group" "public_alb_security_group" {
   name = "${var.resource_prefix}-api-lb-sg"
   description = "Allow all traffic to and from api load balancer"
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv4_rule" {
-  security_group_id = aws_security_group.alb_security_group.id
+resource "aws_vpc_security_group_ingress_rule" "public_alb_ingress_ipv4_rule" {
+  security_group_id = aws_security_group.public_alb_security_group.id
 
   description = "Allow https traffic from the internet"
   ip_protocol = "-1"
@@ -189,7 +189,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv4_rule" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
-  security_group_id = aws_security_group.alb_security_group.id
+  security_group_id = aws_security_group.public_alb_security_group.id
 
   description = "Allow https traffic from the internet"
   ip_protocol = "-1"
@@ -199,7 +199,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
-  security_group_id = aws_security_group.alb_security_group.id
+  security_group_id = aws_security_group.public_alb_security_group.id
   
   referenced_security_group_id = aws_security_group.frontend_security_group.id
   ip_protocol = "tcp"
@@ -219,7 +219,7 @@ resource "aws_vpc_security_group_ingress_rule" "frontend_ingress" {
   security_group_id = aws_security_group.frontend_security_group.id
 
   description = "Allow ingress only from alb to web"
-  referenced_security_group_id = aws_security_group.alb_security_group.id
+  referenced_security_group_id = aws_security_group.public_alb_security_group.id
   ip_protocol = "tcp"
   from_port = 3000
   to_port = 3000
