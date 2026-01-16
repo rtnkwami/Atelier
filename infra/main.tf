@@ -80,5 +80,4 @@ module "compute" {
   auth0_domain = var.auth0_domain
   auth0_secret = var.auth0_secret
   app_base_url = var.app_base_url
-  backend_url = var.backend_url
 }

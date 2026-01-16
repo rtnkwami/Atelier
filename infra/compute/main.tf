@@ -220,6 +220,13 @@ resource "aws_ecs_service" "api_service" {
     security_groups  = [var.api_security_group_id]
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.api_target_group.arn
+    container_name = "${var.resource_prefix}-api"
+    container_port = 5000
+    
+  }
+
   tags = {
     "Name"         = "${var.resource_prefix}-api-service"
     "Project"      = var.project_name
@@ -251,7 +258,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
         { "name" : "AUTH0_SECRET", "value" : var.auth0_secret },
         { "name" : "APP_BASE_URL", "value" : var.app_base_url },
         { "name" : "AUTH0_AUDIENCE", "value" : var.auth0_audience },
-        { "name" : "BACKEND_URL", "value" : var.backend_url }
+        { "name" : "BACKEND_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}" }
       ]
       portMappings = [
         {
