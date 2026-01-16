@@ -255,9 +255,9 @@ resource "aws_ecs_task_definition" "frontend_task" {
           containerPort = 3000, # with awsvpc network mode, we don't need host port as it's auto-allocated
         }
       ]
-      healthCheck = {
-        command = [ "CMD-SHELL", "curl -f http://localhost:3000 || exit 1" ]
-      }
+      # healthCheck = {
+      #   command = [ "CMD-SHELL", "curl -f http://localhost:3000 || exit 1" ]
+      # }
 
       logConfiguration = {
         logDriver = "awslogs"
