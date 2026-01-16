@@ -173,8 +173,8 @@ resource "aws_route_table_association" "app_subnet_rt_association" {
 # --------------- Public Load Balancer Security Group Rules ---------------------- #
 
 resource "aws_security_group" "public_alb_security_group" {
-  name = "${var.resource_prefix}-api-lb-sg"
-  description = "Allow all traffic to and from api load balancer"
+  name = "${var.resource_prefix}-public-lb-sg"
+  description = "Restrict network access to public load balancer"
   vpc_id = aws_vpc.vpc.id
 }
 
@@ -188,7 +188,7 @@ resource "aws_vpc_security_group_ingress_rule" "public_alb_ingress_ipv4_rule" {
   cidr_ipv4 = "0.0.0.0/0"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
+resource "aws_vpc_security_group_ingress_rule" "public_alb_ingress_ipv6_rule" {
   security_group_id = aws_security_group.public_alb_security_group.id
 
   description = "Allow https traffic from the internet"
@@ -198,10 +198,11 @@ resource "aws_vpc_security_group_ingress_rule" "alb_ingress_ipv6_rule" {
   cidr_ipv6 = "::/0"
 }
 
-resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
+resource "aws_vpc_security_group_egress_rule" "public_alb_egress_rule" {
   security_group_id = aws_security_group.public_alb_security_group.id
   
   referenced_security_group_id = aws_security_group.frontend_security_group.id
+  description = "Allow traffic to frontend service only"
   ip_protocol = "tcp"
   from_port = 3000
   to_port = 3000
@@ -211,14 +212,14 @@ resource "aws_vpc_security_group_egress_rule" "alb_egress_rule" {
 
 resource "aws_security_group" "frontend_security_group" {
   name = "${var.resource_prefix}-web-sg"
-  description = "Allow traffic to and from web app"
+  description = "Restrict network access to frontend service"
   vpc_id = aws_vpc.vpc.id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "frontend_ingress" {
   security_group_id = aws_security_group.frontend_security_group.id
 
-  description = "Allow ingress only from alb to web"
+  description = "Allow traffic from public load balancer only"
   referenced_security_group_id = aws_security_group.public_alb_security_group.id
   ip_protocol = "tcp"
   from_port = 3000
@@ -230,6 +231,7 @@ resource "aws_vpc_security_group_ingress_rule" "frontend_ingress" {
 resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv4" {
   security_group_id = aws_security_group.frontend_security_group.id
   
+  description = "Allow traffic to the internet"
   ip_protocol = "-1"
   cidr_ipv4 = "0.0.0.0/0"
 }
@@ -237,23 +239,52 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv4" {
 resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv6" {
   security_group_id = aws_security_group.frontend_security_group.id
   
+  description = "Allow traffic to the internet"
   ip_protocol = "-1"
   cidr_ipv6 = "::/0"
+}
+
+# --------------- Private Load Balancer Security Group Rules ---------------------- #
+
+resource "aws_security_group" "private_alb_security_group" {
+  name = "${var.resource_prefix}-private-lb-sg"
+  description = "Restrict network access to private load balancer"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "private_alb_ingress_rule" {
+  security_group_id = aws_security_group.private_alb_security_group.id
+
+  referenced_security_group_id = aws_security_group.frontend_security_group.id
+  description = "Allow traffic from the frontend service only"
+  ip_protocol = "tcp"
+  from_port = 5000
+  to_port = 5000
+}
+
+resource "aws_vpc_security_group_egress_rule" "private_alb_egress_rule" {
+  security_group_id = aws_security_group.private_alb_security_group.id
+  
+  referenced_security_group_id = aws_security_group.api_security_group.id
+  description = "Allow traffic to the backend service only"
+  ip_protocol = "tcp"
+  from_port = 5000
+  to_port = 5000
 }
 
 # --------------- API Security Group Rules ---------------------- #
 
 resource "aws_security_group" "api_security_group" {
   name = "${var.resource_prefix}-api-sg"
-  description = "Allow all traffic to and from api"
+  description = "Restrict network access to backend service"
   vpc_id = aws_vpc.vpc.id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
   security_group_id = aws_security_group.api_security_group.id
   
-  description = "Allow ingress only from api load balancer to api"
-  referenced_security_group_id = aws_security_group.frontend_security_group.id
+  referenced_security_group_id = aws_security_group.private_alb_security_group.id
+  description = "Allow traffic from private load balancer only"
   ip_protocol = "tcp"
   from_port = 5000
   to_port = 5000
@@ -264,6 +295,7 @@ resource "aws_vpc_security_group_ingress_rule" "api_ingress" {
 resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv4" {
   security_group_id = aws_security_group.api_security_group.id
   
+  description = "Allow traffic to the internet"
   ip_protocol = "-1"
   cidr_ipv4 = "0.0.0.0/0"
 }
@@ -271,6 +303,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv4" {
 resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv6" {
   security_group_id = aws_security_group.api_security_group.id
   
+  description = "Allow traffic to the internet"
   ip_protocol = "-1"
   cidr_ipv6 = "::/0"
 }
@@ -279,7 +312,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv6" {
 
 resource "aws_security_group" "database_cluster_security_group" {
   name = "${var.resource_prefix}-database-cluster-sg"
-  description = "Allow only traffic from the api to the database cluster"
+  description = "Allow only traffic from the backend to the database cluster"
   vpc_id = aws_vpc.vpc.id
 }
 
