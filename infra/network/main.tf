@@ -178,23 +178,43 @@ resource "aws_security_group" "public_alb_security_group" {
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "public_alb_ingress_ipv4_rule" {
+resource "aws_vpc_security_group_ingress_rule" "public_alb_https_ingress_ipv4_rule" {
   security_group_id = aws_security_group.public_alb_security_group.id
 
-  description = "Allow https traffic from the internet"
-  ip_protocol = "-1"
-  # from_port = 443
-  # to_port = 443
+  description = "Allow IPv4 https traffic from the internet"
+  ip_protocol = "tcp"
+  from_port = 443
+  to_port = 443
   cidr_ipv4 = "0.0.0.0/0"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "public_alb_ingress_ipv6_rule" {
+resource "aws_vpc_security_group_ingress_rule" "public_alb_https_ingress_ipv6_rule" {
   security_group_id = aws_security_group.public_alb_security_group.id
 
-  description = "Allow https traffic from the internet"
-  ip_protocol = "-1"
-  # from_port = 443
-  # to_port = 443
+  description = "Allow IPv6 https traffic from the internet"
+  ip_protocol = "tcp"
+  from_port = 443
+  to_port = 443
+  cidr_ipv6 = "::/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "public_alb_http_ingress_ipv4_rule" {
+  security_group_id = aws_security_group.public_alb_security_group.id
+
+  description = "Allow IPv4 http only traffic from the internet"
+  ip_protocol = "tcp"
+  from_port = 80
+  to_port = 80
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "public_alb_http_ingress_ipv6_rule" {
+  security_group_id = aws_security_group.public_alb_security_group.id
+
+  description = "Allow IPv6 http only traffic from the internet"
+  ip_protocol = "tcp"
+  from_port = 80
+  to_port = 80
   cidr_ipv6 = "::/0"
 }
 
