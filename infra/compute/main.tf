@@ -8,6 +8,8 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
+#---------------- Public Load Balancer ------------------#
+
 resource "aws_lb" "public_load_balancer" {
   name = "${var.resource_prefix}-public-lb"
   load_balancer_type = "application"
@@ -23,7 +25,7 @@ resource "aws_lb" "public_load_balancer" {
 
 resource "aws_lb_target_group" "frontend_target_group" {
   name = "${var.resource_prefix}-public-lb-web-tg"
-  port = 80
+  port = 3000
   protocol = "HTTP"
   target_type = "ip"
   vpc_id = var.vpc_id
@@ -50,17 +52,71 @@ resource "aws_lb_listener" "frontend_http_listener" {
   }
 }
 
-# resource "aws_lb_listener" "alb_http_listener" {
-#   load_balancer_arn = aws_lb.api_load_balancer.arn
-#   port = 443
-#   protocol = "HTTPS"
+resource "aws_lb_listener" "frontend_https_listener" {
+  load_balancer_arn = aws_lb.public_load_balancer.arn
+  port = 443
+  protocol = "HTTPS"
 
-#   default_action {
-#     type = "forward"
-#     target_group_arn = aws_lb_target_group.alb_target_group.arn
-#   }
-# }
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+  }
+}
 
+#---------------- Private Load Balancer ------------------#
+
+resource "aws_lb" "private_load_balancer" {
+  name = "${var.resource_prefix}-private-lb"
+  load_balancer_type = "application"
+  security_groups = [var.private_alb_security_group_id]
+  subnets = var.app_subnet_ids
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-private-lb"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
+}
+
+resource "aws_lb_target_group" "api_target_group" {
+  name = "${var.resource_prefix}-private-lb-api-tg"
+  port = 5000
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = var.vpc_id
+
+  health_check {
+    path = "/health"
+  }
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-public-lb-api-tg"
+    "Project"      = var.project_name
+    "ResourceType" = "Compute"
+  }
+}
+
+resource "aws_lb_listener" "api_http_listener" {
+  load_balancer_arn = aws_lb.private_load_balancer.arn
+  port = 5000
+  protocol = "HTTP"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.api_target_group.arn
+  }
+}
+
+resource "aws_lb_listener" "alb_https_listener" {
+  load_balancer_arn = aws_lb.private_load_balancer.arn
+  port = 5000
+  protocol = "HTTPS"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.api_target_group.arn
+  }
+}
 
 # ------ Required Task Execution Role for Logs ----------- #
 

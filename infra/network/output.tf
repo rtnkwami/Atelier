@@ -37,3 +37,7 @@ output "database_cluster_security_group_id" {
 output "public_alb_security_group_id" {
   value = aws_security_group.public_alb_security_group.id
 }
+
+output "private_alb_security_group_id" {
+  value = aws_security_group.private_alb_security_group.id
+}
