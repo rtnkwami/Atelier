@@ -245,7 +245,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
         { "name" : "AUTH0_CLIENT_ID", "value" : var.auth0_client_id },
         { "name" : "AUTH0_CLIENT_SECRET", "value" : var.auth0_client_secret },
         { "name" : "AUTH0_SECRET", "value" : var.auth0_secret },
-        { "name" : "APP_BASE_URL", "value" : var.app_base_url },
+        { "name" : "APP_BASE_URL", "value" : "http://${aws_lb.public_load_balancer.dns_name}" },
         { "name" : "AUTH0_AUDIENCE", "value" : var.auth0_audience },
         { "name" : "BACKEND_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}" }
       ]
