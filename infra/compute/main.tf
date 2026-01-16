@@ -52,16 +52,16 @@ resource "aws_lb_listener" "frontend_http_listener" {
   }
 }
 
-resource "aws_lb_listener" "frontend_https_listener" {
-  load_balancer_arn = aws_lb.public_load_balancer.arn
-  port = 443
-  protocol = "HTTPS"
+# resource "aws_lb_listener" "frontend_https_listener" {
+#   load_balancer_arn = aws_lb.public_load_balancer.arn
+#   port = 443
+#   protocol = "HTTPS"
 
-  default_action {
-    type = "forward"
-    target_group_arn = aws_lb_target_group.frontend_target_group.arn
-  }
-}
+#   default_action {
+#     type = "forward"
+#     target_group_arn = aws_lb_target_group.frontend_target_group.arn
+#   }
+# }
 
 #---------------- Private Load Balancer ------------------#
 

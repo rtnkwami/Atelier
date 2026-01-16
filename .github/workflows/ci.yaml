@@ -192,7 +192,7 @@ jobs:
       contents: read
       security-events: write
 
-    needs: [build-api-image, build-web-image]
+    needs: [build-api-image]
     if: needs.build-api-image.result == 'success'
     runs-on: ubuntu-latest
     name: Scan Container Images for Vulnerabilities
@@ -220,7 +220,7 @@ jobs:
       contents: read
       security-events: write
 
-    needs: [build-api-image, build-web-image]
+    needs: [build-web-image]
     if: needs.build-web-image.result == 'success'
     runs-on: ubuntu-latest
     name: Scan Container Images for Vulnerabilities
