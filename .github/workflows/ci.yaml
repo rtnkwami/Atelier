@@ -58,7 +58,8 @@ jobs:
       runs-on: ubuntu-latest
       name: Detect Application Changes
       outputs:
-          changed: ${{ steps.changes.outputs.changed }}
+          api: ${{ steps.changes.outputs.api }}
+          web: ${{ steps.changes.outputs.web }}
       
       steps:
         - name: Check out code
@@ -72,7 +73,7 @@ jobs:
           with:
             base: main
             filters: |
-              changed:
+              api:
                 - api/src/**
                 - api/test/**
                 - api/Dockerfile
@@ -80,18 +81,23 @@ jobs:
                 - api/pnpm*.yaml
                 - api/prisma/**
                 - api/prisma.config.ts
+              web:
+                - web/src/**
+                - web/Dockerfile
+                - web/.dockerignore
+                - web/pnpm*.yaml
 
-  build:
+  build-api-image:
     permissions:
       contents: read
 
     needs: [application-tests, detect-changes]
-    if: needs.detect-changes.outputs.changed == 'true'
+    if: needs.detect-changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    name: Docker Build & Push
+    name: Build & Push API Container Image
 
     concurrency:
-        group: container-image-build
+        group: api-container-image-build
         cancel-in-progress: false
 
     steps:
@@ -128,16 +134,66 @@ jobs:
           context: ./api
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/atelier:${{ github.sha }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/atelier:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:latest
 
-  container-security-scan:
+  build-web-image:
+    permissions:
+      contents: read
+
+    needs: [application-tests, detect-changes]
+    if: needs.detect-changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    name: Build & Push Web Container Image
+
+    concurrency:
+        group: web-container-image-build
+        cancel-in-progress: false
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.23.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: web
+        run: pnpm install
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:latest
+
+  api-image-security-scan:
     permissions:
       contents: read
       security-events: write
 
-    needs: [build]
-    if: needs.build.result == 'success'
+    needs: [build-api-image, build-web-image]
+    if: needs.build-api-image.result == 'success'
     runs-on: ubuntu-latest
     name: Scan Container Images for Vulnerabilities
 
@@ -148,15 +204,43 @@ jobs:
         - name: Run Trivy vulnerability scanner
           uses: aquasecurity/trivy-action@0.33.1
           with:
-            image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/atelier:${{ github.sha }}'
+            image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:${{ github.sha }}'
             format: 'sarif'
-            output: 'trivy-results.sarif'
+            output: 'api-trivy-results.sarif'
             severity: 'CRITICAL,HIGH'
 
         - name: Upload Trivy scan results to GitHub Security tab
           uses: github/codeql-action/upload-sarif@v4
           with:
-            sarif_file: 'trivy-results.sarif'
+            sarif_file: 'api-trivy-results.sarif'
+            category: Trivy-Container
+
+  web-image-security-scan:
+    permissions:
+      contents: read
+      security-events: write
+
+    needs: [build-api-image, build-web-image]
+    if: needs.build-web-image.result == 'success'
+    runs-on: ubuntu-latest
+    name: Scan Container Images for Vulnerabilities
+
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+
+        - name: Run Trivy vulnerability scanner
+          uses: aquasecurity/trivy-action@0.33.1
+          with:
+            image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:${{ github.sha }}'
+            format: 'sarif'
+            output: 'web-trivy-results.sarif'
+            severity: 'CRITICAL,HIGH'
+
+        - name: Upload Trivy scan results to GitHub Security tab
+          uses: github/codeql-action/upload-sarif@v4
+          with:
+            sarif_file: 'web-trivy-results.sarif'
             category: Trivy-Container
 
   deploy-infrastructure:
@@ -193,21 +277,26 @@ jobs:
         - name: Deploy Infrastructure
           working-directory: infra
           env:
-            TF_VAR_issuer_base_url: ${{ secrets.ISSUER_BASE_URL }}
-            TF_VAR_audience: ${{ secrets.AUDIENCE }}
+            TF_VAR_issuer_base_url: ${{ secrets.AUTH0_DOMAIN }}
+            TF_VAR_audience: ${{ secrets.AUTH0_AUDIENCE }}
             TF_VAR_database_user: ${{ secrets.DATABASE_USER }}
             TF_VAR_database_password: ${{ secrets.DATABASE_PASSWORD }}
             TF_VAR_database_name: ${{ secrets.DATABASE_NAME }}
+            TF_VAR_auth0_audience: ${{ secrets.AUTH0_AUDIENCE }}
+            TF_VAR_auth0_client_id: ${{ secrets.AUTH0_CLIENT_ID }}
+            TF_VAR_auth0_client_secret: ${{ secrets.AUTH0_CLIENT_SECRET }}
+            TF_VAR_auth0_secret: ${{ secrets.AUTH0_SECRET }}
+            TF_VAR_auth0_domain: ${{ secrets.AUTH0_DOMAIN }}
           run: tofu apply --auto-approve
 
-  deploy-application:
+  deploy-api:
     permissions:
       contents: read
       id-token: write
 
-    needs: [build, deploy-infrastructure]
+    needs: [build-api-image, deploy-infrastructure]
     runs-on: ubuntu-latest
-    name: Deploy Application Changes
+    name: Deploy API Changes
 
     steps:
         - name: Checkout Code
@@ -233,6 +322,45 @@ jobs:
           run: |
             CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
             SERVICE_NAME=$(tofu output -raw api_service_name)
+            
+            aws ecs update-service \
+              --cluster $CLUSTER_NAME \
+              --service $SERVICE_NAME \
+              --force-new-deployment
+
+  deploy-web:
+    permissions:
+      contents: read
+      id-token: write
+
+    needs: [build-web-image, deploy-infrastructure]
+    runs-on: ubuntu-latest
+    name: Deploy Web Changes
+
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v5
+          with:
+            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            aws-region: us-east-1
+
+        - name: Setup OpenTofu
+          uses: opentofu/setup-opentofu@v1
+          with:
+            tofu_version: 1.10.3
+
+        - name: Initialize OpenTofu
+          working-directory: infra
+          run: tofu init
+
+        - name: Create New App Deployment
+          working-directory: infra
+          run: |
+            CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
+            SERVICE_NAME=$(tofu output -raw web_service_name)
             
             aws ecs update-service \
               --cluster $CLUSTER_NAME \
