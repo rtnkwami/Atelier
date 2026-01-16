@@ -1,15 +1,5 @@
-# CloudMap namespace for ECS Service Connect
-resource "aws_service_discovery_http_namespace" "cloudmap_namepsace" {
-  name = var.cloudmap_namepsace
-}
-
 resource "aws_ecs_cluster" "cluster" {
   name = "${var.resource_prefix}-ecs-cluster"
-
-  service_connect_defaults {
-    # default namespace for service connect for other services to use
-    namespace = aws_service_discovery_http_namespace.cloudmap_namepsace.arn
-  }
 
   tags = {
     "Name"         = "${var.resource_prefix}-ecs-cluster"
@@ -136,7 +126,6 @@ resource "aws_ecs_task_definition" "api_task" {
       ]
       portMappings = [
         {
-          name = "backend" # Port name for use in service connect configuration
           containerPort = 5000,  # with awsvpc network mode, we don't need host port as it's auto-allocated
         }
       ]
@@ -173,23 +162,6 @@ resource "aws_ecs_service" "api_service" {
     assign_public_ip = true
     subnets          = var.app_subnet_ids
     security_groups  = [var.api_security_group_id]
-  }
-
-  service_connect_configuration {
-    enabled = true
-    
-    service {
-      # Name of one of the portMappings from all the containers in the task definition of this Amazon ECS service.
-      port_name = "backend"
-
-      client_alias {
-        # Name to use in the applications of client tasks to connect to this service.
-        dns_name = "backend"
-        # Listening port number for the Service Connect proxy.
-        #This port is available inside of all of the tasks within the same namespace.
-        port = 5000
-      }
-    }
   }
 
   tags = {
@@ -263,10 +235,6 @@ resource "aws_ecs_service" "frontend_service" {
     assign_public_ip = true
     subnets          = var.app_subnet_ids
     security_groups  = [var.frontend_security_group_id]
-  }
-
-  service_connect_configuration {
-    enabled = true
   }
 
   load_balancer {
