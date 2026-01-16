@@ -247,7 +247,8 @@ resource "aws_ecs_task_definition" "frontend_task" {
         { "name" : "AUTH0_SECRET", "value" : var.auth0_secret },
         { "name" : "APP_BASE_URL", "value" : "http://${aws_lb.public_load_balancer.dns_name}" },
         { "name" : "AUTH0_AUDIENCE", "value" : var.auth0_audience },
-        { "name" : "BACKEND_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}" }
+        { "name" : "BACKEND_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}" },
+        { "name" : "HOSTNAME", "value" : "0.0.0.0" }
       ]
       portMappings = [
         {
