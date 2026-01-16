@@ -216,7 +216,6 @@ resource "aws_ecs_service" "api_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    assign_public_ip = true
     subnets          = var.app_subnet_ids
     security_groups  = [var.api_security_group_id]
   }
@@ -296,7 +295,6 @@ resource "aws_ecs_service" "frontend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    assign_public_ip = true
     subnets          = var.app_subnet_ids
     security_groups  = [var.frontend_security_group_id]
   }
