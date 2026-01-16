@@ -86,9 +86,9 @@ resource "aws_lb_target_group" "api_target_group" {
   target_type = "ip"
   vpc_id = var.vpc_id
 
-  health_check {
-    path = "/health"
-  }
+  # health_check {
+  #   path = "/health"
+  # }
 
   tags = {
     "Name"         = "${var.resource_prefix}-private-lb-api-tg"
