@@ -108,17 +108,6 @@ resource "aws_lb_listener" "api_http_listener" {
   }
 }
 
-resource "aws_lb_listener" "alb_https_listener" {
-  load_balancer_arn = aws_lb.private_load_balancer.arn
-  port = 5000
-  protocol = "HTTPS"
-
-  default_action {
-    type = "forward"
-    target_group_arn = aws_lb_target_group.api_target_group.arn
-  }
-}
-
 # ------ Required Task Execution Role for Logs ----------- #
 
 resource "aws_cloudwatch_log_group" "api_service_logs" {
