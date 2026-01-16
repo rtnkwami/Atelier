@@ -91,7 +91,7 @@ resource "aws_lb_target_group" "api_target_group" {
   }
 
   tags = {
-    "Name"         = "${var.resource_prefix}-public-lb-api-tg"
+    "Name"         = "${var.resource_prefix}-private-lb-api-tg"
     "Project"      = var.project_name
     "ResourceType" = "Compute"
   }
