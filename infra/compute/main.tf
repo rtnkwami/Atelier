@@ -67,6 +67,7 @@ resource "aws_lb_listener" "frontend_https_listener" {
 
 resource "aws_lb" "private_load_balancer" {
   name = "${var.resource_prefix}-private-lb"
+  internal = true
   load_balancer_type = "application"
   security_groups = [var.private_alb_security_group_id]
   subnets = var.app_subnet_ids
