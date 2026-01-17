@@ -11,10 +11,6 @@ jobs:
         runs-on: ubuntu-latest
         name: Run Database Migrations
 
-        permissions:
-            contents: read
-            id-token: write
-
         steps:
             - name: Check out code
               uses: actions/checkout@v5

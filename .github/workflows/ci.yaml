@@ -238,6 +238,9 @@ jobs:
     name: Run Database Schema Migrations
     needs: [change-detection, api-docker-build, infrastructure-deployment]
 
+    permissions:
+      id-token: write
+
     if: needs.change-detection.outputs.migrations == 'true'
     uses: ./.github/workflows/migrations.yaml
 
