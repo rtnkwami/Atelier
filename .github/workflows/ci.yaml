@@ -60,6 +60,7 @@ jobs:
       outputs:
           api: ${{ steps.changes.outputs.api }}
           web: ${{ steps.changes.outputs.web }}
+          migrations: ${{ steps.changes.outputs.migrations }}
       
       steps:
         - name: Check out code
@@ -75,24 +76,24 @@ jobs:
             filters: |
               api:
                 - api/src/**
-                - api/test/**
                 - api/Dockerfile
                 - api/.dockerignore
                 - api/pnpm*.yaml
-                - api/prisma/**
-                - api/prisma.config.ts
               web:
                 - web/src/**
                 - web/Dockerfile
                 - web/.dockerignore
                 - web/pnpm*.yaml
+              migrations:
+                - api/prisma/**
+                - api/prisma.config.ts
 
   build-api-image:
     permissions:
       contents: read
 
     needs: [application-tests, detect-changes]
-    if: needs.detect-changes.outputs.api == 'true'
+    if: needs.detect-changes.outputs.api == 'true' || needs.detect-changes.outputs.migrations == 'true'
     runs-on: ubuntu-latest
     name: Build & Push API Container Image
 
@@ -289,14 +290,25 @@ jobs:
             TF_VAR_auth0_domain: ${{ secrets.AUTH0_DOMAIN }}
           run: tofu apply --auto-approve
 
+  database-migrations:
+    name: Run Database Schema Migrations
+    needs: [detect-changes, build-api-image, deploy-infrastructure]
+
+    if: needs.detect-changes.outputs.migrations == 'true'
+    uses: ./.github/workflows/migrations.yaml
+
   deploy-api:
     permissions:
       contents: read
       id-token: write
 
-    needs: [build-api-image, deploy-infrastructure]
+    needs: [build-api-image, deploy-infrastructure, database-migrations]
     runs-on: ubuntu-latest
     name: Deploy API Changes
+
+    if: |
+      (needs.build-api-image.result == 'success' && needs.deploy-infrastructure.result == 'success') ||
+      needs.database-migrations.result == 'success'
 
     steps:
         - name: Checkout Code

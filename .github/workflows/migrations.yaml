@@ -4,12 +4,15 @@ permissions:
     id-token: write
 
 on:
-    workflow_dispatch:
+    workflow_call:
 
 jobs:
-    migrations:
+    run-migrations:
         runs-on: ubuntu-latest
         name: Run Database Migrations
+
+        permissions:
+            contents: read
 
         steps:
             - name: Check out code
@@ -49,4 +52,3 @@ jobs:
                 CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
                 SERVICE_NAME: ${{ env.SERVICE_NAME }}
               run: python scripts/migrate.py
-            
