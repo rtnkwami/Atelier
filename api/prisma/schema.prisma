@@ -4,7 +4,7 @@ generator client {
   moduleFormat    = "cjs"
   previewFeatures = ["relationJoins"]
 }
-// test
+
 datasource db {
   provider = "postgresql"
 }
