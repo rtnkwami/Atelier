@@ -188,62 +188,6 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:latest
 
-  api-image-security-scan:
-    permissions:
-      contents: read
-      security-events: write
-
-    needs: [build-api-image]
-    if: needs.build-api-image.result == 'success'
-    runs-on: ubuntu-latest
-    name: Scan Container Images for Vulnerabilities
-
-    steps:
-        - name: Checkout Code
-          uses: actions/checkout@v4
-
-        - name: Run Trivy vulnerability scanner
-          uses: aquasecurity/trivy-action@0.33.1
-          with:
-            image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:${{ github.sha }}'
-            format: 'sarif'
-            output: 'api-trivy-results.sarif'
-            severity: 'CRITICAL,HIGH'
-
-        - name: Upload Trivy scan results to GitHub Security tab
-          uses: github/codeql-action/upload-sarif@v4
-          with:
-            sarif_file: 'api-trivy-results.sarif'
-            category: Trivy-Container
-
-  web-image-security-scan:
-    permissions:
-      contents: read
-      security-events: write
-
-    needs: [build-web-image]
-    if: needs.build-web-image.result == 'success'
-    runs-on: ubuntu-latest
-    name: Scan Container Images for Vulnerabilities
-
-    steps:
-        - name: Checkout Code
-          uses: actions/checkout@v4
-
-        - name: Run Trivy vulnerability scanner
-          uses: aquasecurity/trivy-action@0.33.1
-          with:
-            image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:${{ github.sha }}'
-            format: 'sarif'
-            output: 'web-trivy-results.sarif'
-            severity: 'CRITICAL,HIGH'
-
-        - name: Upload Trivy scan results to GitHub Security tab
-          uses: github/codeql-action/upload-sarif@v4
-          with:
-            sarif_file: 'web-trivy-results.sarif'
-            category: Trivy-Container
-
   deploy-infrastructure:
     permissions:
       contents: read
