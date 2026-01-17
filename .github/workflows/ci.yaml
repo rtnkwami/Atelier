@@ -243,6 +243,7 @@ jobs:
 
     if: needs.change-detection.outputs.migrations == 'true'
     uses: ./.github/workflows/migrations.yaml
+    secrets: inherit
 
   api-deployment:
     permissions:
