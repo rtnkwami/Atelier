@@ -86,9 +86,9 @@ resource "aws_lb_target_group" "api_target_group" {
   target_type = "ip"
   vpc_id = var.vpc_id
 
-  # health_check {
-  #   path = "/health"
-  # }
+  health_check {
+    path = "/health"
+  }
 
   tags = {
     "Name"         = "${var.resource_prefix}-private-lb-api-tg"
@@ -255,9 +255,9 @@ resource "aws_ecs_task_definition" "frontend_task" {
           containerPort = 3000, # with awsvpc network mode, we don't need host port as it's auto-allocated
         }
       ]
-      # healthCheck = {
-      #   command = [ "CMD-SHELL", "curl -f http://localhost:3000 || exit 1" ]
-      # }
+      healthCheck = {
+        command = [ "CMD-SHELL", "curl -f http://localhost:3000/ || exit 1" ]
+      }
 
       logConfiguration = {
         logDriver = "awslogs"
