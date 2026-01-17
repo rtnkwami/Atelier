@@ -51,7 +51,7 @@ jobs:
         working-directory: api
         run: pnpm test
 
-  detect-changes:
+  change-detection:
       permissions:
         contents: read
 
@@ -88,12 +88,12 @@ jobs:
                 - api/prisma/**
                 - api/prisma.config.ts
 
-  build-api-image:
+  api-docker-build:
     permissions:
       contents: read
 
-    needs: [application-tests, detect-changes]
-    if: needs.detect-changes.outputs.api == 'true' || needs.detect-changes.outputs.migrations == 'true'
+    needs: [application-tests, change-detection]
+    if: needs.change-detection.outputs.api == 'true' || needs.change-detection.outputs.migrations == 'true'
     runs-on: ubuntu-latest
     name: Build & Push API Container Image
 
@@ -138,12 +138,12 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:latest
 
-  build-web-image:
+  web-docker-build:
     permissions:
       contents: read
 
-    needs: [application-tests, detect-changes]
-    if: needs.detect-changes.outputs.web == 'true'
+    needs: [application-tests, change-detection]
+    if: needs.change-detection.outputs.web == 'true'
     runs-on: ubuntu-latest
     name: Build & Push Web Container Image
 
@@ -188,7 +188,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:latest
 
-  deploy-infrastructure:
+  infrastructure-deployment:
     permissions:
       contents: read
       id-token: write
@@ -236,22 +236,22 @@ jobs:
 
   database-migrations:
     name: Run Database Schema Migrations
-    needs: [detect-changes, build-api-image, deploy-infrastructure]
+    needs: [change-detection, api-docker-build, infrastructure-deployment]
 
-    if: needs.detect-changes.outputs.migrations == 'true'
+    if: needs.change-detection.outputs.migrations == 'true'
     uses: ./.github/workflows/migrations.yaml
 
-  deploy-api:
+  api-deployment:
     permissions:
       contents: read
       id-token: write
 
-    needs: [build-api-image, deploy-infrastructure, database-migrations]
+    needs: [api-docker-build, infrastructure-deployment, database-migrations]
     runs-on: ubuntu-latest
     name: Deploy API Changes
 
     if: |
-      (needs.build-api-image.result == 'success' && needs.deploy-infrastructure.result == 'success') ||
+      (needs.api-docker-build.result == 'success' && needs.infrastructure-deployment.result == 'success') ||
       needs.database-migrations.result == 'success'
 
     steps:
@@ -284,12 +284,12 @@ jobs:
               --service $SERVICE_NAME \
               --force-new-deployment
 
-  deploy-web:
+  web-deployment:
     permissions:
       contents: read
       id-token: write
 
-    needs: [build-web-image, deploy-infrastructure]
+    needs: [web-docker-build, infrastructure-deployment]
     runs-on: ubuntu-latest
     name: Deploy Web Changes
 
