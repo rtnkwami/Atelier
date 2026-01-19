@@ -9,7 +9,6 @@ on:
 jobs:
     run-migrations:
         runs-on: ubuntu-latest
-        name: Run Database Migrations
 
         steps:
             - name: Check out code
