@@ -13,8 +13,8 @@ resource "aws_ecs_cluster" "cluster" {
 resource "aws_lb" "public_load_balancer" {
   name = "${var.resource_prefix}-public-lb"
   load_balancer_type = "application"
-  security_groups = [var.public_alb_security_group_id]
-  subnets = var.web_subnet_ids
+  security_groups = [aws_security_group.public_alb_security_group.id]
+  subnets = [for subnet in aws_subnet.web_subnets : subnet.id]
 
   tags = {
     "Name"         = "${var.resource_prefix}-public-lb"
@@ -28,7 +28,7 @@ resource "aws_lb_target_group" "frontend_target_group" {
   port = 3000
   protocol = "HTTP"
   target_type = "ip"
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.vpc.id
 
   health_check {
     path = "/"
@@ -69,8 +69,8 @@ resource "aws_lb" "private_load_balancer" {
   name = "${var.resource_prefix}-private-lb"
   internal = true
   load_balancer_type = "application"
-  security_groups = [var.private_alb_security_group_id]
-  subnets = var.app_subnet_ids
+  security_groups = [aws_security_group.private_alb_security_group.id]
+  subnets = [for subnet in aws_subnet.app_subnets : subnet.id]
 
   tags = {
     "Name"         = "${var.resource_prefix}-private-lb"
@@ -84,7 +84,7 @@ resource "aws_lb_target_group" "api_target_group" {
   port = 5000
   protocol = "HTTP"
   target_type = "ip"
-  vpc_id = var.vpc_id
+  vpc_id = aws_vpc.vpc.id
 
   health_check {
     path = "/health"
@@ -166,7 +166,7 @@ resource "aws_ecs_task_definition" "api_task" {
       image     = var.api_image
       essential = true
       environment = [
-        { "name" : "DATABASE_URL", "value" : var.database_url },
+        { "name" : "DATABASE_URL", "value" : aws_rds_cluster.db_cluster.endpoint },
         { "name" : "ISSUER_BASE_URL", "value" : var.issuer_base_url },
         { "name" : "AUDIENCE", "value" : var.audience }
       ]
@@ -205,8 +205,8 @@ resource "aws_ecs_service" "api_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.app_subnet_ids
-    security_groups  = [var.api_security_group_id]
+    subnets          = [for subnet in aws_subnet.app_subnets : subnet.id]
+    security_groups  = [aws_security_group.api_security_group.id]
   }
 
   load_balancer {
@@ -285,8 +285,8 @@ resource "aws_ecs_service" "frontend_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.app_subnet_ids
-    security_groups  = [var.frontend_security_group_id]
+    subnets          = [for subnet in aws_subnet.app_subnets : subnet.id]
+    security_groups  = [aws_security_group.frontend_security_group.id]
   }
 
   load_balancer {
