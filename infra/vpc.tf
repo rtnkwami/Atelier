@@ -308,19 +308,3 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv6" {
   ip_protocol = "-1"
   cidr_ipv6 = "::/0"
 }
-
-resource "aws_security_group" "database_cluster_security_group" {
-  name = "${var.resource_prefix}-database-cluster-sg"
-  description = "Allow only traffic from the backend to the database cluster"
-  vpc_id = aws_vpc.vpc.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "database_ingress_rule" {
-  security_group_id = aws_security_group.database_cluster_security_group.id
-  
-  description = "Allow inbound connections from API to database cluster"
-  referenced_security_group_id = aws_security_group.api_security_group.id
-  ip_protocol = "tcp"
-  from_port = 5432
-  to_port = 5432
-}
