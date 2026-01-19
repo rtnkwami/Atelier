@@ -207,7 +207,7 @@ jobs:
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v5
           with:
-            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            role-to-assume: ${{ secrets.TEST_CI_CD_ROLE }}
             aws-region: us-east-1
 
         - name: Setup OpenTofu
@@ -265,7 +265,7 @@ jobs:
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v5
           with:
-            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            role-to-assume: ${{ secrets.TEST_CI_CD_ROLE }}
             aws-region: us-east-1
 
         - name: Setup OpenTofu
@@ -304,7 +304,7 @@ jobs:
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v5
           with:
-            role-to-assume: ${{ secrets.CI_CD_ROLE }}
+            role-to-assume: ${{ secrets.TEST_CI_CD_ROLE }}
             aws-region: us-east-1
 
         - name: Setup OpenTofu
