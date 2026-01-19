@@ -1,6 +1,12 @@
+# ============================================================================
+#  In this file:
+#     - Database Security Group
+#     - Database Cluster
+# ============================================================================
+
 resource "aws_db_subnet_group" "db_cluster_subnet_group" {
   name = "${var.resource_prefix}-db-subnet-group"
-  subnet_ids = var.db_subnet_ids
+  subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
 
   tags = {
     "Name"         = "${var.resource_prefix}-db-subnet-group"
@@ -18,7 +24,7 @@ resource "aws_rds_cluster" "db_cluster" {
   master_username = var.database_user
   master_password = var.database_password
   db_subnet_group_name = aws_db_subnet_group.db_cluster_subnet_group.name
-  vpc_security_group_ids = [var.database_cluster_security_group_id]
+  vpc_security_group_ids = [aws_security_group.database_cluster_security_group.id]
   skip_final_snapshot = true
   
   

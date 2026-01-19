@@ -27,19 +27,7 @@ data "aws_availability_zones" "available" {
 
 locals {
   availability_zones =  toset(slice(data.aws_availability_zones.available.names, 0, 3))
-  database_url = "postgresql://${var.database_user}:${var.database_password}@${module.database.db_cluster_endpoint}/${var.database_name}?sslmode=no-verify"
-}
-
-module "database" {
-  source = "./database"
-  
-  database_user = var.database_user
-  database_name = var.database_name
-  database_password = var.database_password
-  resource_prefix = var.resource_prefix
-  project_name = var.project_name
-  db_subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
-  database_cluster_security_group_id = aws_security_group.database_cluster_security_group.id
+  database_url = "postgresql://${var.database_user}:${var.database_password}@${aws_rds_cluster.db_cluster.endpoint}/${var.database_name}?sslmode=no-verify"
 }
 
 module "compute" {
