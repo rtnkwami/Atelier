@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  cidr_block                       = var.vpc_cidr_block
+  cidr_block                       = var.vpc_cidr_range
   assign_generated_ipv6_cidr_block = true
 
   tags = {
@@ -19,20 +19,13 @@ resource "aws_internet_gateway" "vpc_igw" {
   }
 }
 
-locals {
-  availability_zones = toset(var.availability_zones)
-}
-
-# ========================================
-# PUBLIC SUBNETS
-# ========================================
 resource "aws_subnet" "web_subnets" {
   for_each = local.availability_zones
 
   vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key))
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key))
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(tolist(local.availability_zones), each.key))
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(tolist(local.availability_zones), each.key))
   assign_ipv6_address_on_creation = true
   map_public_ip_on_launch         = true
 
@@ -43,7 +36,6 @@ resource "aws_subnet" "web_subnets" {
   }
 }
 
-# Make web subnet public
 resource "aws_route_table" "web_route_table" {
   vpc_id = aws_vpc.vpc.id
 
@@ -71,16 +63,13 @@ resource "aws_route_table_association" "web_subnet_rt_association" {
   route_table_id = aws_route_table.web_route_table.id
 }
 
-# ========================================
-# PRIVATE SUBNETS
-# ========================================
 resource "aws_subnet" "app_subnets" {
   for_each = local.availability_zones
 
   vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 3)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 3)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(tolist(local.availability_zones), each.key) + 3)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(tolist(local.availability_zones), each.key) + 3)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -95,8 +84,8 @@ resource "aws_subnet" "db_subnets" {
 
   vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 6)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 6)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(tolist(local.availability_zones), each.key) + 6)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(tolist(local.availability_zones), each.key) + 6)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -111,8 +100,8 @@ resource "aws_subnet" "reserved_subnets" {
 
   vpc_id                          = aws_vpc.vpc.id
   availability_zone               = each.key
-  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(var.availability_zones, each.key) + 9)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(var.availability_zones, each.key) + 9)
+  cidr_block                      = cidrsubnet(aws_vpc.vpc.cidr_block, 4, index(tolist(local.availability_zones), each.key) + 9)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 4, index(tolist(local.availability_zones), each.key) + 9)
   assign_ipv6_address_on_creation = true
 
   tags = {
@@ -122,7 +111,6 @@ resource "aws_subnet" "reserved_subnets" {
   }
 }
 
-# Very expensive resource. Beware
 resource "aws_eip" "nat_gateway_eip" {
   domain = "vpc"
 
@@ -133,7 +121,7 @@ resource "aws_eip" "nat_gateway_eip" {
   }
 }
 
-# Create single NAT gateway in one AZ
+# Create single NAT gateway in one AZ. Because NAT GWs are expensive and this is a "small" project, only 1 will be used.
 resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = aws_eip.nat_gateway_eip.id
   subnet_id     = aws_subnet.web_subnets[tolist(local.availability_zones)[0]].id
@@ -145,7 +133,6 @@ resource "aws_nat_gateway" "nat_gateway" {
   }
 }
 
-# Create single private route table
 resource "aws_route_table" "private_subnet_route_table" {
   vpc_id = aws_vpc.vpc.id
 
@@ -161,7 +148,6 @@ resource "aws_route_table" "private_subnet_route_table" {
   }
 }
 
-# Associate all app subnets to the single route table
 resource "aws_route_table_association" "app_subnet_rt_association" {
   for_each = local.availability_zones
 
@@ -169,8 +155,7 @@ resource "aws_route_table_association" "app_subnet_rt_association" {
   route_table_id = aws_route_table.private_subnet_route_table.id
 }
 
-
-# --------------- Public Load Balancer Security Group Rules ---------------------- #
+#------- Security---------
 
 resource "aws_security_group" "public_alb_security_group" {
   name = "${var.resource_prefix}-public-lb-sg"
@@ -264,8 +249,6 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_frontend_egress_ipv6" {
   cidr_ipv6 = "::/0"
 }
 
-# --------------- Private Load Balancer Security Group Rules ---------------------- #
-
 resource "aws_security_group" "private_alb_security_group" {
   name = "${var.resource_prefix}-private-lb-sg"
   description = "Restrict network access to private load balancer"
@@ -291,8 +274,6 @@ resource "aws_vpc_security_group_egress_rule" "private_alb_egress_rule" {
   from_port = 5000
   to_port = 5000
 }
-
-# --------------- API Security Group Rules ---------------------- #
 
 resource "aws_security_group" "api_security_group" {
   name = "${var.resource_prefix}-api-sg"
@@ -327,8 +308,6 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_backend_egress_ipv6" {
   ip_protocol = "-1"
   cidr_ipv6 = "::/0"
 }
-
-# --------------- Database Security Group Rules ---------------------- #
 
 resource "aws_security_group" "database_cluster_security_group" {
   name = "${var.resource_prefix}-database-cluster-sg"

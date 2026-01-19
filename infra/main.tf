@@ -26,17 +26,8 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  availability_zones = slice(data.aws_availability_zones.available.names, 0, 3)
+  availability_zones =  toset(slice(data.aws_availability_zones.available.names, 0, 3))
   database_url = "postgresql://${var.database_user}:${var.database_password}@${module.database.db_cluster_endpoint}/${var.database_name}?sslmode=no-verify"
-}
-
-module "network" {
-  source = "./network"
-
-  availability_zones = local.availability_zones
-  project_name       = var.project_name
-  resource_prefix    = var.resource_prefix
-  vpc_cidr_block     = var.vpc_cidr_range
 }
 
 module "database" {
@@ -47,8 +38,8 @@ module "database" {
   database_password = var.database_password
   resource_prefix = var.resource_prefix
   project_name = var.project_name
-  db_subnet_ids = module.network.db_subnet_ids
-  database_cluster_security_group_id = module.network.database_cluster_security_group_id
+  db_subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
+  database_cluster_security_group_id = aws_security_group.database_cluster_security_group.id
 }
 
 module "compute" {
@@ -60,13 +51,13 @@ module "compute" {
   frontend_image           = var.frontend_image
 
   # Required networking inputs
-  web_subnet_ids           = module.network.web_subnet_ids
-  app_subnet_ids           = module.network.app_subnet_ids
-  api_security_group_id     = module.network.api_security_group_id
-  public_alb_security_group_id = module.network.public_alb_security_group_id
-  private_alb_security_group_id = module.network.private_alb_security_group_id
-  frontend_security_group_id = module.network.frontend_security_group_id
-  vpc_id = module.network.vpc_id
+  web_subnet_ids           = [for subnet in aws_subnet.web_subnets : subnet.id]
+  app_subnet_ids           = [for subnet in aws_subnet.app_subnets : subnet.id]
+  api_security_group_id     = aws_security_group.api_security_group.id
+  public_alb_security_group_id = aws_security_group.public_alb_security_group.id
+  private_alb_security_group_id = aws_security_group.private_alb_security_group.id
+  frontend_security_group_id = aws_security_group.frontend_security_group.id
+  vpc_id = aws_vpc.vpc.id
 
   # Required api task variables
   database_url             = local.database_url
