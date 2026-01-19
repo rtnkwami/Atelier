@@ -7,16 +7,16 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "niovial-sandbox-terraform-state"
-    key     = "Sandbox/Atelier/terraform.tfstate"
-    encrypt = true
+    bucket       = "niovial-sandbox-terraform-state"
+    key          = "Sandbox/Atelier/terraform.tfstate"
+    encrypt      = true
     use_lockfile = true
-    region  = "us-east-1"
+    region       = "us-east-1"
   }
 }
 
 provider "aws" {
-  region  = "us-east-1"
+  region = "us-east-1"
 }
 
 data "aws_availability_zones" "available" {
@@ -24,7 +24,7 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  availability_zones =  toset(slice(data.aws_availability_zones.available.names, 0, 3))
+  availability_zones = toset(slice(data.aws_availability_zones.available.names, 0, 3))
 
   # sslmode=no-verify is used in the database url because the Prisma ORM expects ssl for database connections in production.
   # Within this IaC, there is no ssl configured for database connections between the api tasks and the database

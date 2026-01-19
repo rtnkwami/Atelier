@@ -16,7 +16,7 @@ resource "aws_cloudwatch_log_group" "api_service_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "frontend_service_logs" {
-  name = "/ecs/${var.resource_prefix}-web"
+  name              = "/ecs/${var.resource_prefix}-web"
   retention_in_days = 1
 }
 
