@@ -21,6 +21,7 @@ chdir("../../setup")
 with open(SETUP_VARS_FILE, 'w') as setup_vars_file:
     dump(setup_vars, setup_vars_file, indent=4)
 
+run(['tofu', 'init'], check=True)
 run(['tofu', 'apply', '--auto-approve'], check=True)
 
 remove(SETUP_VARS_FILE)
