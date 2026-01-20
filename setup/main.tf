@@ -8,5 +8,5 @@ terraform {
 }
 
 provider "aws" {
-  region = var.deployment_region
+  region = var.state_file_region
 }
