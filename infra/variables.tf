@@ -1,3 +1,18 @@
+variable "s3_state_bucket" {
+  type = string
+  default = "niovial-sandbox-terraform-state"
+}
+
+variable "s3_state_file_key" {
+  type = string
+  default = "Sandbox/Atelier/terraform.tfstate"
+}
+
+variable "deployment_region" {
+type = string
+default = "us-east-1"
+}
+
 variable "project_name" {
   type        = string
   description = "Project name for resource tagging"

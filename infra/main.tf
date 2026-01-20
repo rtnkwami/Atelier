@@ -7,16 +7,16 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "niovial-sandbox-terraform-state"
-    key          = "Sandbox/Atelier/terraform.tfstate"
+    bucket       = var.s3_state_bucket
+    key          = var.s3_state_file_key
     encrypt      = true
     use_lockfile = true
-    region       = "us-east-1"
+    region       = var.deployment_region
   }
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = var.deployment_region
 }
 
 data "aws_availability_zones" "available" {
