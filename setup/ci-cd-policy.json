@@ -1,0 +1,225 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateTags",
+				"ec2:DescribeAccountAttributes",
+				"ec2:DescribeAddresses",
+				"ec2:DescribeAddressesAttribute",
+				"ec2:DescribeAvailabilityZones",
+				"ec2:DescribeInternetGateways",
+				"ec2:DescribeNatGateways",
+				"ec2:DescribeNetworkAcls",
+				"ec2:DescribeRouteTables",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeSubnets",
+				"ec2:DescribeVpcs",
+				"ecs:DescribeTaskDefinition",
+				"elasticloadbalancing:CreateListener",
+				"elasticloadbalancing:CreateLoadBalancer",
+				"elasticloadbalancing:DescribeCapacityReservation",
+				"elasticloadbalancing:DescribeListenerAttributes",
+				"elasticloadbalancing:DescribeListeners",
+				"elasticloadbalancing:DescribeLoadBalancerAttributes",
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"elasticloadbalancing:DescribeTags",
+				"elasticloadbalancing:DescribeTargetGroupAttributes",
+				"elasticloadbalancing:DescribeTargetGroups",
+				"iam:ListPolicies",
+				"logs:DescribeLogGroups",
+				"logs:ListTagsForResource",
+				"rds:AddTagsToResource",
+				"rds:DescribeDBClusters",
+				"rds:DescribeDBInstances",
+				"rds:DescribeDBSubnetGroups",
+				"rds:DescribeGlobalClusters",
+				"rds:ListTagsForResource",
+				"sts:GetCallerIdentity"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "autoscaling:PutScalingPolicy",
+			"Resource": "arn:aws:autoscaling:*:${Account}:autoScalingGroup:*:autoScalingGroupName/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"cloudwatch:DescribeAlarms",
+				"cloudwatch:PutMetricAlarm"
+			],
+			"Resource": "arn:aws:cloudwatch:*:${Account}:alarm:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ec2:AllocateAddress",
+			"Resource": "arn:aws:ec2:*:${Account}:elastic-ip/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AttachInternetGateway",
+				"ec2:CreateInternetGateway"
+			],
+			"Resource": "arn:aws:ec2:*:${Account}:internet-gateway/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ec2:CreateNatGateway",
+			"Resource": "arn:aws:ec2:*:${Account}:natgateway/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AssociateRouteTable",
+				"ec2:CreateRoute",
+				"ec2:CreateRouteTable"
+			],
+			"Resource": "arn:aws:ec2:*:${Account}:route-table/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:CreateSecurityGroup",
+				"ec2:RevokeSecurityGroupEgress"
+			],
+			"Resource": "arn:aws:ec2:*:${Account}:security-group/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateSubnet",
+				"ec2:ModifySubnetAttribute"
+			],
+			"Resource": "arn:aws:ec2:*:${Account}:subnet/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AttachInternetGateway",
+				"ec2:CreateRouteTable",
+				"ec2:CreateSubnet",
+				"ec2:CreateVpc",
+				"ec2:DescribeVpcAttribute",
+				"ec2:GetSecurityGroupsForVpc"
+			],
+			"Resource": "arn:aws:ec2:*:${Account}:vpc/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ecs:CreateCluster",
+				"ecs:DescribeClusters"
+			],
+			"Resource": "arn:aws:ecs:*:${Account}:cluster/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ecs:CreateService",
+				"ecs:DescribeServices",
+				"ecs:UpdateService"
+			],
+			"Resource": "arn:aws:ecs:*:${Account}:service/*/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ecs:RegisterTaskDefinition",
+			"Resource": "arn:aws:ecs:*:${Account}:task-definition/*:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticloadbalancing:AddTags",
+				"elasticloadbalancing:ModifyLoadBalancerAttributes"
+			],
+			"Resource": "arn:aws:elasticloadbalancing:*:${Account}:loadbalancer/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticloadbalancing:CreateTargetGroup",
+				"elasticloadbalancing:ModifyTargetGroupAttributes"
+			],
+			"Resource": "arn:aws:elasticloadbalancing:*:${Account}:targetgroup/*/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:GetPolicy",
+				"iam:GetPolicyVersion"
+			],
+			"Resource": "arn:aws:iam::${Account}:policy/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:AttachRolePolicy",
+				"iam:CreateRole",
+				"iam:GetRole",
+				"iam:ListAttachedRolePolicies",
+				"iam:ListRolePolicies"
+			],
+			"Resource": "arn:aws:iam::${Account}:role/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"kms:CreateGrant",
+				"kms:Decrypt",
+				"kms:DescribeKey",
+				"kms:GenerateDataKey"
+			],
+			"Resource": "arn:aws:kms:*:${Account}:key/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:PutRetentionPolicy"
+			],
+			"Resource": "arn:aws:logs:*:${Account}:log-group:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateDBCluster",
+			"Resource": [
+				"arn:aws:rds:*:${Account}:cluster-pg:*",
+				"arn:aws:rds:*:${Account}:cluster:*",
+				"arn:aws:rds:*:${Account}:og:*",
+				"arn:aws:rds:*:${Account}:subgrp:*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"rds:CreateDBInstance",
+				"rds:CreateTenantDatabase"
+			],
+			"Resource": "arn:aws:rds:*:${Account}:db:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateDBSubnetGroup",
+			"Resource": "arn:aws:rds:*:${Account}:subgrp:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateTenantDatabase",
+			"Resource": "arn:aws:rds:*:${Account}:tenant-database:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:CreateSecret",
+				"secretsmanager:TagResource"
+			],
+			"Resource": "arn:aws:secretsmanager:*:${Account}:secret:*"
+		}
+	]
+}
