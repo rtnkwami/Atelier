@@ -1,5 +1,5 @@
 from pathlib import Path
-from os import chdir, remove
+from os import chdir, remove, environ
 from subprocess import run
 from yaml import safe_load
 from json import dump, loads
@@ -16,7 +16,7 @@ with open('variables.yaml', 'r') as variables:
 setup_vars = config['setup']
 project_vars = config['project']
 
-chdir("../../setup")
+chdir("../setup")
 
 with open(SETUP_VARS_FILE, 'w') as setup_vars_file:
     dump(setup_vars, setup_vars_file, indent=4)
@@ -37,4 +37,31 @@ setup_output_values = { key: value ['value'] for key, value in setup_outputs.ite
 
 project_vars.update(setup_output_values)
 
+infra_vars = {}
+infra_vars.update(project_vars)
 
+dockerhub_username = project_vars['dockerhub_username']
+infra_vars.update({
+    'api_image': f'docker.io/{ dockerhub_username }/atelier-api',
+    'frontend_image': f'docker.io/{ dockerhub_username }/atelier-web'
+})
+
+chdir("../infra")
+
+with open(PROJECT_VARS_FILE, 'w') as project_vars_file:
+    dump(infra_vars, project_vars_file, indent=4)
+
+run(['tofu', 'init'], check=True)
+run(['tofu', 'apply', '--auto-approve'], check=True)
+
+infra_deploy_outputs = run(
+    ['tofu', 'output', '-json'],
+    check=True,
+    capture_output=True,
+    text=True
+)
+infra_outputs = loads(infra_deploy_outputs.stdout)
+infra_outputs_values = { key: value ['value'] for key, value in setup_outputs.items() }
+
+environ['CLUSTER_NAME'] = infra_outputs_values['ecs_cluster_name']
+environ['SERVICE_NAME'] = infra_outputs_values['api_service_name']
