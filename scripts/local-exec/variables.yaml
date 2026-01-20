@@ -1,0 +1,14 @@
+setup:
+    github_repo: owner/repo
+    s3_state_bucket_name: your-s3-bucket
+    state_file_region: your-deployment-region
+
+project:
+    s3_state_file_key: your/bucket/key
+    deployment_region: your-deployment-region
+    dockerhub_username: your-dockerhub-username
+    auth0_domain: your-domain.auth0.com
+    auth0_client_id: your-client_id
+    auth0_client_secret: your-client-secret
+    auth0_secret: your-auth0-secret
+    auth0_audience: your-auth0-audience
