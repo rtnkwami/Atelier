@@ -10,6 +10,47 @@ on:
       - refactor/*
 
 jobs:
+  change-detection:
+      permissions:
+        contents: read
+
+      runs-on: ubuntu-latest
+      name: Detect Application Changes
+      outputs:
+          api: ${{ steps.changes.outputs.api }}
+          web: ${{ steps.changes.outputs.web }}
+          migrations: ${{ steps.changes.outputs.migrations }}
+          infrastructure: ${{ steps.changes.outputs.infrastructure }}
+      
+      steps:
+        - name: Check out code
+          uses: actions/checkout@v5
+          with:
+            fetch-depth: 0
+
+        - name: Detect changes
+          uses: dorny/paths-filter@v3
+          id: changes
+          with:
+            base: main
+            filters: |
+              api:
+                - api/src/**
+                - api/Dockerfile
+                - api/.dockerignore
+                - api/pnpm*.yaml
+              web:
+                - web/src/**
+                - web/Dockerfile
+                - web/.dockerignore
+                - web/pnpm*.yaml
+              migrations:
+                - api/prisma/**
+                - api/prisma.config.ts
+              infrastructure:
+                - infra/**
+
+
   application-tests:
     permissions:
       contents: read
@@ -50,43 +91,6 @@ jobs:
       - name: Run tests
         working-directory: api
         run: pnpm test
-
-  change-detection:
-      permissions:
-        contents: read
-
-      runs-on: ubuntu-latest
-      name: Detect Application Changes
-      outputs:
-          api: ${{ steps.changes.outputs.api }}
-          web: ${{ steps.changes.outputs.web }}
-          migrations: ${{ steps.changes.outputs.migrations }}
-      
-      steps:
-        - name: Check out code
-          uses: actions/checkout@v5
-          with:
-            fetch-depth: 0
-
-        - name: Detect changes
-          uses: dorny/paths-filter@v3
-          id: changes
-          with:
-            base: main
-            filters: |
-              api:
-                - api/src/**
-                - api/Dockerfile
-                - api/.dockerignore
-                - api/pnpm*.yaml
-              web:
-                - web/src/**
-                - web/Dockerfile
-                - web/.dockerignore
-                - web/pnpm*.yaml
-              migrations:
-                - api/prisma/**
-                - api/prisma.config.ts
 
   api-docker-build:
     permissions:
