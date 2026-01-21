@@ -50,7 +50,6 @@ jobs:
               infrastructure:
                 - infra/**
 
-
   application-tests:
     name: Run ${{ matrix.test-type }} tests
     runs-on: ubuntu-latest
@@ -96,17 +95,18 @@ jobs:
         run: pnpm test
 
   api-docker-build:
+    name: Build & Push API Container Image
+    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
-
+      
+    concurrency:
+      group: api-container-image-build
+      cancel-in-progress: false
+    
     needs: [application-tests, change-detection]
     if: needs.change-detection.outputs.api == 'true' || needs.change-detection.outputs.migrations == 'true'
-    runs-on: ubuntu-latest
-    name: Build & Push API Container Image
-
-    concurrency:
-        group: api-container-image-build
-        cancel-in-progress: false
 
     steps:
       - name: Check out code
@@ -146,17 +146,18 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-api:latest
 
   web-docker-build:
+    name: Build & Push Web Container Image
+    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
+    
+    concurrency:
+      group: web-container-image-build
+      cancel-in-progress: false
 
     needs: [application-tests, change-detection]
     if: needs.change-detection.outputs.web == 'true'
-    runs-on: ubuntu-latest
-    name: Build & Push Web Container Image
-
-    concurrency:
-        group: web-container-image-build
-        cancel-in-progress: false
 
     steps:
       - name: Check out code
@@ -196,16 +197,16 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/atelier-web:latest
 
   infrastructure-deployment:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
       id-token: write
 
-    runs-on: ubuntu-latest
-    name: Deploy Infrastructure
-
     concurrency:
-        group: infrastructure-deployment
-        cancel-in-progress: false
+      group: infrastructure-deployment
+      cancel-in-progress: false
 
     steps:
         - name: Checkout Code
@@ -243,24 +244,25 @@ jobs:
 
   database-migrations:
     name: Run Database Schema Migrations
-    needs: [change-detection, api-docker-build, infrastructure-deployment]
-
+    
     permissions:
       id-token: write
-
+      
+    needs: [change-detection, api-docker-build, infrastructure-deployment]
     if: needs.change-detection.outputs.migrations == 'true'
+    
     uses: ./.github/workflows/migrations.yaml
     secrets: inherit
 
   api-deployment:
+    name: Deploy API Changes
+    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
       id-token: write
 
     needs: [api-docker-build, infrastructure-deployment, database-migrations]
-    runs-on: ubuntu-latest
-    name: Deploy API Changes
-
     if: |
       (needs.api-docker-build.result == 'success' && needs.infrastructure-deployment.result == 'success') ||
       needs.database-migrations.result == 'success'
@@ -296,13 +298,14 @@ jobs:
               --force-new-deployment
 
   web-deployment:
+    name: Deploy Web Changes
+    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
       id-token: write
 
     needs: [web-docker-build, infrastructure-deployment]
-    runs-on: ubuntu-latest
-    name: Deploy Web Changes
 
     steps:
         - name: Checkout Code
