@@ -1,7 +1,8 @@
 import { DecimalType, Entity, JsonType, PrimaryKey, Property } from "@mikro-orm/core";
+import { BaseEntity } from "./base.entity";
 
 @Entity()
-export class Product {
+export class Product extends BaseEntity {
   @PrimaryKey({ type: 'uuid' })
   id: string;
 
@@ -26,13 +27,4 @@ export class Product {
 
   @Property({ type: new JsonType(), default: '[]' })
   images: string[];
-
-  @Property({ defaultRaw: 'now()' })
-  createdAt: Date = new Date();
-
-  @Property({
-    onUpdate: () => new Date(),
-    defaultRaw: 'now()'
-  })
-  updatedAt: Date = new Date();
 }
