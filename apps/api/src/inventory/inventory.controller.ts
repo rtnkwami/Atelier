@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UsePipes,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import type { UpdateProduct, CreateProduct } from 'contracts';
@@ -20,7 +21,7 @@ export class InventoryController {
   @Post()
   @UsePipes(new ZodValidationPipe(CreateProductSchema))
   create(@Body() data: CreateProduct) {
-    return this.inventoryService.create(data);
+    return this.inventoryService.createProduct(data);
   }
 
   @Get()
@@ -34,8 +35,11 @@ export class InventoryController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() data: UpdateProduct) {
-    return this.inventoryService.update(+id, data);
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() data: UpdateProduct,
+  ) {
+    return this.inventoryService.updateProduct(id, data);
   }
 
   @Delete(':id')
