@@ -1,6 +1,7 @@
 import {
   EntityManager,
   FilterQuery,
+  LockMode,
   Transactional,
   wrap,
 } from '@mikro-orm/postgresql';
@@ -107,5 +108,37 @@ export class InventoryService {
       this.em.persist(reservation);
     }
     return reservation;
+  }
+
+  private async validateProductStock(id: string, requestedQty: number) {
+    const product = await this.em.findOne(
+      Product,
+      { id },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE, // use this lock mode to make transactions trying the same operations wait until the first one served finishes.
+        populate: ['reservations'],
+      },
+    );
+
+    if (!product) {
+      throw new NotFoundException(`Product ${id} does not exist`);
+    }
+
+    const reservedStock = product.reservations.reduce(
+      (acc, item) => acc + item.quantity,
+      0,
+    );
+    const totalRequestedStock = reservedStock + requestedQty;
+
+    if (product.stock - totalRequestedStock < 0) {
+      return {
+        error: {
+          id: product.id,
+          requested: requestedQty,
+          stock: product.stock - reservedStock,
+        },
+      };
+    }
+    return { product };
   }
 }
