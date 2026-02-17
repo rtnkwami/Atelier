@@ -7,6 +7,7 @@ import {
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateProduct, SearchProducts, UpdateProduct } from 'contracts';
 import { Product } from 'src/entities/product.entity';
+import { Reservation } from 'src/entities/reservation.entity';
 
 @Injectable()
 export class InventoryService {
@@ -91,5 +92,20 @@ export class InventoryService {
     this.em.remove(product);
 
     return { success: true, deleted: product.id };
+  }
+
+  private async findOrCreateReservation(id: string) {
+    const existing = await this.em.findOne(
+      Reservation,
+      { id },
+      { populate: ['items'] },
+    );
+    const reservation = existing ?? new Reservation();
+
+    if (!existing) {
+      reservation.id = id;
+      this.em.persist(reservation);
+    }
+    return reservation;
   }
 }
