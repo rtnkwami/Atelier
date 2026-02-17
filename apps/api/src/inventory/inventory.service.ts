@@ -81,7 +81,15 @@ export class InventoryService {
     return dto;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} inventory`;
+  @Transactional()
+  public async deleteProduct(id: string) {
+    const product = await this.em.findOne(Product, id);
+
+    if (!product) {
+      throw new NotFoundException(`Product ${id} does not exist`);
+    }
+    this.em.remove(product);
+
+    return { success: true, deleted: product.id };
   }
 }
