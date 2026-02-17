@@ -1,5 +1,5 @@
-import { Migrator } from "@mikro-orm/migrations";
-import { defineConfig } from "@mikro-orm/postgresql";
+import { Migrator } from '@mikro-orm/migrations';
+import { defineConfig } from '@mikro-orm/postgresql';
 import 'dotenv/config';
 
 export default defineConfig({
