@@ -15,7 +15,7 @@ export class InventoryService {
   public async createProduct(data: CreateProduct) {
     const product = this.em.create(Product, data);
     await this.em.flush();
-    return product;
+    return { success: true, created: product };
   }
 
   public async search(filters?: SearchProducts, page = 1, limit = 20) {
@@ -78,7 +78,7 @@ export class InventoryService {
       stock: product.stock,
       images: product.images,
     };
-    return dto;
+    return { success: true, updated: dto };
   }
 
   @Transactional()
