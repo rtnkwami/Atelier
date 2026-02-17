@@ -26,3 +26,14 @@ export const SearchProductSchema = z
   })
   .strict();
 export type SearchProducts = z.infer<typeof SearchProductSchema>;
+
+
+const ReservationItemSchema = z.object({
+  id: z.uuid(),
+  quantity: z.number().int().positive(),
+});
+export const ReserveStockRequestSchema = z.object({
+  reservationId: z.uuid(),
+  products: z.array(ReservationItemSchema).nonempty(),
+});
+export type ReserveStockRequest = z.infer<typeof ReserveStockRequestSchema>;

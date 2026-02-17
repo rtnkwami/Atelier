@@ -11,8 +11,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import type { UpdateProduct, CreateProduct, SearchProducts } from 'contracts';
-import { CreateProductSchema, SearchProductSchema } from 'contracts';
+import type {
+  UpdateProduct,
+  CreateProduct,
+  SearchProducts,
+  ReserveStockRequest,
+} from 'contracts';
+import {
+  CreateProductSchema,
+  ReserveStockRequestSchema,
+  SearchProductSchema,
+} from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 
 @Controller('inventory')
@@ -47,5 +56,11 @@ export class InventoryController {
   @Delete(':id')
   deleteProduct(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.inventoryService.deleteProduct(id);
+  }
+
+  @Post('reservation')
+  @UsePipes(new ZodValidationPipe(ReserveStockRequestSchema))
+  reserveInventory(@Body() data: ReserveStockRequest) {
+    return this.inventoryService.reserveInventory(data);
   }
 }

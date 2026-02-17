@@ -6,8 +6,14 @@ import {
   wrap,
 } from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateProduct, SearchProducts, UpdateProduct } from 'contracts';
+import type {
+  CreateProduct,
+  ReserveStockRequest,
+  SearchProducts,
+  UpdateProduct,
+} from 'contracts';
 import { Product } from 'src/entities/product.entity';
+import { ReservationItem } from 'src/entities/reservation-item.entity';
 import { Reservation } from 'src/entities/reservation.entity';
 
 @Injectable()
@@ -140,5 +146,62 @@ export class InventoryService {
       };
     }
     return { product };
+  }
+
+  @Transactional()
+  public async reserveInventory(data: ReserveStockRequest) {
+    type ReservationErrors = {
+      id: string;
+      requested: number;
+      stock: number;
+    };
+
+    const sortedRequestItems = [...data.products].sort((a, b) =>
+      a.id.localeCompare(b.id),
+    );
+    const reservation = await this.findOrCreateReservation(data.reservationId);
+
+    const reservationItems: ReservationItem[] = [];
+    const errors: ReservationErrors[] = [];
+
+    for (const requested of sortedRequestItems) {
+      const { product, error } = await this.validateProductStock(
+        requested.id,
+        requested.quantity,
+      );
+
+      if (error) {
+        errors.push(error);
+        continue;
+      }
+
+      if (product) {
+        const item = new ReservationItem();
+        item.product = product;
+        item.quantity = requested.quantity;
+        item.reservation = reservation;
+
+        reservationItems.push(item);
+      }
+    }
+    if (errors.length > 0) {
+      return {
+        success: false,
+        error: {
+          message: 'insufficient stock for one or more products',
+          reason: errors,
+        },
+      };
+    }
+    reservation.items.set(reservationItems);
+
+    return {
+      success: true,
+      data: {
+        reservationId: data.reservationId,
+        created: reservation.createdAt,
+        expires: reservation.expiresAt,
+      },
+    };
   }
 }
