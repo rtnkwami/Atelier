@@ -14,12 +14,12 @@ export class ReservationItem {
   @PrimaryKey()
   id: string = randomUUID();
 
-  @ManyToOne({ entity: () => Reservation })
-  reservation: Rel<Product>;
-
   @ManyToOne({ entity: () => Product })
   product: Rel<Product>;
 
   @Property({ type: 'int' })
   quantity: number;
+
+  @ManyToOne({ entity: () => Reservation })
+  reservation: Rel<Product>;
 }

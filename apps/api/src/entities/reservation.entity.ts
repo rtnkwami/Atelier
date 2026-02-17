@@ -12,11 +12,6 @@ export class Reservation {
   @PrimaryKey({ type: 'uuid' })
   id: string;
 
-  @OneToMany(() => ReservationItem, (item) => item.reservation, {
-    orphanRemoval: true,
-  })
-  items = new Collection<ReservationItem>(this);
-
   @Property()
   createdAt: Date = new Date();
 
@@ -24,4 +19,9 @@ export class Reservation {
     onCreate: () => new Date(Date.now() + 15 * 60 * 1000),
   })
   expiresAt: Date;
+
+  @OneToMany(() => ReservationItem, (item) => item.reservation, {
+    orphanRemoval: true,
+  })
+  items = new Collection<ReservationItem>(this);
 }

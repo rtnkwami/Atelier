@@ -16,9 +16,6 @@ export class Product extends BaseEntity<'description' | 'images'> {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @OneToMany(() => ReservationItem, (item) => item.product)
-  reservations = new Collection<ReservationItem>(this);
-
   @Property()
   name: string;
 
@@ -40,4 +37,7 @@ export class Product extends BaseEntity<'description' | 'images'> {
 
   @Property({ type: new JsonType(), default: '[]' })
   images?: string[];
+
+  @OneToMany(() => ReservationItem, (item) => item.product)
+  reservations = new Collection<ReservationItem>(this);
 }
