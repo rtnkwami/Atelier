@@ -3,13 +3,16 @@ import {
   DecimalType,
   Entity,
   Enum,
+  ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
+  type Rel,
 } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 import { randomUUID } from 'crypto';
 import { OrderItem } from './order-item.entity';
+import { User } from './user.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -34,4 +37,7 @@ export class Order extends BaseEntity<'status'> {
 
   @OneToMany(() => OrderItem, (item) => item.order)
   items = new Collection<OrderItem>(this);
+
+  @ManyToOne({ entity: () => User })
+  user: Rel<User>;
 }
