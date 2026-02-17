@@ -1,6 +1,11 @@
-import { EntityManager, Transactional, wrap } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  FilterQuery,
+  Transactional,
+  wrap,
+} from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateProduct, UpdateProduct } from 'contracts';
+import type { CreateProduct, SearchProducts, UpdateProduct } from 'contracts';
 import { Product } from 'src/entities/product.entity';
 
 @Injectable()
@@ -13,7 +18,38 @@ export class InventoryService {
     return product;
   }
 
-  findAll() {
+  public async search(filters?: SearchProducts, page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+    const search: FilterQuery<Product> = {};
+
+    if (filters?.name) {
+      search.name = { $ilike: filters.name };
+    }
+
+    if (filters?.category) {
+      search.category = filters.category;
+    }
+
+    if (filters?.minPrice || filters?.maxPrice) {
+      search.price = {};
+      if (filters.minPrice) search.price.$gte = filters.minPrice;
+      if (filters.maxPrice) search.price.$lte = filters.maxPrice;
+    }
+
+    const [results, count] = await this.em.findAndCount(
+      Product,
+      { ...search },
+      { limit, offset },
+    );
+
+    return {
+      products: results,
+      page,
+      perPage: limit,
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+    };
+
     return `This action returns all inventory`;
   }
 

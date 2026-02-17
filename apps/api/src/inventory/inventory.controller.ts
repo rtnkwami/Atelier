@@ -8,10 +8,11 @@ import {
   Delete,
   UsePipes,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import type { UpdateProduct, CreateProduct } from 'contracts';
-import { CreateProductSchema } from 'contracts';
+import type { UpdateProduct, CreateProduct, SearchProducts } from 'contracts';
+import { CreateProductSchema, SearchProductSchema } from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 
 @Controller('inventory')
@@ -24,9 +25,10 @@ export class InventoryController {
     return this.inventoryService.createProduct(data);
   }
 
-  @Get()
-  findAll() {
-    return this.inventoryService.findAll();
+  @Get('search')
+  @UsePipes(new ZodValidationPipe(SearchProductSchema))
+  search(@Query() query: SearchProducts) {
+    return this.inventoryService.search(query);
   }
 
   @Get(':id')
