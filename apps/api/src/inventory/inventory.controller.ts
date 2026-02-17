@@ -32,8 +32,8 @@ export class InventoryController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.inventoryService.findOne(+id);
+  getProduct(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.inventoryService.getProduct(id);
   }
 
   @Patch(':id')

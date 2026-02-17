@@ -23,7 +23,7 @@ export class InventoryService {
     const search: FilterQuery<Product> = {};
 
     if (filters?.name) {
-      search.name = { $ilike: filters.name };
+      search.name = { $ilike: `%${filters.name}%` };
     }
 
     if (filters?.category) {
@@ -49,12 +49,15 @@ export class InventoryService {
       totalItems: count,
       totalPages: Math.ceil(count / limit),
     };
-
-    return `This action returns all inventory`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} inventory`;
+  public async getProduct(id: string) {
+    const product = await this.em.findOne(Product, id);
+
+    if (!product) {
+      throw new NotFoundException(`Product ${id} does not exist`);
+    }
+    return product;
   }
 
   @Transactional()
