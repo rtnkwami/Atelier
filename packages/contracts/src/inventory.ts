@@ -10,4 +10,7 @@ export const CreateProductSchema = z
     images: z.array(z.url()).optional(),
   })
   .strict();
-export type ProductCreate = z.infer<typeof CreateProductSchema>;
+export type CreateProduct = z.infer<typeof CreateProductSchema>;
+
+export const UpdateProductSchema = CreateProductSchema.partial();
+export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
