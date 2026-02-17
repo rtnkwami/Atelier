@@ -13,6 +13,7 @@ import {
 import type {
   CommitStockRequest,
   CreateProduct,
+  ReleaseStockRequest,
   ReserveStockRequest,
   SearchProducts,
   UpdateProduct,
@@ -260,6 +261,33 @@ export class InventoryService {
       reservationId: data.reservationId,
       committedAt: new Date(),
       affectedProducts: products,
+    };
+  }
+
+  @Transactional()
+  public async releaseInventory(data: ReleaseStockRequest) {
+    const reservation = await this.em.findOne(
+      Reservation,
+      { id: data.reservationId },
+      { populate: ['items'] },
+    );
+
+    if (!reservation) {
+      throw new NotFoundException(
+        `Reservation ${data.reservationId} does not exist`,
+      );
+    }
+
+    const affectedProducts = reservation.items.map((item) => ({
+      id: item.id,
+      releasedStock: item.quantity,
+    }));
+
+    this.em.remove(reservation);
+
+    return {
+      reservationId: data.reservationId,
+      affectedProducts,
     };
   }
 }

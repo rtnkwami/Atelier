@@ -43,3 +43,9 @@ export const CommitStockRequestSchema = z.object({
   reservationId: z.string().min(1),
 });
 export type CommitStockRequest = z.infer<typeof CommitStockRequestSchema>;
+
+
+export const ReleaseStockRequestSchema = z.object({
+  reservationId: z.string().min(1),
+});
+export type ReleaseStockRequest = z.infer<typeof ReleaseStockRequestSchema>;
