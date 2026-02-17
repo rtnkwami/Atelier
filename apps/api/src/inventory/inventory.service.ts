@@ -5,8 +5,13 @@ import {
   Transactional,
   wrap,
 } from '@mikro-orm/postgresql';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
+  CommitStockRequest,
   CreateProduct,
   ReserveStockRequest,
   SearchProducts,
@@ -202,6 +207,59 @@ export class InventoryService {
         created: reservation.createdAt,
         expires: reservation.expiresAt,
       },
+    };
+  }
+
+  @Transactional()
+  public async commitInventoryReservation(data: CommitStockRequest) {
+    const reservation = await this.em.findOne(
+      Reservation,
+      { id: data.reservationId },
+      {
+        populate: ['items'],
+        populateOrderBy: {
+          items: {
+            product: { id: 'asc' },
+          },
+        },
+      },
+    );
+
+    if (!reservation) {
+      throw new BadRequestException(
+        `Reservation ${data.reservationId} does not exist`,
+      );
+    }
+
+    const productIds: string[] = [];
+    const reservedItems = reservation.items.getItems();
+
+    reservedItems.forEach((item) => {
+      productIds.push(item.product.id);
+    });
+
+    const products = await this.em.findAll(Product, {
+      where: {
+        id: { $in: productIds },
+      },
+      lockMode: LockMode.PESSIMISTIC_WRITE,
+    });
+
+    products.forEach((product) => {
+      const reservedItem = reservedItems.find(
+        (item) => item.product.id === product.id,
+      );
+      if (reservedItem) {
+        product.stock -= reservedItem.quantity;
+        reservation.items.remove(reservedItem);
+      }
+    });
+    this.em.remove(reservation);
+
+    return {
+      reservationId: data.reservationId,
+      committedAt: new Date(),
+      affectedProducts: products,
     };
   }
 }
