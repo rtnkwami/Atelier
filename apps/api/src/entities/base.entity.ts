@@ -1,14 +1,14 @@
-import { OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
+import { OptionalProps, Property } from '@mikro-orm/core';
 
 export class BaseEntity<Optional = never> {
-  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
 
   @Property({ defaultRaw: 'now()' })
   createdAt: Date = new Date();
 
   @Property({
     onUpdate: () => new Date(),
-    defaultRaw: 'now()'
+    defaultRaw: 'now()',
   })
   updatedAt: Date = new Date();
 }
