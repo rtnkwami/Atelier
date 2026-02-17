@@ -6,15 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  UsePipes,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
-import { type UpdateProduct, type CreateProduct } from 'contracts';
+import type { UpdateProduct, CreateProduct } from 'contracts';
+import { CreateProductSchema } from 'contracts';
+import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
+  @UsePipes(new ZodValidationPipe(CreateProductSchema))
   create(@Body() data: CreateProduct) {
     return this.inventoryService.create(data);
   }

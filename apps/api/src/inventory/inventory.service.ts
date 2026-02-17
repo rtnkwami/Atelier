@@ -1,10 +1,16 @@
+import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { CreateProduct, UpdateProduct } from 'contracts';
+import { Product } from 'src/entities/product.entity';
 
 @Injectable()
 export class InventoryService {
-  create(data: CreateProduct) {
-    return 'This action adds a new inventory';
+  constructor(private readonly em: EntityManager) {}
+
+  public async create(data: CreateProduct) {
+    const product = this.em.create(Product, data);
+    await this.em.flush();
+    return product;
   }
 
   findAll() {
