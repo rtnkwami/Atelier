@@ -10,6 +10,7 @@ import {
 import { BaseEntity } from './base.entity';
 import { randomUUID } from 'crypto';
 import { ReservationItem } from './reservation-item.entity';
+import { OrderItem } from './order-item.entity';
 
 @Entity()
 export class Product extends BaseEntity<'description' | 'images'> {
@@ -38,6 +39,9 @@ export class Product extends BaseEntity<'description' | 'images'> {
   @Property({ type: new JsonType(), default: '[]' })
   images?: string[];
 
-  @OneToMany(() => ReservationItem, (item) => item.product)
+  @OneToMany(() => ReservationItem, (reservation) => reservation.product)
   reservations = new Collection<ReservationItem>(this);
+
+  @OneToMany(() => OrderItem, (order) => order.product)
+  orders = new Collection<OrderItem>(this);
 }
