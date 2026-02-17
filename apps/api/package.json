@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "contracts": "workspace:*",
     "dotenv": "^17.3.1",
+    "express-oauth2-jwt-bearer": "^1.7.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.3.6"
