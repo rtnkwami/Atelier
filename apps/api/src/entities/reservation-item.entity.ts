@@ -21,5 +21,5 @@ export class ReservationItem {
   quantity: number;
 
   @ManyToOne({ entity: () => Reservation })
-  reservation: Rel<Product>;
+  reservation: Rel<Reservation>;
 }
