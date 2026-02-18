@@ -11,10 +11,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
-  CommitStockRequest,
+  CommitStock,
   CreateProduct,
-  ReleaseStockRequest,
-  ReserveStockRequest,
+  ReserveStock,
   SearchProducts,
   UpdateProduct,
 } from 'contracts';
@@ -143,76 +142,46 @@ export class InventoryService {
     const totalRequestedStock = reservedStock + requestedQty;
 
     if (product.stock - totalRequestedStock < 0) {
-      return {
-        error: {
-          id: product.id,
+      throw new BadRequestException({
+        message: `insufficient stock for product ${product.id}`,
+        reason: {
           requested: requestedQty,
           stock: product.stock - reservedStock,
         },
-      };
+      });
     }
-    return { product };
+    return product;
   }
 
   @Transactional()
-  public async reserveInventory(data: ReserveStockRequest) {
-    type ReservationErrors = {
-      id: string;
-      requested: number;
-      stock: number;
-    };
-
-    const sortedRequestItems = [...data.products].sort((a, b) =>
+  public async reserveInventory(data: ReserveStock) {
+    const sortedRequestItems = [...data.items].sort((a, b) =>
       a.id.localeCompare(b.id),
     );
-    const reservation = await this.findOrCreateReservation(data.reservationId);
+    const reservation = await this.findOrCreateReservation(data.orderId);
 
     const reservationItems: ReservationItem[] = [];
-    const errors: ReservationErrors[] = [];
 
     for (const requested of sortedRequestItems) {
-      const { product, error } = await this.validateProductStock(
+      const product = await this.validateProductStock(
         requested.id,
         requested.quantity,
       );
 
-      if (error) {
-        errors.push(error);
-        continue;
-      }
+      const item = new ReservationItem();
+      item.product = product;
+      item.quantity = requested.quantity;
+      item.reservation = reservation;
 
-      if (product) {
-        const item = new ReservationItem();
-        item.product = product;
-        item.quantity = requested.quantity;
-        item.reservation = reservation;
-
-        reservationItems.push(item);
-      }
-    }
-    if (errors.length > 0) {
-      return {
-        success: false,
-        error: {
-          message: 'insufficient stock for one or more products',
-          reason: errors,
-        },
-      };
+      reservationItems.push(item);
     }
     reservation.items.set(reservationItems);
 
-    return {
-      success: true,
-      data: {
-        reservationId: data.reservationId,
-        created: reservation.createdAt,
-        expires: reservation.expiresAt,
-      },
-    };
+    return { orderId: data.orderId };
   }
 
   @Transactional()
-  public async commitInventoryReservation(data: CommitStockRequest) {
+  public async commitInventoryReservation(data: CommitStock) {
     const reservation = await this.em.findOne(
       Reservation,
       { id: data.reservationId },
@@ -256,38 +225,5 @@ export class InventoryService {
       }
     });
     this.em.remove(reservation);
-
-    return {
-      reservationId: data.reservationId,
-      committedAt: new Date(),
-      affectedProducts: products,
-    };
-  }
-
-  @Transactional()
-  public async releaseInventory(data: ReleaseStockRequest) {
-    const reservation = await this.em.findOne(
-      Reservation,
-      { id: data.reservationId },
-      { populate: ['items'] },
-    );
-
-    if (!reservation) {
-      throw new NotFoundException(
-        `Reservation ${data.reservationId} does not exist`,
-      );
-    }
-
-    const affectedProducts = reservation.items.map((item) => ({
-      id: item.id,
-      releasedStock: item.quantity,
-    }));
-
-    this.em.remove(reservation);
-
-    return {
-      reservationId: data.reservationId,
-      affectedProducts,
-    };
   }
 }

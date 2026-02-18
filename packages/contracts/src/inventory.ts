@@ -32,20 +32,14 @@ const ReservationItemSchema = z.object({
   id: z.uuid(),
   quantity: z.number().int().positive(),
 });
-export const ReserveStockRequestSchema = z.object({
-  reservationId: z.uuid(),
-  products: z.array(ReservationItemSchema).nonempty(),
+export const ReserveStockSchema = z.object({
+  orderId: z.uuid(),
+  items: z.array(ReservationItemSchema).nonempty(),
 });
-export type ReserveStockRequest = z.infer<typeof ReserveStockRequestSchema>;
+export type ReserveStock = z.infer<typeof ReserveStockSchema>;
 
 
 export const CommitStockRequestSchema = z.object({
   reservationId: z.string().min(1),
 });
-export type CommitStockRequest = z.infer<typeof CommitStockRequestSchema>;
-
-
-export const ReleaseStockRequestSchema = z.object({
-  reservationId: z.string().min(1),
-});
-export type ReleaseStockRequest = z.infer<typeof ReleaseStockRequestSchema>;
+export type CommitStock = z.infer<typeof CommitStockRequestSchema>;
