@@ -8,6 +8,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { CartModule } from './cart/cart.module';
 import dbConfig from './mikro-orm.config';
 import { AuthMiddleware } from './auth/auth.middleware';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthMiddleware } from './auth/auth.middleware';
     MikroOrmModule.forRoot(dbConfig),
     InventoryModule,
     CartModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
