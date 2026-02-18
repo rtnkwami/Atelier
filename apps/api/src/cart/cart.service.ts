@@ -1,34 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRedis } from '@nestjs-redis/client';
-import type { RedisClientType } from 'redis';
-import { Cart } from 'contracts';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
+import { type Cart } from 'contracts';
 
 @Injectable()
 export class CartService {
   constructor(
-    @InjectRedis()
-    private readonly redis: RedisClientType,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
-  private readonly redisPrefix = 'cart';
 
-  private aggregateCart(cart: Cart) {
-    const total = cart.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    const itemCount = cart.items.reduce(
-      (count, item) => count + item.quantity,
-      0,
-    );
-
-    return {
-      items: cart.items,
-      total,
-      itemCount,
-    };
-  }
-
-  private mergeIncomingWithCurrentCart(incoming: Cart, existing: Cart) {
+  private mergeIncomingWithExistingCart(incoming: Cart, existing: Cart) {
     const currentCart = new Map(existing.items.map((item) => [item.id, item]));
 
     for (const incomingItem of incoming.items) {
@@ -44,14 +25,24 @@ export class CartService {
         quantity: existingItem.quantity + incomingItem.quantity,
       });
     }
-    return Array.from(currentCart.values());
+    const cart: Cart = { items: [] };
+    const mergedItems = Array.from(currentCart.values());
+    cart.items = mergedItems;
+    return cart;
   }
 
-  upsertCart(key: string, data: CreateCart) {
-    return `This action updates a #${id} cart`;
+  public async upsertCart(key: string, incoming: Cart) {
+    const existing = await this.cacheManager.get<Cart>(key);
+
+    if (!existing) {
+      const cart = await this.cacheManager.set<Cart>(key, incoming);
+      return cart;
+    }
+    const mergedCart = this.mergeIncomingWithExistingCart(incoming, existing);
+    return await this.cacheManager.set<Cart>(key, mergedCart);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} cart`;
+  // }
 }
