@@ -2,3 +2,6 @@
 **/dist
 **/coverage
 **/.env
+**/.turbo
+start
+docs

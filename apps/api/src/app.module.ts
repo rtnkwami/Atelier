@@ -7,19 +7,12 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { InventoryModule } from './inventory/inventory.module';
 import { CartModule } from './cart/cart.module';
 import dbConfig from './mikro-orm.config';
-import { AuthMiddleware } from './middleware/auth.middleware';
-// import { RedisModule } from '@nestjs-redis/client';
+import { AuthMiddleware } from './auth/auth.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate }),
     MikroOrmModule.forRoot(dbConfig),
-    // RedisModule.forRoot({
-    //   isGlobal: true,
-    //   options: {
-    //     url: process.env.REDIS_ENDPOINT || 'redis://localhost:6379',
-    //   },
-    // }),
     InventoryModule,
     CartModule,
   ],
