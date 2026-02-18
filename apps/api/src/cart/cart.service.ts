@@ -31,18 +31,24 @@ export class CartService {
     return cart;
   }
 
-  public async upsertCart(key: string, incoming: Cart) {
-    const existing = await this.cacheManager.get<Cart>(key);
+  public async upsertCart(userId: string, incoming: Cart) {
+    const existing = await this.cacheManager.get<Cart>(userId);
 
     if (!existing) {
-      const cart = await this.cacheManager.set<Cart>(key, incoming);
+      const cart = await this.cacheManager.set<Cart>(userId, incoming);
       return cart;
     }
     const mergedCart = this.mergeIncomingWithExistingCart(incoming, existing);
-    return await this.cacheManager.set<Cart>(key, mergedCart);
+    return await this.cacheManager.set<Cart>(userId, mergedCart);
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} cart`;
-  // }
+  public async getCart(userId: string) {
+    return await this.cacheManager.get<Cart>(userId);
+  }
+
+  public async deleteCart(userId: string) {
+    const cart = await this.cacheManager.get<Cart>(userId);
+    const success = await this.cacheManager.del(userId);
+    return { success, cart };
+  }
 }

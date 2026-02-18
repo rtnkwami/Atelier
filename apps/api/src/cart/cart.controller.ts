@@ -1,12 +1,13 @@
 import {
   Controller,
-  // Get,
   Body,
   // Patch,
   // Param,
   // Delete,
   Put,
   UsePipes,
+  Get,
+  Delete,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { User } from 'src/auth/user.decorator';
@@ -23,18 +24,13 @@ export class CartController {
     return this.cartService.upsertCart(userId, data);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.cartService.findAll();
-  // }
+  @Get()
+  getCart(@User() userId: string) {
+    return this.cartService.getCart(userId);
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.cartService.findOne(+id);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.cartService.remove(+id);
-  // }
+  @Delete()
+  deleteCart(@User() userId: string) {
+    return this.cartService.deleteCart(userId);
+  }
 }
