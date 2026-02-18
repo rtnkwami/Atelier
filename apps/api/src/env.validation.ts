@@ -4,7 +4,7 @@ const environmentVariablesSchema = z.object({
   PORT: z.coerce.number().min(0).max(65535).optional(),
   DATABASE_URL: z.string().nonempty(),
   // NATS_ENDPOINT: z.string().nonempty(),
-  // REDIS_ENDPOINT: z.string().nonempty(),
+  REDIS_ENDPOINT: z.string().nonempty(),
 });
 
 export function validate(config: Record<string, unknown>) {
