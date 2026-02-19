@@ -8,7 +8,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SearchOrders } from 'contracts';
+import type { OrderPaymentStatus, SearchOrders } from 'contracts';
 import { CartService } from 'src/cart/cart.service';
 import { OrderItem } from 'src/entities/order-item.entity';
 import { Order } from 'src/entities/order.entity';
@@ -110,11 +110,16 @@ export class OrdersService {
     return order;
   }
 
-  // update(id: number, updateOrderDto: UpdateOrderDto) {
-  //   return `This action updates a #${id} order`;
-  // }
+  @Transactional()
+  public async changePaymentStatus(id: string, data: OrderPaymentStatus) {
+    const order = await this.em.findOne(Order, id);
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} order`;
-  // }
+    if (!order) {
+      throw new NotFoundException(`Order ${id} does not exist`);
+    }
+
+    order.status = data.status;
+
+    return order;
+  }
 }
