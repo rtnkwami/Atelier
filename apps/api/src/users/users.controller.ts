@@ -10,8 +10,8 @@ export class UsersController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(CreateUserSchema))
-  upsertUser(@Body() data: CreateUser) {
-    return this.usersService.upsertUser(data);
+  upsertUser(@User() userId: string, data: CreateUser) {
+    return this.usersService.upsertUser(userId, data);
   }
 
   @Get()

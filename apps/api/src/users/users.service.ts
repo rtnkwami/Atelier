@@ -7,11 +7,11 @@ import { User } from 'src/entities/user.entity';
 export class UsersService {
   constructor(private readonly em: EntityManager) {}
 
-  public async upsertUser(data: CreateUser) {
-    const { email, avatar, sub } = data;
+  public async upsertUser(userId: string, data: CreateUser) {
+    const { email, avatar } = data;
 
     const user = this.em.create(User, {
-      id: sub,
+      id: userId,
       name: email,
       email,
       avatar,
@@ -34,9 +34,9 @@ export class UsersService {
     return user;
   }
 
-  // update(id: number) {
-  //   return `This action updates a #${id} user`;
-  // }
+  updateProfile(id: string) {
+    return `This action updates a #${id} user`;
+  }
 
   // remove(id: number) {
   //   return `This action removes a #${id} user`;
