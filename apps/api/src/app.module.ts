@@ -9,6 +9,7 @@ import { CartModule } from './cart/cart.module';
 import dbConfig from './mikro-orm.config';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { OrdersModule } from './orders/orders.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OrdersModule } from './orders/orders.module';
     InventoryModule,
     CartModule,
     OrdersModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
