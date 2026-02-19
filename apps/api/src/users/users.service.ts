@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUser } from 'contracts';
 import { User } from 'src/entities/user.entity';
 
@@ -25,9 +25,14 @@ export class UsersService {
   //   return `This action returns all users`;
   // }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} user`;
-  // }
+  public async getProfile(id: string) {
+    const user = await this.em.findOne(User, id);
+
+    if (!user) {
+      throw new NotFoundException(`User ${id} does not exist`);
+    }
+    return user;
+  }
 
   // update(id: number) {
   //   return `This action updates a #${id} user`;
