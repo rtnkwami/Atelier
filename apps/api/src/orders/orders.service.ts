@@ -3,7 +3,11 @@ import {
   Transactional,
   FilterQuery,
 } from '@mikro-orm/postgresql';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { SearchOrders } from 'contracts';
 import { CartService } from 'src/cart/cart.service';
 import { OrderItem } from 'src/entities/order-item.entity';
@@ -96,9 +100,15 @@ export class OrdersService {
     };
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} order`;
-  // }
+  public async getOrder(id: string) {
+    const order = await this.em.findOne(Order, id, { populate: ['items'] });
+
+    if (!order) {
+      throw new NotFoundException(`Order ${id} does not exist`);
+    }
+
+    return order;
+  }
 
   // update(id: number, updateOrderDto: UpdateOrderDto) {
   //   return `This action updates a #${id} order`;

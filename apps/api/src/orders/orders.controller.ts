@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Param,
+  ParseUUIDPipe,
   // Get,
   Post,
   Query,
@@ -27,10 +29,10 @@ export class OrdersController {
     return this.ordersService.search(userId, query);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.ordersService.findOne(+id);
-  // }
+  @Get(':id')
+  getOrder(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.ordersService.getOrder(id);
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
