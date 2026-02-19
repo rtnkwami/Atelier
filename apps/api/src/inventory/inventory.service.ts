@@ -3,6 +3,7 @@ import {
   FilterQuery,
   LockMode,
   Transactional,
+  TransactionPropagation,
   wrap,
 } from '@mikro-orm/postgresql';
 import {
@@ -153,7 +154,7 @@ export class InventoryService {
     return product;
   }
 
-  @Transactional()
+  @Transactional({ propagation: TransactionPropagation.REQUIRED })
   public async reserveInventory(data: ReserveStock) {
     const sortedRequestItems = [...data.items].sort((a, b) =>
       a.id.localeCompare(b.id),
@@ -180,7 +181,7 @@ export class InventoryService {
     return { orderId: data.orderId };
   }
 
-  @Transactional()
+  @Transactional({ propagation: TransactionPropagation.REQUIRED })
   public async commitInventoryReservation(data: CommitStock) {
     const reservation = await this.em.findOne(
       Reservation,
