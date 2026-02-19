@@ -1,7 +1,9 @@
 import {
   Controller,
+  Get,
   // Get,
   Post,
+  Query,
   // Patch,
   // Param,
   // Delete,
@@ -9,6 +11,7 @@ import {
 import { OrdersService } from './orders.service';
 // import { UpdateOrderDto } from './dto/update-order.dto';
 import { User } from 'src/auth/user.decorator';
+import type { SearchOrders } from 'contracts';
 
 @Controller('orders')
 export class OrdersController {
@@ -19,10 +22,10 @@ export class OrdersController {
     return this.ordersService.createOrder(userId);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.ordersService.findAll();
-  // }
+  @Get()
+  search(@User() userId: string, @Query() query: SearchOrders) {
+    return this.ordersService.search(userId, query);
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

@@ -1,5 +1,10 @@
-import { EntityManager, Transactional } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  Transactional,
+  FilterQuery,
+} from '@mikro-orm/postgresql';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { SearchOrders } from 'contracts';
 import { CartService } from 'src/cart/cart.service';
 import { OrderItem } from 'src/entities/order-item.entity';
 import { Order } from 'src/entities/order.entity';
@@ -60,9 +65,36 @@ export class OrdersService {
     return { order };
   }
 
-  // findAll() {
-  //   return `This action returns all orders`;
-  // }
+  public async search(userId: string, filters: SearchOrders) {
+    const { page = 1, limit = 20, status, fromDate, toDate } = filters;
+    const offset = (page - 1) * limit;
+
+    const search: FilterQuery<Order> = { user: { id: userId } };
+
+    if (status) {
+      search.status = status;
+    }
+
+    if (fromDate || toDate) {
+      search.createdAt = {};
+      if (fromDate) search.createdAt.$gte = fromDate;
+      if (toDate) search.createdAt.$lte = toDate;
+    }
+
+    const [results, count] = await this.em.findAndCount(
+      Order,
+      { ...search },
+      { limit, offset },
+    );
+
+    return {
+      orders: results,
+      page,
+      perPage: limit,
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+    };
+  }
 
   // findOne(id: number) {
   //   return `This action returns a #${id} order`;
