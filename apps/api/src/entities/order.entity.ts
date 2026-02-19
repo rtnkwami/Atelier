@@ -15,7 +15,8 @@ import { OrderItem } from './order-item.entity';
 import { User } from './user.entity';
 
 export enum OrderStatus {
-  PENDING = 'pending',
+  PENDING_PAYMENT = 'pending_payment',
+  PAID = 'paid',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
 }
@@ -25,7 +26,7 @@ export class Order extends BaseEntity<'status'> {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Enum({ items: () => OrderStatus, default: OrderStatus.PENDING })
+  @Enum({ items: () => OrderStatus, default: OrderStatus.PENDING_PAYMENT })
   status: OrderStatus;
 
   @Property({

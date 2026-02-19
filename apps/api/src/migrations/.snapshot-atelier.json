@@ -372,9 +372,10 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "'pending'",
+          "default": "'pending_payment'",
           "enumItems": [
-            "pending",
+            "pending_payment",
+            "paid",
             "cancelled",
             "completed"
           ],
