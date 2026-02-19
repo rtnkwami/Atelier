@@ -32,22 +32,23 @@ export class InventoryService {
     return { success: true, created: product };
   }
 
-  public async search(filters?: SearchProducts, page = 1, limit = 20) {
+  public async search(filters: SearchProducts) {
+    const { page, limit, name, category, minPrice, maxPrice } = filters;
     const offset = (page - 1) * limit;
     const search: FilterQuery<Product> = {};
 
-    if (filters?.name) {
-      search.name = { $ilike: `%${filters.name}%` };
+    if (name) {
+      search.name = { $ilike: `%${name}%` };
     }
 
-    if (filters?.category) {
-      search.category = filters.category;
+    if (category) {
+      search.category = category;
     }
 
-    if (filters?.minPrice || filters?.maxPrice) {
+    if (minPrice || maxPrice) {
       search.price = {};
-      if (filters.minPrice) search.price.$gte = filters.minPrice;
-      if (filters.maxPrice) search.price.$lte = filters.maxPrice;
+      if (minPrice) search.price.$gte = minPrice;
+      if (maxPrice) search.price.$lte = maxPrice;
     }
 
     const [results, count] = await this.em.findAndCount(
