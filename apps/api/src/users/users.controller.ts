@@ -1,7 +1,11 @@
-import { Controller, Post, Body, UsePipes, Get } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, Get, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
-import { type CreateUser, CreateUserSchema } from 'contracts';
+import {
+  type CreateUser,
+  CreateUserSchema,
+  type UpdateUserProfile,
+} from 'contracts';
 import { User } from 'src/auth/user.decorator';
 
 @Controller('users')
@@ -19,10 +23,10 @@ export class UsersController {
     return this.usersService.getProfile(userId);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  @Patch(':id')
+  updateProfile(@User() userId: string, @Body() data: UpdateUserProfile) {
+    return this.usersService.updateProfile(userId, data);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

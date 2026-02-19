@@ -1,6 +1,6 @@
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, Transactional, wrap } from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUser } from 'contracts';
+import type { CreateUser, UpdateUserProfile } from 'contracts';
 import { User } from 'src/entities/user.entity';
 
 @Injectable()
@@ -34,8 +34,16 @@ export class UsersService {
     return user;
   }
 
-  updateProfile(id: string) {
-    return `This action updates a #${id} user`;
+  @Transactional()
+  public async updateProfile(id: string, data: UpdateUserProfile) {
+    const user = await this.em.findOne(User, id);
+
+    if (!user) {
+      throw new NotFoundException(`User ${id} does not exist`);
+    }
+    wrap(user).assign(data);
+
+    return user;
   }
 
   // remove(id: number) {
