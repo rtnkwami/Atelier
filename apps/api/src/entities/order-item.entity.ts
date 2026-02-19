@@ -9,11 +9,12 @@ import {
 } from '@mikro-orm/core';
 import { Order } from './order.entity';
 import { Product } from './product.entity';
+import { randomUUID } from 'crypto';
 
 @Entity()
 export class OrderItem extends BaseEntity {
   @PrimaryKey({ type: 'uuid' })
-  id: string;
+  id: string = randomUUID();
 
   @Property()
   quantity: number;
@@ -23,7 +24,7 @@ export class OrderItem extends BaseEntity {
     precision: 10,
     scale: 2,
   })
-  price: string;
+  price: number;
 
   @ManyToOne({ entity: () => Order })
   order: Rel<Order>;
