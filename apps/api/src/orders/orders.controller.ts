@@ -6,6 +6,7 @@ import {
   // Get,
   Post,
   Query,
+  UsePipes,
   // Patch,
   // Param,
   // Delete,
@@ -13,7 +14,8 @@ import {
 import { OrdersService } from './orders.service';
 // import { UpdateOrderDto } from './dto/update-order.dto';
 import { User } from 'src/auth/user.decorator';
-import type { SearchOrders } from 'contracts';
+import { OrdersSearchSchema, type SearchOrders } from 'contracts';
+import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 
 @Controller('orders')
 export class OrdersController {
@@ -25,6 +27,7 @@ export class OrdersController {
   }
 
   @Get()
+  @UsePipes(new ZodValidationPipe(OrdersSearchSchema))
   search(@User() userId: string, @Query() query: SearchOrders) {
     return this.ordersService.search(userId, query);
   }
