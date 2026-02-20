@@ -25,7 +25,7 @@ export class InventoryController {
     return this.inventoryService.createProduct(data);
   }
 
-  @Get('search')
+  @Get()
   @UsePipes(new ZodValidationPipe(SearchProductSchema))
   search(@Query() query: SearchProducts) {
     return this.inventoryService.search(query);
