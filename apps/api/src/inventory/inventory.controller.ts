@@ -37,7 +37,7 @@ export class InventoryController {
   }
 
   @Patch(':id')
-  update(
+  updateProduct(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() data: UpdateProduct,
   ) {

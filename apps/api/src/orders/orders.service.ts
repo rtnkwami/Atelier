@@ -8,7 +8,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { OrderPaymentStatus, SearchOrders } from 'contracts';
+import type {
+  CreateOrderResponse,
+  OrderPaymentStatus,
+  SearchOrders,
+  SearchOrdersResponse,
+} from 'contracts';
 import { CartService } from 'src/cart/cart.service';
 import { OrderItem } from 'src/entities/order-item.entity';
 import { Order } from 'src/entities/order.entity';
@@ -36,7 +41,7 @@ export class OrdersService {
   }
 
   @Transactional()
-  public async createOrder(userId: string) {
+  public async createOrder(userId: string): Promise<CreateOrderResponse> {
     const cart = await this.validateCart(userId);
     const cartTotal = cart.items.reduce(
       (acc, item) => acc + item.price * item.quantity,
@@ -57,19 +62,29 @@ export class OrdersService {
       order.items.add(orderItem);
     }
 
-    const dto = {
+    const reserveInventoryDto = {
       orderId: order.id,
       items: cart.items.map((item) => ({
         id: item.id,
         quantity: item.quantity,
       })),
     };
-    await this.inventoryService.reserveInventory(dto);
+    await this.inventoryService.reserveInventory(reserveInventoryDto);
 
-    return { order };
+    const returnDto = {
+      id: order.id,
+      total: order.total,
+      status: order.status,
+      createdAt: order.createdAt.toISOString(),
+    };
+
+    return returnDto;
   }
 
-  public async search(userId: string, filters: SearchOrders) {
+  public async search(
+    userId: string,
+    filters: SearchOrders,
+  ): SearchOrdersResponse {
     const { page = 1, limit = 20, status, fromDate, toDate } = filters;
     const offset = (page - 1) * limit;
 
@@ -91,8 +106,15 @@ export class OrdersService {
       { limit, offset },
     );
 
+    const dto = results.map((order) => ({
+      id: order.id,
+      status: order.status,
+      total: order.total,
+      createdAt: order.createdAt.toISOString(),
+    }));
+
     return {
-      orders: results,
+      orders: dto,
       page,
       perPage: limit,
       totalItems: count,
@@ -101,13 +123,34 @@ export class OrdersService {
   }
 
   public async getOrder(id: string) {
-    const order = await this.em.findOne(Order, id, { populate: ['items'] });
+    const order = await this.em.findOne(Order, id, {
+      populate: ['items'],
+      fields: [
+        'status',
+        'total',
+        'createdAt',
+        'items.quantity',
+        'items.price',
+        'items.product.id',
+      ],
+    } as const);
 
     if (!order) {
       throw new NotFoundException(`Order ${id} does not exist`);
     }
 
-    return order;
+    const dto = {
+      id: order.id,
+      status: order.status,
+      total: order.total,
+      createdAt: order.createdAt.toISOString(),
+      items: order.items.map((item) => ({
+        id: item.product.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
+    return dto;
   }
 
   @Transactional()

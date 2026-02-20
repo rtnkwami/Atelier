@@ -14,9 +14,14 @@ import {
 import type {
   CommitStock,
   CreateProduct,
+  CreateProductResponse,
+  DeleteProductResponse,
+  GetProductResponse,
   ReserveStock,
+  SearchProductResponse,
   SearchProducts,
   UpdateProduct,
+  UpdateProductResponse,
 } from 'contracts';
 import { Product } from 'src/entities/product.entity';
 import { ReservationItem } from 'src/entities/reservation-item.entity';
@@ -26,13 +31,24 @@ import { Reservation } from 'src/entities/reservation.entity';
 export class InventoryService {
   constructor(private readonly em: EntityManager) {}
 
-  public async createProduct(data: CreateProduct) {
+  public async createProduct(data: CreateProduct): CreateProductResponse {
     const product = this.em.create(Product, data);
     await this.em.flush();
-    return { success: true, created: product };
+
+    const dto = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price,
+      stock: product.stock,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+    };
+    return dto;
   }
 
-  public async search(filters: SearchProducts) {
+  public async search(filters: SearchProducts): SearchProductResponse {
     const { page, limit, name, category, minPrice, maxPrice } = filters;
     const offset = (page - 1) * limit;
     const search: FilterQuery<Product> = {};
@@ -57,8 +73,16 @@ export class InventoryService {
       { limit, offset },
     );
 
+    const dto = results.map((product) => ({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price,
+    }));
+
     return {
-      products: results,
+      products: dto,
       page,
       perPage: limit,
       totalItems: count,
@@ -66,17 +90,30 @@ export class InventoryService {
     };
   }
 
-  public async getProduct(id: string) {
+  public async getProduct(id: string): GetProductResponse {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
       throw new NotFoundException(`Product ${id} does not exist`);
     }
-    return product;
+
+    const dto = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price,
+      stock: product.stock,
+    };
+
+    return dto;
   }
 
   @Transactional()
-  public async updateProduct(id: string, data: UpdateProduct) {
+  public async updateProduct(
+    id: string,
+    data: UpdateProduct,
+  ): UpdateProductResponse {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
@@ -93,11 +130,11 @@ export class InventoryService {
       stock: product.stock,
       images: product.images,
     };
-    return { success: true, updated: dto };
+    return dto;
   }
 
   @Transactional()
-  public async deleteProduct(id: string) {
+  public async deleteProduct(id: string): DeleteProductResponse {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
@@ -105,7 +142,7 @@ export class InventoryService {
     }
     this.em.remove(product);
 
-    return { success: true, deleted: product.id };
+    return { deleted: product.id };
   }
 
   private async findOrCreateReservation(id: string) {

@@ -31,7 +31,7 @@ export class CartService {
     return cart;
   }
 
-  public async upsertCart(userId: string, incoming: Cart) {
+  public async upsertCart(userId: string, incoming: Cart): Promise<Cart> {
     const existing = await this.cacheManager.get<Cart>(userId);
 
     if (!existing) {
@@ -42,13 +42,13 @@ export class CartService {
     return await this.cacheManager.set<Cart>(userId, mergedCart);
   }
 
-  public async getCart(userId: string) {
+  public async getCart(userId: string): Promise<Cart | undefined> {
     return await this.cacheManager.get<Cart>(userId);
   }
 
-  public async deleteCart(userId: string) {
+  public async deleteCart(userId: string): Promise<Cart | undefined> {
     const cart = await this.cacheManager.get<Cart>(userId);
-    const success = await this.cacheManager.del(userId);
-    return { success, cart };
+    await this.cacheManager.del(userId);
+    return cart;
   }
 }
