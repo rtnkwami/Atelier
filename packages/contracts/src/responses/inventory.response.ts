@@ -1,20 +1,16 @@
 import { z } from "zod";
 
-// --- Base Schemas ---
-
 export const ProductSchema = z.object({
   id: z.uuid(),
-  name: z.string(),
+  name: z.string().nonempty(),
   description: z.string().optional(),
-  category: z.string(),
-  price: z.number(),
-  stock: z.number(),
+  category: z.string().nonempty(),
+  price: z.number().positive(),
+  stock: z.number().positive(),
   images: z.array(z.string()).optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().nonempty(),
+  updatedAt: z.string().nonempty(),
 });
-
-// --- Response Schemas ---
 
 export const CreateProductResponseSchema = ProductSchema;
 
@@ -22,17 +18,18 @@ export const SearchProductResponseSchema = z.object({
   products: z.array(
     z.object({
       id: z.uuid(),
-      name: z.string(),
+      name: z.string().nonempty(),
       description: z.string().optional(),
-      category: z.string(),
-      price: z.number(),
+      category: z.string().nonempty(),
+      price: z.number().positive(),
     })
   ),
-  page: z.number(),
-  perPage: z.number(),
-  totalItems: z.number(),
-  totalPages: z.number(),
-});
+  page: z.number().positive(),
+  perPage: z.number().positive(),
+  totalItems: z.number().positive(),
+  totalPages: z.number().positive(),
+})
+  .strict();
 
 export const GetProductResponseSchema = ProductSchema.omit({
   createdAt: true,
@@ -42,10 +39,8 @@ export const GetProductResponseSchema = ProductSchema.omit({
 export const UpdateProductResponseSchema = GetProductResponseSchema;
 
 export const DeleteProductResponseSchema = z.object({
-  deleted: z.string(),
+  deleted: z.uuid(),
 });
-
-// --- Types (Inferred from Schemas) ---
 
 export type Product = z.infer<typeof ProductSchema>;
 
