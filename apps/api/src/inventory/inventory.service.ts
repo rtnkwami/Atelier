@@ -41,6 +41,7 @@ export class InventoryService {
       category: product.category,
       price: product.price,
       stock: product.stock,
+      images: product.images,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     };
@@ -78,6 +79,7 @@ export class InventoryService {
       description: product.description,
       category: product.category,
       price: product.price,
+      images: product.images,
     }));
 
     return {
@@ -103,6 +105,7 @@ export class InventoryService {
       category: product.category,
       price: product.price,
       stock: product.stock,
+      images: product.images,
     };
 
     return dto;

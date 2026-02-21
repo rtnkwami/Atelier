@@ -36,8 +36,8 @@ export class Product extends BaseEntity<'description' | 'images'> {
   @Property()
   stock: number;
 
-  @Property({ type: new JsonType(), default: '[]' })
-  images?: string[];
+  @Property({ type: JsonType })
+  images: string[] = [];
 
   @OneToMany(() => ReservationItem, (reservation) => reservation.product)
   reservations = new Collection<ReservationItem>(this);
