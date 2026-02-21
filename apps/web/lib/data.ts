@@ -1,0 +1,30 @@
+import { SearchProductResponseSchema, SearchProducts } from "contracts"
+
+export async function getCatalog(params?: SearchProducts) {
+  const searchParams = new URLSearchParams();
+  if (params) {
+    // loop over each key value pair in params because URLSearchParams expects only strings
+    for (const [key, value] of Object.entries(params)) {
+      searchParams.append(key, String(value));
+    }
+  }
+  try {
+    const response = await fetch(`${process.env.API_BASE_URL}/inventory?${searchParams}`)
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    const validation = SearchProductResponseSchema.safeParse(data);
+
+    if (validation.error) {
+      console.error(validation.error);
+      return null
+    }
+    return validation.data;
+  } catch (error) {
+    console.error(error)
+    return null;
+  }
+}
