@@ -12,46 +12,28 @@ export const ProductSchema = z.object({
   updatedAt: z.string().nonempty(),
 });
 
-export const CreateProductResponseSchema = ProductSchema;
+export const PublicProductSchema = ProductSchema.omit({
+  stock: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const SearchProductResponseSchema = z.object({
-  products: z.array(
-    z.object({
-      id: z.uuid(),
-      name: z.string().nonempty(),
-      description: z.string().optional(),
-      category: z.string().nonempty(),
-      price: z.number().positive(),
-    })
-  ),
+  products: z.array(PublicProductSchema),
   page: z.number().positive(),
   perPage: z.number().positive(),
   totalItems: z.number().positive(),
   totalPages: z.number().positive(),
 })
   .strict();
-
-export const GetProductResponseSchema = ProductSchema.omit({
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const UpdateProductResponseSchema = GetProductResponseSchema;
-
+  
 export const DeleteProductResponseSchema = z.object({
   deleted: z.uuid(),
 });
 
-export type Product = z.infer<typeof ProductSchema>;
+export const PrivateProductSchema = ProductSchema;
 
-export type CreateProductResponse = Promise<z.infer<typeof CreateProductResponseSchema>>;
-
-export type SearchProductResponse = Promise<z.infer<typeof SearchProductResponseSchema>>;
-
-type ProductWithoutTimestamps = z.infer<typeof GetProductResponseSchema>;
-
-export type GetProductResponse = Promise<ProductWithoutTimestamps>;
-
-export type UpdateProductResponse = Promise<ProductWithoutTimestamps>;
-
-export type DeleteProductResponse = Promise<z.infer<typeof DeleteProductResponseSchema>>;
+export type PrivateProduct = z.infer<typeof PrivateProductSchema>;
+export type PublicProduct = z.infer<typeof PublicProductSchema>;
+export type SearchProductResponse = z.infer<typeof SearchProductResponseSchema>;
+export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;

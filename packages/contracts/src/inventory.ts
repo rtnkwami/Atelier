@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const CreateProductSchema = z
   .object({
-    name: z.string().min(1),
-    description: z.string().optional(),
-    category: z.string().min(1),
+    name: z.string().nonempty(),
+    description: z.string(),
+    category: z.string().nonempty(),
     price: z.number().positive(),
     stock: z.number().positive(),
     images: z.array(z.url()).optional(),
@@ -40,6 +40,6 @@ export type ReserveStock = z.infer<typeof ReserveStockSchema>;
 
 
 export const CommitStockRequestSchema = z.object({
-  reservationId: z.string().min(1),
+  reservationId: z.uuid(),
 });
 export type CommitStock = z.infer<typeof CommitStockRequestSchema>;

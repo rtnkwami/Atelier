@@ -14,14 +14,13 @@ import {
 import type {
   CommitStock,
   CreateProduct,
-  CreateProductResponse,
   DeleteProductResponse,
-  GetProductResponse,
+  PrivateProduct,
+  PublicProduct,
   ReserveStock,
   SearchProductResponse,
   SearchProducts,
   UpdateProduct,
-  UpdateProductResponse,
 } from 'contracts';
 import { Product } from 'src/entities/product.entity';
 import { ReservationItem } from 'src/entities/reservation-item.entity';
@@ -31,7 +30,7 @@ import { Reservation } from 'src/entities/reservation.entity';
 export class InventoryService {
   constructor(private readonly em: EntityManager) {}
 
-  public async createProduct(data: CreateProduct): CreateProductResponse {
+  public async createProduct(data: CreateProduct): Promise<PrivateProduct> {
     const product = this.em.create(Product, data);
     await this.em.flush();
 
@@ -48,7 +47,7 @@ export class InventoryService {
     return dto;
   }
 
-  public async search(filters: SearchProducts): SearchProductResponse {
+  public async search(filters: SearchProducts): Promise<SearchProductResponse> {
     const { page, limit, name, category, minPrice, maxPrice } = filters;
     const offset = (page - 1) * limit;
     const search: FilterQuery<Product> = {};
@@ -90,7 +89,7 @@ export class InventoryService {
     };
   }
 
-  public async getProduct(id: string): GetProductResponse {
+  public async getProduct(id: string): Promise<PublicProduct> {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
@@ -113,7 +112,7 @@ export class InventoryService {
   public async updateProduct(
     id: string,
     data: UpdateProduct,
-  ): UpdateProductResponse {
+  ): Promise<PrivateProduct> {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
@@ -129,12 +128,14 @@ export class InventoryService {
       price: product.price,
       stock: product.stock,
       images: product.images,
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
     };
     return dto;
   }
 
   @Transactional()
-  public async deleteProduct(id: string): DeleteProductResponse {
+  public async deleteProduct(id: string): Promise<DeleteProductResponse> {
     const product = await this.em.findOne(Product, id);
 
     if (!product) {
