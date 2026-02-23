@@ -5,7 +5,15 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "lint": { "dependsOn": ["^build"] },
+    "lint": { 
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "tsconfig.json",
+        "test/**/*.ts",
+        "eslint.config.mjs"
+      ]
+    },
     "dev": {
       "persistent": true,
       "cache": false

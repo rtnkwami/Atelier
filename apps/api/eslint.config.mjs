@@ -32,4 +32,10 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    rules: {
+      '@typescript-eslint/require-await': 'off'
+    },
+    files: ['./src/migrations/**']
+  }
 );
