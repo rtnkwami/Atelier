@@ -17,6 +17,15 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "test/**/*.ts",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
     }
   },
   "cacheDir": ".turbo/cache"
