@@ -1,5 +1,6 @@
 import { defaultExclude, defineConfig } from 'vitest/config';
 import swc from 'unplugin-swc';
+import path from 'path';
 
 export default defineConfig({
   test: {
@@ -14,10 +15,10 @@ export default defineConfig({
           include: ['**/*.unit.spec.ts'],
           sequence: {
             shuffle: { tests: true },
-            concurrent: true
+            concurrent: true,
           },
-          fileParallelism: true
-        }
+          fileParallelism: true,
+        },
       },
       {
         extends: true,
@@ -26,16 +27,22 @@ export default defineConfig({
           include: ['**/*.e2e-spec.ts'],
           sequence: {
             shuffle: { tests: true },
-            concurrent: true
+            concurrent: true,
           },
-          fileParallelism: true
-        }
-      }
-    ]
+          fileParallelism: true,
+        },
+      },
+    ],
   },
   plugins: [
     swc.vite({
-      module: { type: 'es6' }
-    })
-  ]
-})
+      module: { type: 'es6' },
+    }),
+  ],
+  resolve: {
+    alias: {
+      src: path.resolve(__dirname, './src'),
+      test: path.resolve(__dirname, './test'),
+    },
+  },
+});

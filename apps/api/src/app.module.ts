@@ -14,7 +14,10 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate }),
-    MikroOrmModule.forRoot(dbConfig),
+    MikroOrmModule.forRoot({
+      ...dbConfig,
+      autoLoadEntities: true,
+    }),
     InventoryModule,
     CartModule,
     OrdersModule,
@@ -31,6 +34,7 @@ export class AppModule {
         { path: 'inventory', method: RequestMethod.GET },
         { path: 'inventory/:id', method: RequestMethod.GET },
         { path: 'inventory/search', method: RequestMethod.GET },
+        { path: '/', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }
