@@ -49,9 +49,9 @@ export class InventoryService {
     return dto;
   }
 
-  public async quickSearch(query: string): Promise<QuickSearchResult> {
+  public async quickSearch(name: string): Promise<QuickSearchResult> {
     const results = await this.em.findAll(Product, {
-      where: { name: { $ilike: `${query}%` } },
+      where: { name: { $ilike: `${name}%` } },
     });
 
     const dto = {

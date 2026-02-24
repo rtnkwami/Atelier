@@ -27,8 +27,8 @@ export class InventoryController {
 
   @Get('search')
   @UsePipes(new ZodValidationPipe(z.string()))
-  async quickSearch(@Query('q') query: string) {
-    return await this.inventoryService.quickSearch(query);
+  async quickSearch(@Query('name') name: string) {
+    return await this.inventoryService.quickSearch(name);
   }
 
   @Get()

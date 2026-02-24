@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q');
+  const query = searchParams.get('name');
 
   if (!query) {
     return NextResponse.json({ data: [] });
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   const backendUrl = process.env.API_BASE_URL || 'http://localhost:5000';
     const response =  await fetch(
-      `${ backendUrl }/inventory/search?q=${ encodeURIComponent(query) }`,
+      `${ backendUrl }/inventory/search?name=${ encodeURIComponent(query) }`,
       { headers: { 'Content-Type': 'application/json' } }
     );
 

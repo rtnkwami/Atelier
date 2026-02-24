@@ -52,7 +52,7 @@ export default function SearchBar() {
     if (!query.trim()) return;
 
     const delaySearch = setTimeout(async () => {
-      const response = await fetch(`/api/quick-search?q=${ encodeURIComponent(query) }`)
+      const response = await fetch(`/api/quick-search?name=${ encodeURIComponent(query) }`)
 
       if (!response.ok) {
         throw new Error(`Error when fetching data: ${response}`)
@@ -75,36 +75,39 @@ export default function SearchBar() {
 
   return (
     <div className="relative w-full max-w-md">
-      <Popover open={ query.length > 0 }>
-        <PopoverTrigger asChild>
-          <div className="relative flex items-center w-full">
-            <Input
-              type="text"
-              placeholder="Search Atelier..."
-              className="pr-12 pl-4 h-10 w-full"
-              value={ query }
-              onChange={ (e) => setQuery(e.target.value) }
-            />
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="absolute right-1 h-8 w-8 p-0 hover:bg-transparent"
-              type="submit"
-            >
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <span className="sr-only">Search</span>
-            </Button>
-          </div>
-        </PopoverTrigger>
+      <form action="/search" method="GET">
+        <Popover open={ query.length > 0 }>
+          <PopoverTrigger asChild>
+            <div className="relative flex items-center w-full">
+              <Input
+                type="text"
+                placeholder="Search Atelier..."
+                className="pr-12 pl-4 h-10 w-full"
+                value={ query }
+                name='name'
+                onChange={ (e) => setQuery(e.target.value) }
+              />
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="absolute right-1 h-8 w-8 p-0 hover:bg-transparent"
+                type="submit"
+              >
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <span className="sr-only">Search</span>
+              </Button>
+            </div>
+          </PopoverTrigger>
 
-        <PopoverContent
-          className="w-(--radix-popover-trigger-width) p-0" 
-          align="start"
-          onOpenAutoFocus={ (e) => e.preventDefault() }
-        >
-          <QuickSearchResults query={ query } results={ results } />
-        </PopoverContent>
-      </Popover>
+          <PopoverContent
+            className="w-(--radix-popover-trigger-width) p-0" 
+            align="start"
+            onOpenAutoFocus={ (e) => e.preventDefault() }
+          >
+            <QuickSearchResults query={ query } results={ results } />
+          </PopoverContent>
+        </Popover>
+      </form>
     </div>
   );
 }
