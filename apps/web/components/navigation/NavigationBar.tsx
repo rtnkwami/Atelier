@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SearchBar from "./SearchBar";
 
 export default async function NavigationBar() {
 
@@ -12,7 +13,7 @@ export default async function NavigationBar() {
 
       {/* Search Bar Section */}
       <div className="flex-1 max-w-md mx-4">
-        
+        <SearchBar />
       </div>
 
       {/* User Actions Section */}
