@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import type { PublicProduct } from 'contracts';
 
 export default function ProductCard({ product }: { product: PublicProduct }) {
@@ -23,9 +23,6 @@ export default function ProductCard({ product }: { product: PublicProduct }) {
 
       <div className="p-3">
         <CardTitle className="text-base mb-1">{product.name}</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground mb-1">
-          {product.description ?? 'No description available.'}
-        </CardDescription>
         <p className="text-lg font-medium">{product.price}</p>
       </div>
     </Card>
