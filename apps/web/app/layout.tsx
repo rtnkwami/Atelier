@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cabin } from "next/font/google";
 import "./globals.css";
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navigation/NavigationBar";
 
 const cabin = Cabin({
   subsets: ["latin"],
