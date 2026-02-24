@@ -7,17 +7,13 @@ import {
   Param,
   Delete,
   UsePipes,
-  ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import type { UpdateProduct, CreateProduct, SearchProducts } from 'contracts';
-import {
-  CreateProductSchema,
-  QuickSearchResultSchema,
-  SearchProductSchema,
-} from 'contracts';
+import { CreateProductSchema, SearchProductSchema } from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
+import z from 'zod';
 
 @Controller('inventory')
 export class InventoryController {
@@ -29,9 +25,9 @@ export class InventoryController {
     return this.inventoryService.createProduct(data);
   }
 
-  @Get()
-  @UsePipes(new ZodValidationPipe(QuickSearchResultSchema))
-  async quickSearch(@Query() query: string) {
+  @Get('search')
+  @UsePipes(new ZodValidationPipe(z.string()))
+  async quickSearch(@Query('q') query: string) {
     return await this.inventoryService.quickSearch(query);
   }
 
@@ -42,20 +38,20 @@ export class InventoryController {
   }
 
   @Get(':id')
-  getProduct(@Param('id', new ParseUUIDPipe()) id: string) {
+  @UsePipes(new ZodValidationPipe(z.uuid()))
+  getProduct(@Param('id') id: string) {
     return this.inventoryService.getProduct(id);
   }
 
   @Patch(':id')
-  updateProduct(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() data: UpdateProduct,
-  ) {
+  @UsePipes(new ZodValidationPipe(z.uuid()))
+  updateProduct(@Param('id') id: string, @Body() data: UpdateProduct) {
     return this.inventoryService.updateProduct(id, data);
   }
 
   @Delete(':id')
-  deleteProduct(@Param('id', new ParseUUIDPipe()) id: string) {
+  @UsePipes(new ZodValidationPipe(z.uuid()))
+  deleteProduct(@Param('id') id: string) {
     return this.inventoryService.deleteProduct(id);
   }
 }

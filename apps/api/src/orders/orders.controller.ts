@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseUUIDPipe,
   // Get,
   Post,
   Query,
@@ -16,6 +15,7 @@ import { OrdersService } from './orders.service';
 import { User } from 'src/auth/user.decorator';
 import { OrdersSearchSchema, type SearchOrders } from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
+import z from 'zod';
 
 @Controller('orders')
 export class OrdersController {
@@ -33,7 +33,8 @@ export class OrdersController {
   }
 
   @Get(':id')
-  getOrder(@Param('id', new ParseUUIDPipe()) id: string) {
+  @UsePipes(new ZodValidationPipe(z.uuid()))
+  getOrder(@Param('id') id: string) {
     return this.ordersService.getOrder(id);
   }
 
