@@ -17,6 +17,7 @@ import type {
   DeleteProductResponse,
   PrivateProduct,
   PublicProduct,
+  QuickSearchResult,
   ReserveStock,
   SearchProductResponse,
   SearchProducts,
@@ -45,6 +46,21 @@ export class InventoryService {
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     };
+    return dto;
+  }
+
+  public async quickSearch(query: string): Promise<QuickSearchResult> {
+    const results = await this.em.findAll(Product, {
+      where: { name: { $like: `%${query}%` } },
+    });
+
+    const dto = {
+      data: results.map((product) => ({
+        id: product.id,
+        name: product.name,
+      })),
+    };
+
     return dto;
   }
 

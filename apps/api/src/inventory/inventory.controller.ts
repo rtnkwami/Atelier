@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import type { UpdateProduct, CreateProduct, SearchProducts } from 'contracts';
-import { CreateProductSchema, SearchProductSchema } from 'contracts';
+import {
+  CreateProductSchema,
+  QuickSearchResultSchema,
+  SearchProductSchema,
+} from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 
 @Controller('inventory')
@@ -23,6 +27,12 @@ export class InventoryController {
   @UsePipes(new ZodValidationPipe(CreateProductSchema))
   create(@Body() data: CreateProduct) {
     return this.inventoryService.createProduct(data);
+  }
+
+  @Get()
+  @UsePipes(new ZodValidationPipe(QuickSearchResultSchema))
+  async quickSearch(@Query() query: string) {
+    return await this.inventoryService.quickSearch(query);
   }
 
   @Get()

@@ -26,6 +26,16 @@ export const SearchProductResponseSchema = z.object({
   totalPages: z.number().positive(),
 })
   .strict();
+
+export const QuickSearchResultSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string().nonempty()
+    })
+  )
+})
+  .strict();
   
 export const DeleteProductResponseSchema = z.object({
   deleted: z.uuid(),
@@ -36,4 +46,5 @@ export const PrivateProductSchema = ProductSchema;
 export type PrivateProduct = z.infer<typeof PrivateProductSchema>;
 export type PublicProduct = z.infer<typeof PublicProductSchema>;
 export type SearchProductResponse = z.infer<typeof SearchProductResponseSchema>;
+export type QuickSearchResult = z.infer<typeof QuickSearchResultSchema>;
 export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;
