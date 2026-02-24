@@ -51,7 +51,7 @@ export class InventoryService {
 
   public async quickSearch(query: string): Promise<QuickSearchResult> {
     const results = await this.em.findAll(Product, {
-      where: { name: { $like: `%${query}%` } },
+      where: { name: { $ilike: `${query}%` } },
     });
 
     const dto = {
@@ -70,7 +70,7 @@ export class InventoryService {
     const search: FilterQuery<Product> = {};
 
     if (name) {
-      search.name = { $ilike: `%${name}%` };
+      search.name = { $ilike: `${name}%` };
     }
 
     if (category) {
