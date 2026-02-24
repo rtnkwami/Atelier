@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cabin } from "next/font/google";
 import "./globals.css";
+import NavigationBar from "@/components/NavigationBar";
 
 const cabin = Cabin({
   subsets: ["latin"],
@@ -19,7 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cabin.className} antialiased`}>
-        {children}
+        <main className="pt-16">
+          <NavigationBar />
+          {children}
+        </main>
       </body>
     </html>
   );
