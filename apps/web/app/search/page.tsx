@@ -1,5 +1,6 @@
 import Catalog from "@/components/catalog/Catalog";
 import SearchFilters from "@/components/catalog/SearchFilters";
+import ResultsPagination from "@/components/navigation/Pagination";
 import { getCatalog, getCategories } from "@/lib/data/inventory";
 import { SearchProducts } from "contracts";
 
@@ -27,12 +28,22 @@ export default async function SearchPage({
 
       <div className="flex gap-6 px-6">
         <aside className="w-64 shrink-0">
-          <SearchFilters categories={ categories }/>
+          <div className="sticky top-20">
+            <SearchFilters categories={categories} />
+          </div>
         </aside>
 
-        <main className="flex-1">
-          <Catalog catalog={catalog} />
-          {/* Pagination goes here */}
+        <main className="flex-1 flex flex-col min-h-[calc(100vh-200px)] relative">
+          <div className="flex-1">
+            <Catalog catalog={catalog} />
+          </div>
+
+          <div className="sticky bottom-0 mt-8 py-4 bg-white/80 backdrop-blur-md border-t flex justify-center">
+            <ResultsPagination 
+              currentPage={catalog.page} 
+              totalPages={catalog.totalPages} 
+            />
+          </div>
         </main>
       </div>
     </div>
