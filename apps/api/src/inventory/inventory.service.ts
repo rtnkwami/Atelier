@@ -64,6 +64,18 @@ export class InventoryService {
     return dto;
   }
 
+  public async getProductCategories() {
+    const results = await this.em.findAll(Product, {
+      fields: ['category'],
+    });
+
+    const dto = {
+      categories: [...new Set(results.map((product) => product.category))],
+    };
+
+    return dto;
+  }
+
   public async search(filters: SearchProducts): Promise<SearchProductResponse> {
     const { page, limit, name, category, minPrice, maxPrice } = filters;
     const offset = (page - 1) * limit;

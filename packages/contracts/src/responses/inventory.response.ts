@@ -41,10 +41,16 @@ export const DeleteProductResponseSchema = z.object({
   deleted: z.uuid(),
 });
 
+export const GetCategoriesResponse = z.object({
+  categories: z.array(z.string()),
+})
+  .strict();
+
 export const PrivateProductSchema = ProductSchema;
 
 export type PrivateProduct = z.infer<typeof PrivateProductSchema>;
 export type PublicProduct = z.infer<typeof PublicProductSchema>;
 export type SearchProductResponse = z.infer<typeof SearchProductResponseSchema>;
+export type GetCategories = z.infer<typeof GetCategoriesResponse>;
 export type QuickSearchResult = z.infer<typeof QuickSearchResultSchema>;
 export type DeleteProductResponse = z.infer<typeof DeleteProductResponseSchema>;

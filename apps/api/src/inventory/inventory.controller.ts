@@ -31,6 +31,11 @@ export class InventoryController {
     return await this.inventoryService.quickSearch(name);
   }
 
+  @Get('categories')
+  async getCategories() {
+    return await this.inventoryService.getProductCategories();
+  }
+
   @Get()
   @UsePipes(new ZodValidationPipe(SearchProductSchema))
   search(@Query() query: SearchProducts) {
