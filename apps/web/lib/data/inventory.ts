@@ -1,4 +1,9 @@
-import { GetCategoriesResponse, SearchProductResponseSchema, SearchProducts } from "contracts"
+import {
+  GetCategoriesResponse,
+  PublicProductSchema,
+  SearchProductResponseSchema,
+  SearchProducts
+} from "contracts"
 
 export async function getCatalog(params?: SearchProducts) {
   const searchParams = new URLSearchParams();
@@ -27,6 +32,28 @@ export async function getCatalog(params?: SearchProducts) {
   } catch (error) {
     console.error(error)
     return null;
+  }
+}
+
+export async function getCatalogProduct(id: string) {
+  try {
+    const response = await fetch(`${ process.env.API_BASE_URL }/inventory/${ id }`)
+
+    if (!response.ok) {
+      throw new Error(`Error fetching product ${ id }`);
+    }
+
+    const data = await response.json()
+    const validation = PublicProductSchema.safeParse(data);
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new Error('Error fetching product from catalog', { cause: validation.error })
+    }
+    return validation.data;
+  } catch (error) {
+    console.error(error)
+    throw new Error('Error fetching product from catalog', { cause: error })
   }
 }
 
