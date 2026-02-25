@@ -1,30 +1,33 @@
 import Image from 'next/image';
 import { Card, CardTitle } from '@/components/ui/card';
 import type { PublicProduct } from 'contracts';
+import Link from 'next/link';
 
 export default function ProductCard({ product }: { product: PublicProduct }) {
   return (
-    <Card className="hover:shadow-md transition-shadow duration-300 cursor-pointer overflow-hidden rounded-lg p-0">
-      <div className="relative w-full aspect-4/3">
-        {product.images?.length > 0 ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            unoptimized
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-400 text-sm">No image</span>
-          </div>
-        )}
-      </div>
+    <Link href={ `/catalog/${ product.id }` }>
+      <Card className="hover:shadow-md transition-shadow duration-300 cursor-pointer overflow-hidden rounded-lg p-0">
+        <div className="relative w-full aspect-4/3">
+          {product.images?.length > 0 ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              unoptimized
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400 text-sm">No image</span>
+            </div>
+          )}
+        </div>
 
-      <div className="p-4">
-        <CardTitle className="text-base mb-1">{product.name}</CardTitle>
-        <p className="text-lg font-medium">{product.price}</p>
-      </div>
-    </Card>
+        <div className="p-4">
+          <CardTitle className="text-base mb-1">{product.name}</CardTitle>
+          <p className="text-lg font-medium">{product.price}</p>
+        </div>
+      </Card>
+    </Link>
   );
 }
