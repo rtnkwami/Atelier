@@ -1,4 +1,4 @@
-import { SearchProductResponseSchema, SearchProducts } from "contracts"
+import { GetCategoriesResponse, SearchProductResponseSchema, SearchProducts } from "contracts"
 
 export async function getCatalog(params?: SearchProducts) {
   const searchParams = new URLSearchParams();
@@ -12,6 +12,7 @@ export async function getCatalog(params?: SearchProducts) {
     const response = await fetch(`${process.env.API_BASE_URL}/inventory?${searchParams}`)
 
     if (!response.ok) {
+      console.error(await response.json())
       return null;
     }
 
@@ -26,5 +27,27 @@ export async function getCatalog(params?: SearchProducts) {
   } catch (error) {
     console.error(error)
     return null;
+  }
+}
+
+export async function getCategories() {
+  try {
+    const response = await fetch(`${ process.env.API_BASE_URL }/inventory/categories`);
+
+    if (!response.ok) {
+      throw new Error('Error fetching product categories', { cause: response.statusText });
+    }
+
+    const data = await response.json()
+    const validation = GetCategoriesResponse.safeParse(data);
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new Error('Error fetching product categories', { cause: validation.error })
+    }
+    return validation.data;
+  } catch (error) {
+    console.error(error)
+    throw new Error('Error fetching product categories', { cause: error })
   }
 }
