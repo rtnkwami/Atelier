@@ -21,6 +21,22 @@ export default function SearchFilters ({ categories }: { categories: string[] })
     maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined,
   });
 
+  const clearFilters = () => {
+    setFilters({
+      category: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+    });
+    
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("category");
+    params.delete("minPrice");
+    params.delete("maxPrice");
+    params.delete("page");
+
+    router.push(`/search?${params.toString()}`);
+  }
+
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -51,7 +67,7 @@ export default function SearchFilters ({ categories }: { categories: string[] })
         <label className="text-sm font-medium mb-2 block">Category</label>
         <Select
           value={filters.category ?? "all"}
-          onValueChange={(val) => 
+          onValueChange={ (val) => 
             setFilters((prev) => ({ ...prev, category: val === "all" ? undefined : val }))
           }
         >
@@ -60,9 +76,9 @@ export default function SearchFilters ({ categories }: { categories: string[] })
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-            ))}
+            { categories.map((cat) => (
+              <SelectItem key={ cat } value={ cat }>{ cat }</SelectItem>
+            )) }
           </SelectContent>
         </Select>
       </div>
@@ -73,7 +89,7 @@ export default function SearchFilters ({ categories }: { categories: string[] })
           <Input
             type="number"
             placeholder="Min"
-            value={filters.minPrice ?? ""}
+            value={ filters.minPrice ?? "" }
             onChange={(e) => 
               setFilters((prev) => ({ 
                 ...prev, 
@@ -84,7 +100,7 @@ export default function SearchFilters ({ categories }: { categories: string[] })
           <Input
             type="number"
             placeholder="Max"
-            value={filters.maxPrice ?? ""}
+            value={ filters.maxPrice ?? "" }
             onChange={(e) => 
               setFilters((prev) => ({ 
                 ...prev, 
@@ -95,9 +111,19 @@ export default function SearchFilters ({ categories }: { categories: string[] })
         </div>
       </div>
 
-      <Button onClick={applyFilters} className="w-full">
+      <Button onClick={ applyFilters } className="w-full">
         Apply Filters
       </Button>
+
+      { (filters.category || filters.minPrice || filters.maxPrice) && (
+        <Button 
+          onClick={ clearFilters } 
+          variant="ghost" 
+          className="w-full text-muted-foreground hover:text-foreground"
+        >
+          Clear Filters
+        </Button>
+      ) }
     </div>
   );
 }
