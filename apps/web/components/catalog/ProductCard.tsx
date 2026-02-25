@@ -21,7 +21,7 @@ export default function ProductCard({ product }: { product: PublicProduct }) {
         )}
       </div>
 
-      <div className="p-3">
+      <div className="p-4">
         <CardTitle className="text-base mb-1">{product.name}</CardTitle>
         <p className="text-lg font-medium">{product.price}</p>
       </div>

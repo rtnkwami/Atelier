@@ -1,5 +1,5 @@
 import Catalog from "@/components/catalog/Catalog";
-import { getCatalog } from "@/lib/data";
+import { getCatalog } from "@/lib/data/inventory";
 
 export default async function CatalogPage() {
   const catalog = await getCatalog();
@@ -9,6 +9,8 @@ export default async function CatalogPage() {
       )
     }
   return (
-    <Catalog catalog={ catalog }/>
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <Catalog catalog={ catalog }/>
+    </div>
   );
 }
