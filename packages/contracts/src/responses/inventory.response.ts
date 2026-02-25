@@ -6,7 +6,7 @@ export const ProductSchema = z.object({
   description: z.string().optional(),
   category: z.string().nonempty(),
   price: z.number().positive(),
-  stock: z.number().positive(),
+  stock: z.number().nonnegative(),
   images: z.array(z.string()),
   createdAt: z.string().nonempty(),
   updatedAt: z.string().nonempty(),
@@ -20,10 +20,10 @@ export const PublicProductSchema = ProductSchema.omit({
 
 export const SearchProductResponseSchema = z.object({
   products: z.array(PublicProductSchema),
-  page: z.number().positive(),
-  perPage: z.number().positive(),
-  totalItems: z.number().positive(),
-  totalPages: z.number().positive(),
+  page: z.number().nonnegative(),
+  perPage: z.number().nonnegative(),
+  totalItems: z.number().nonnegative(),
+  totalPages: z.number().nonnegative(),
 })
   .strict();
 
