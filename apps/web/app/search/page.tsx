@@ -21,8 +21,25 @@ export default async function SearchPage({
   return (
     <div className="flex flex-col gap-4">
       <header className="px-6 pt-6">
-        <h1 className="text-xl font-semibold italic text-muted-foreground">
-          Results for: &quot;{params.name}&quot;
+        <h1 className="text-xl font-semibold text-muted-foreground">
+          {catalog.totalItems > 0 ? (
+            <>
+              Showing 
+              <span className="text-muted-foreground mx-1">
+                {Math.min((catalog.page - 1) * 20 + 1, catalog.totalItems)}–
+                {Math.min(catalog.page * 20, catalog.totalItems)}
+              </span> 
+              of 
+              <span className="text-muted-foreground mx-1">{catalog.totalItems}</span> 
+              {params.name ? (
+                <>results for <span className="italic">&quot;{params.name}&quot;</span></>
+              ) : (
+                "products"
+              )}
+            </>
+          ) : (
+            <>No results found {params.name && `for "${params.name}"`}</>
+          )}
         </h1>
       </header>
 
