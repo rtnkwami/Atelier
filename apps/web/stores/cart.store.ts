@@ -82,7 +82,7 @@ export const useCart = create<CartState>((set, get) => ({
     
     if (isAuthenticated) {
       await fetch("/api/cart", {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
       });

@@ -1,12 +1,13 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
 import { NextRequest, NextResponse } from "next/server";
 import { CreateCartSchema } from "contracts";
+import { auth0 } from "@/lib/auth0";
 
 const backendUrl = process.env.API_BASE_URL;
 
-export async function POST(req: NextRequest) {
-  const token = await getAccessToken();
+export async function PUT(req: NextRequest) {
+  const { token } = await auth0.getAccessToken()
   const body = CreateCartSchema.parse(await req.json());
+  console.log(body);
 
   const response = await fetch(`${ backendUrl }/cart`, {
     method: "PUT",
@@ -17,11 +18,15 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify(body),
   });
 
+  if (!response.ok) {
+    console.log(await response.json())
+  }
+
   return NextResponse.json(null, { status: response.status });
 }
 
 export async function GET() {
-    const token = await getAccessToken();
+    const { token } = await auth0.getAccessToken();
 
     const response = await fetch(`${ backendUrl }/cart`, {
       method: "GET",
@@ -41,7 +46,7 @@ export async function GET() {
 }
 
 export async function DELETE() {
-    const token = await getAccessToken();
+    const { token } = await auth0.getAccessToken();
 
     const response = await fetch(`${ backendUrl }/cart`, {
       method: "DELETE",
