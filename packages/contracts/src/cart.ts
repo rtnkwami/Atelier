@@ -5,7 +5,7 @@ const CartItemSchema = z.object({
   name: z.string(),
   price: z.number().positive(),
   quantity: z.number().positive(),
-  image: z.string().url(),
+  image: z.url(),
 });
 
 export const CreateCartSchema = z.object({
@@ -13,3 +13,4 @@ export const CreateCartSchema = z.object({
 });
 
 export type Cart = z.infer<typeof CreateCartSchema>;
+export type CartItem = z.infer<typeof CartItemSchema>;
