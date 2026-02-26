@@ -3,6 +3,7 @@ import SearchBar from "./SearchBar";
 import { auth0 } from "@/lib/auth0";
 import LoginButton from "@/components/auth/LoginButton";
 import UserProfile from "@/components/auth/UserProfile";
+import Cart from '@/components/cart/Cart';
 
 export default async function NavigationBar() {
   const session = await auth0.getSession();
@@ -32,7 +33,7 @@ export default async function NavigationBar() {
       <div className="flex items-center gap-4 ml-auto pr-12">
         {user ? <UserProfile /> : <LoginButton />}
       </div>
-
+      <Cart />
     </nav>
   );
 }
