@@ -1,4 +1,4 @@
-import { Controller, Body, Put, UsePipes, Get, Delete } from '@nestjs/common';
+import { Controller, Body, Put, Get, Delete } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { User } from 'src/auth/user.decorator';
 import { CreateCartSchema, type Cart } from 'contracts';
@@ -9,8 +9,10 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Put()
-  @UsePipes(new ZodValidationPipe(CreateCartSchema))
-  upsertCart(@User() userId: string, @Body() data: Cart) {
+  upsertCart(
+    @User() userId: string,
+    @Body(new ZodValidationPipe(CreateCartSchema)) data: Cart,
+  ) {
     return this.cartService.upsertCart(userId, data);
   }
 
