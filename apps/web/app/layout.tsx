@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cabin } from "next/font/google";
 import "./globals.css";
 import NavigationBar from "@/components/navigation/NavigationBar";
+import { Auth0Provider } from "@auth0/nextjs-auth0";
+import CartInitializer from "@/components/cart/CartInitializer";
 
 const cabin = Cabin({
   subsets: ["latin"],
@@ -20,10 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cabin.className} antialiased`}>
-        <main className="pt-16">
-          <NavigationBar />
-          {children}
-        </main>
+        <Auth0Provider>
+          <main className="pt-16">
+            <CartInitializer />
+            <NavigationBar />
+            {children}
+          </main>
+        </Auth0Provider>
       </body>
     </html>
   );
