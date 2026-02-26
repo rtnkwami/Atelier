@@ -60,3 +60,26 @@ export async function DELETE() {
     }
     return NextResponse.json(null, { status: 204 });
 }
+
+export async function PATCH(req: NextRequest) {
+  const { token } = await auth0.getAccessToken();
+  const body = CreateCartSchema.parse(await req.json());
+
+  const response = await fetch(`${backendUrl}/cart/merge`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    console.log(await response.json());
+    return NextResponse.json(null, { status: response.status });
+  }
+
+  const data = await response.json();
+  const parsed = CreateCartSchema.parse(data);
+  return NextResponse.json(parsed, { status: 200 });
+}

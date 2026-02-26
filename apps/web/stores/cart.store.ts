@@ -40,7 +40,6 @@ export const useCart = create<CartState>((set, get) => ({
       const data: Cart = await res.json();
       set({ items: data.items, loading: false });
     } else {
-      // Guest → fetch from localStorage
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       set({ items: stored ? JSON.parse(stored) : [], loading: false });
     }
@@ -53,11 +52,15 @@ export const useCart = create<CartState>((set, get) => ({
 
     if (index > -1) {
       newItems = [...items];
-      newItems[index] = {
-        ...newItems[index],
-        quantity: newItems[index].quantity + item.quantity,
-      };
+      const newQuantity = newItems[index].quantity + item.quantity;
+      
+      if (newQuantity <= 0) {
+        newItems = items.filter((i) => i.id !== item.id);
+      } else {
+        newItems[index] = { ...newItems[index], quantity: newQuantity };
+      }
     } else {
+      if (item.quantity <= 0) return;
       newItems = [...items, item];
     }
 
