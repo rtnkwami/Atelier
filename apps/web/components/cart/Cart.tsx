@@ -10,10 +10,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useCart } from "@/stores/cart.store"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Trash2 } from "lucide-react"
+import Image from "next/image"
 
 export default function Cart() {
   const items = useCart((state) => state.items);
+  const addItem = useCart((state) => state.addItem);
+  const removeItem = useCart((state) => state.removeItem);
+  const clearCart = useCart((state) => state.clearCart);
+
   const totalQuantity = items.reduce(
     (sum, item) => sum + item.quantity,
     0
@@ -55,11 +60,14 @@ export default function Cart() {
               >
                 <div className="flex items-center gap-4">
                   {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover"
-                    />
+                    <div className="relative w-16 h-16 shrink-0 overflow-hidden rounded-md border">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                   )}
                   <div>
                     <p className="font-medium">{item.name}</p>
