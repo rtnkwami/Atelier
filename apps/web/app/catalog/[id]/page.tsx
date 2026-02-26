@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import AddToCartButton from "@/components/cart/CartAddButton";
 import { getCatalogProduct } from "@/lib/data/inventory";
 import Image from "next/image";
 
@@ -26,9 +26,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
         <p className="text-2xl font-medium">
           ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </p>
-        <Button size="lg" className="w-full py-6 text-base rounded-none">
-          Add to Cart
-        </Button>
+        <AddToCartButton product={ product }/>
       </aside>
 
       <main className="ml-70 mr-70 px-12 py-12 flex flex-col gap-8">
