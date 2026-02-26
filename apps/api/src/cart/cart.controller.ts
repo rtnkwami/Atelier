@@ -1,4 +1,4 @@
-import { Controller, Body, Put, Get, Delete } from '@nestjs/common';
+import { Controller, Body, Put, Get, Delete, Patch } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { User } from 'src/auth/user.decorator';
 import { CreateCartSchema, type Cart } from 'contracts';
@@ -14,6 +14,14 @@ export class CartController {
     @Body(new ZodValidationPipe(CreateCartSchema)) data: Cart,
   ) {
     return this.cartService.upsertCart(userId, data);
+  }
+
+  @Patch('merge')
+  syncCart(
+    @User() userId: string,
+    @Body(new ZodValidationPipe(CreateCartSchema)) data: Cart,
+  ) {
+    return this.cartService.syncCart(userId, data);
   }
 
   @Get()

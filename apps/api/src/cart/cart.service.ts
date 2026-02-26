@@ -31,7 +31,7 @@ export class CartService {
     return cart;
   }
 
-  public async upsertCart(userId: string, incoming: Cart): Promise<Cart> {
+  public async syncCart(userId: string, incoming: Cart) {
     const existing = await this.cacheManager.get<Cart>(userId);
 
     if (!existing) {
@@ -40,6 +40,16 @@ export class CartService {
     }
     const mergedCart = this.mergeIncomingWithExistingCart(incoming, existing);
     return await this.cacheManager.set<Cart>(userId, mergedCart);
+  }
+
+  public async upsertCart(userId: string, incoming: Cart): Promise<Cart> {
+    const existing = await this.cacheManager.get<Cart>(userId);
+
+    if (!existing) {
+      const cart = await this.cacheManager.set<Cart>(userId, incoming);
+      return cart;
+    }
+    return await this.cacheManager.set<Cart>(userId, incoming);
   }
 
   public async getCart(userId: string): Promise<Cart | undefined> {
