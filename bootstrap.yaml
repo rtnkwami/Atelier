@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Bootstrap template to get all prerequisite resources in place for CI/CD
+
+Parameters:
+  GitHubRepository:
+    Type: String
+    Description: Repository should be of type org/repo
+    Default: rtnkwami/Atelier
+    
+  Auth0ClientIdValue:
+    Type: String
+    Description: You can get this value from your Auth0 Application console
+  
+  Auth0ClientSecretValue:
+    Type: String
+    Description: The client secret from your Auth0 Application Console
+  
+  Auth0DomainValue:
+    Type: String
+    Description: Your Auth0 domain without https:// (e.g. dev-abc123.us.auth0.com)
+  
+  Auth0AudienceValue:
+    Type: String
+    Description: You can get this value from your Auth0 API console
+  
+  DatabaseNameValue:
+    Type: String
+    Default: atelier
+
+Resources:
+  TerraformStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  GitHubActionsOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: "https://token.actions.githubusercontent.com"
+      ClientIdList:
+        - "sts.amazonaws.com"
+
+  CICDRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+            - Effect: Allow
+              Action: "sts:AssumeRoleWithWebIdentity"
+              Principal:
+                Federated: !GetAtt GitHubActionsOIDCProvider.Arn
+              Condition:
+                StringEquals: 
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                  "token.actions.githubusercontent.com:repository": !Sub "${GitHubRepository}"
+                  "token.actions.githubusercontent.com:ref": "refs/heads/main"
+                StringLike:
+                  "token.actions.githubusercontent.com:sub": !Sub "repo:${GitHubRepository}:*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  DatabasePassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: /atelier/database/password
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludePunctuation: True
+
+  Auth0Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: /atelier/auth0/secret
+      GenerateSecretString:
+        PasswordLength: 64
+        ExcludePunctuation: True
+        ExcludeCharacters: "ghijklmnopqrstuvwxyz"
+        ExcludeUppercase: True
+
+  Auth0ClientSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: /atelier/auth0/client-secret
+      SecretString: !Sub ${Auth0ClientSecretValue}
+  
+  DatabaseName:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /atelier/database/name
+      Value: !Sub ${DatabaseNameValue}
+      Type: String
+  
+  Auth0Domain:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /atelier/auth0/domain
+      Value: !Sub "https://${Auth0DomainValue}"
+      Type: String
+      
+  Auth0ClientId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /atelier/auth0/client-id
+      Value: !Sub ${Auth0ClientIdValue}
+      Type: String
+  
+  Auth0Audience:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /atelier/auth0/audience
+      Value: !Sub ${Auth0AudienceValue}
+      Type: String
+  
+  DatabaseUser:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /atelier/database/user
+      Value: admin
+      Type: String
+
+Outputs:
+  TerraformStateBucketName:
+    Value: !Ref TerraformStateBucket
+  
+  CICDRoleArn:
+    Value: !GetAtt CICDRole.Arn
+  
