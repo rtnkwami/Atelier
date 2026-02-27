@@ -3,6 +3,8 @@ import { z } from 'zod';
 const environmentVariablesSchema = z.object({
   PORT: z.coerce.number().min(0).max(65535).optional(),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  ISSUER_BASE_URL: z.url({ protocol: /^https$/ }),
+  AUDIENCE: z.string().nonempty(),
   // NATS_ENDPOINT: z.string().nonempty(),
   REDIS_ENDPOINT: z.url({ protocol: /^redis$/ }),
 });
