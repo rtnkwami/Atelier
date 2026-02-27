@@ -12,48 +12,7 @@
 
 # --> Load balancer for backend api
 
-resource "aws_lb" "private_load_balancer" {
-  name               = "${var.resource_prefix}-private-lb"
-  internal           = true
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.private_alb_security_group.id]
-  subnets            = [for subnet in aws_subnet.app_subnets : subnet.id]
 
-  tags = {
-    "Name"         = "${var.resource_prefix}-private-lb"
-    "Project"      = var.project_name
-    "ResourceType" = "Compute"
-  }
-}
-
-resource "aws_lb_target_group" "api_target_group" {
-  name        = "${var.resource_prefix}-private-lb-api-tg"
-  port        = 5000
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.vpc.id
-
-  health_check {
-    path = "/health"
-  }
-
-  tags = {
-    "Name"         = "${var.resource_prefix}-private-lb-api-tg"
-    "Project"      = var.project_name
-    "ResourceType" = "Compute"
-  }
-}
-
-resource "aws_lb_listener" "api_http_listener" {
-  load_balancer_arn = aws_lb.private_load_balancer.arn
-  port              = 5000
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.api_target_group.arn
-  }
-}
 
 # --> Task definition for backend compute
 

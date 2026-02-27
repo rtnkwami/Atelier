@@ -11,47 +11,6 @@
 
 # --> Load Balancer for frontend web app
 
-resource "aws_lb" "public_load_balancer" {
-  name               = "${var.resource_prefix}-public-lb"
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.public_alb_security_group.id]
-  subnets            = [for subnet in aws_subnet.web_subnets : subnet.id]
-
-  tags = {
-    "Name"         = "${var.resource_prefix}-public-lb"
-    "Project"      = var.project_name
-    "ResourceType" = "Compute"
-  }
-}
-
-resource "aws_lb_target_group" "frontend_target_group" {
-  name        = "${var.resource_prefix}-public-lb-web-tg"
-  port        = 3000
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.vpc.id
-
-  health_check {
-    path = "/"
-  }
-
-  tags = {
-    "Name"         = "${var.resource_prefix}-public-lb-web-tg"
-    "Project"      = var.project_name
-    "ResourceType" = "Compute"
-  }
-}
-
-resource "aws_lb_listener" "frontend_http_listener" {
-  load_balancer_arn = aws_lb.public_load_balancer.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.frontend_target_group.arn
-  }
-}
 
 # --> Task definition for frontend compute
 
