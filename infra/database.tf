@@ -14,9 +14,9 @@ resource "aws_rds_cluster" "db_cluster" {
   engine                 = "aurora-postgresql"
   engine_version         = "17.7"
   engine_mode            = "provisioned"
-  database_name          = var.database_name
-  master_username        = var.database_user
-  master_password        = var.database_password
+  database_name          = data.aws_ssm_parameter.database_name.value
+  master_username        = data.aws_ssm_parameter.database_user
+  master_password        = data.aws_secretsmanager_secret_version.database_password.secret_string
   db_subnet_group_name   = aws_db_subnet_group.db_cluster_subnet_group.name
   vpc_security_group_ids = [aws_security_group.database_cluster_security_group.id]
   skip_final_snapshot    = true

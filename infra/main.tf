@@ -23,14 +23,23 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
+data "aws_ssm_parameter" "database_name" {
+  name = "/atelier/database/name"
+}
+
+data "aws_ssm_parameter" "database_user" {
+  name = "/atelier/database/user"
+}
+
+data "aws_secretsmanager_secret" "database_password" {
+  name = "/atelier/database/password"
+}
+
+data "aws_secretsmanager_secret_version" "database_password" {
+  secret_id = data.aws_secretsmanager_secret.database_password.id
+}
+
 locals {
   availability_zones = toset(slice(data.aws_availability_zones.available.names, 0, 3))
-
-  # sslmode=no-verify is used in the database url because the Prisma ORM expects ssl for database connections in production.
-  # Within this IaC, there is no ssl configured for database connections between the api tasks and the database
-  # adding sslmode=no-verify removes any encryption errors from Prisma ORM that comes along with this.
-  #
-  # In addition, due to the database being locked down via its security group, and by being in a private subnet, ssl was not configured
-  # for connections between it and the backend api tasks.
-  database_url = "postgresql://${var.database_user}:${var.database_password}@${aws_rds_cluster.db_cluster.endpoint}/${var.database_name}?sslmode=no-verify"
+  database_url = "postgresql://${data.aws_ssm_parameter.database_user.value}:${data.aws_secretsmanager_secret_version.database_password.secret_string}@${aws_rds_cluster.db_cluster.endpoint}/${data.aws_ssm_parameter.database_name.value}"
 }
