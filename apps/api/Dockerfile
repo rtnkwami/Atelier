@@ -18,6 +18,8 @@ FROM node:24-alpine AS runner
 
 WORKDIR /app
 
+RUN apk add curl
+
 COPY --from=base /app/prod/dist/ ./dist
 COPY --from=base /app/prod/node_modules ./node_modules
 

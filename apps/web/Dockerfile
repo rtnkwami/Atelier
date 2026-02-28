@@ -16,6 +16,8 @@ FROM node:24-alpine AS runner
 
 WORKDIR /app
 
+RUN apk add curl
+
 COPY --from=base  /app/apps/web/.next/standalone ./
 COPY --from=base  /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=base  /app/apps/web/public ./apps/web/public
