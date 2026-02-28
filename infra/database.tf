@@ -68,6 +68,7 @@ resource "aws_elasticache_cluster" "valkey_cache_instance" {
   port = 6379
   parameter_group_name = "default.valkey8.2"
   security_group_ids = [aws_security_group.valkey_cache_security_group.id]
+  subnet_group_name = aws_elasticache_subnet_group.valkey_cluster_subnet_group.name
 
   tags = {
     "Name"         = "${var.resource_prefix}-cache-cluster"
