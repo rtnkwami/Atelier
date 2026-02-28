@@ -100,7 +100,8 @@ resource "aws_ecs_task_definition" "api_task" {
       environment = [
         { "name" : "DATABASE_URL", "value" : aws_rds_cluster.db_cluster.endpoint },
         { "name" : "ISSUER_BASE_URL", "value" : data.aws_ssm_parameter.auth0_domain.value },
-        { "name" : "AUDIENCE", "value" : data.aws_ssm_parameter.auth0_audience.value }
+        { "name" : "AUDIENCE", "value" : data.aws_ssm_parameter.auth0_audience.value },
+        { "name": "REDIS_ENDPOINT", "value": aws_elasticache_cluster.valkey_cache_instance.cluster_address }
       ]
       portMappings = [
         {

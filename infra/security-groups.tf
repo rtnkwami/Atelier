@@ -171,3 +171,19 @@ resource "aws_vpc_security_group_ingress_rule" "database_ingress_rule" {
   from_port                    = 5432
   to_port                      = 5432
 }
+
+resource "aws_security_group" "valkey_cache_security_group" {
+  name = "${var.resource_prefix}-valkey-cache-cluster-sg"
+  description = "Allow traffic from the backend to the cache cluster"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "valkey_ingress_rule" {
+  security_group_id = aws_security_group.valkey_cache_security_group.id
+  
+  referenced_security_group_id = aws_security_group.api_security_group.id
+  description = "Allow inbound connections to the cache cluster from the backend containers"
+  ip_protocol = "tcp"
+  from_port = 6379
+  to_port = 6379
+}

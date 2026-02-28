@@ -1,6 +1,6 @@
 variable "s3_state_bucket" {
   type = string
-  default = "ateliercicd-terraformstatebucket-xz4pfok5w6nh"
+  default = "atelier-ci-cd-prerequisites-terraformstatebucket-kvvcfazpjngz"
 }
 
 variable "s3_state_file_key" {

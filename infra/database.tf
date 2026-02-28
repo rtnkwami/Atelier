@@ -47,3 +47,31 @@ resource "aws_rds_cluster_instance" "db_cluster_instance" {
     "ResourceType" = "Database"
   }
 }
+
+resource "aws_elasticache_subnet_group" "valkey_cluster_subnet_group" {
+  name       = "${var.resource_prefix}-cache-subnet-group"
+  subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-cache-subnet-group"
+    "Project"      = var.project_name
+    "ResourceType" = "Cache"
+  }
+}
+
+resource "aws_elasticache_cluster" "valkey_cache_instance" {
+  cluster_id = "${var.resource_prefix}-redis"
+  engine = "valkey"
+  engine_version = "8.2"
+  num_cache_nodes = 1
+  node_type = "cache.t4g.small"
+  port = 6379
+  parameter_group_name = "default.valkey8.2"
+  security_group_ids = [aws_security_group.valkey_cache_security_group.id]
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-cache-cluster"
+    "Project"      = var.project_name
+    "ResourceType" = "Cache"
+  }
+}
