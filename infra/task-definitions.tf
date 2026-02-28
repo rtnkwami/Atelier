@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
   container_definitions = jsonencode([
     {
       name      = "${var.resource_prefix}-web"
-      image     = var.frontend_image
+      image     = "${var.frontend_image}:${var.image_tag}"
       essential = true
       secrets   = [
         { "name" : "AUTH0_CLIENT_SECRET", "valueFrom" : data.aws_secretsmanager_secret.auth0_client_secret.arn },
@@ -95,7 +95,7 @@ resource "aws_ecs_task_definition" "api_task" {
   container_definitions = jsonencode([
     {
       name      = "${var.resource_prefix}-api"
-      image     = var.api_image
+      image     = "${var.backend_image}:${var.image_tag}"
       essential = true
       environment = [
         { "name" : "DATABASE_URL", "value" : aws_rds_cluster.db_cluster.endpoint },

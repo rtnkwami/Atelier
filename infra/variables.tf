@@ -1,11 +1,11 @@
 variable "s3_state_bucket" {
   type = string
-  default = "niovial-sandbox-terraform-state"
+  default = "ateliercicd-terraformstatebucket-xz4pfok5w6nh"
 }
 
 variable "s3_state_file_key" {
   type = string
-  default = "Sandbox/Atelier/terraform.tfstate"
+  default = "Atelier/terraform.tfstate"
 }
 
 variable "deployment_region" {
@@ -25,7 +25,7 @@ variable "resource_prefix" {
   default     = "atelier"
 }
 
-variable "api_image" {
+variable "backend_image" {
   type        = string
   description = "Container image URI for api service"
   default     = "docker.io/weaverofinfinity/atelier-api"
@@ -35,6 +35,10 @@ variable "frontend_image" {
   type        = string
   description = "Container image URI for api service"
   default     = "docker.io/weaverofinfinity/atelier-web"
+}
+
+variable "image_tag" {
+  type = string
 }
 
 variable "vpc_cidr_range" {
