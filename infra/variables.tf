@@ -1,6 +1,6 @@
 variable "s3_state_bucket" {
   type = string
-  default = "atelier-ci-cd-prerequisites-terraformstatebucket-kvvcfazpjngz"
+  default = "cicd-terraformstatebucket-gi7czikfwicb"
 }
 
 variable "s3_state_file_key" {
@@ -39,6 +39,7 @@ variable "frontend_image" {
 
 variable "image_tag" {
   type = string
+  default = "latest"
 }
 
 variable "vpc_cidr_range" {
