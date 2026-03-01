@@ -32,7 +32,7 @@ export class AppModule {
         { path: 'inventory', method: RequestMethod.GET },
         { path: 'inventory/:id', method: RequestMethod.GET },
         { path: 'inventory/search', method: RequestMethod.GET },
-        { path: '/', method: RequestMethod.GET },
+        { path: '/health', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }
