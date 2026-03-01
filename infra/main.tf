@@ -41,5 +41,5 @@ data "aws_secretsmanager_secret_version" "database_password" {
 
 locals {
   availability_zones = toset(slice(data.aws_availability_zones.available.names, 0, 3))
-  database_url = "postgresql://${data.aws_ssm_parameter.database_user.value}:${data.aws_secretsmanager_secret_version.database_password.secret_string}@${aws_rds_cluster.db_cluster.endpoint}/${data.aws_ssm_parameter.database_name.value}"
+  database_url = "postgresql://${data.aws_ssm_parameter.database_user.value}:${data.aws_secretsmanager_secret_version.database_password.secret_string}@${aws_rds_cluster.db_cluster.endpoint}/${data.aws_ssm_parameter.database_name.value}?sslmode=require"
 }
