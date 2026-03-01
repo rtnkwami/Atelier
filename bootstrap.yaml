@@ -61,6 +61,38 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "atelier-ecs-task-execution-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: !Sub "${DatabaseNameValue}-execution-secrets-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource:
+                  - !Ref Auth0Secret
+                  - !Ref Auth0ClientSecret
+                  - !Ref DatabasePassword
+              - Effect: Allow
+                Action:
+                  - "ssm:GetParameters"
+                  - "ssm:GetParameter"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/atelier/*"
+  
   DatabasePassword:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -117,7 +149,7 @@ Resources:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /atelier/database/user
-      Value: admin
+      Value: atelieradmin
       Type: String
 
 Outputs:
