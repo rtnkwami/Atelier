@@ -61,16 +61,16 @@ resource "aws_elasticache_subnet_group" "valkey_cluster_subnet_group" {
 
 resource "aws_elasticache_replication_group" "valkey_cluster" {
   replication_group_id = "${var.resource_prefix}-cache-cluster"
-  engine = "valkey"
-  node_type = "cache.t4g.small"
-  description = "Cache cluster for Atelier"
-  num_cache_clusters = 1
-  subnet_group_name = aws_elasticache_subnet_group.valkey_cluster_subnet_group.name
-  security_group_ids = [aws_security_group.valkey_cache_security_group.id]
+  engine               = "valkey"
+  node_type            = "cache.t4g.small"
+  description          = "Cache cluster for Atelier"
+  num_cache_clusters   = 1
+  subnet_group_name    = aws_elasticache_subnet_group.valkey_cluster_subnet_group.name
+  security_group_ids   = [aws_security_group.valkey_cache_security_group.id]
   # multi_az_enabled = true
   # automatic_failover_enabled = true
 
-    tags = {
+  tags = {
     "Name"         = "${var.resource_prefix}-cache-cluster"
     "Project"      = var.project_name
     "ResourceType" = "Cache"

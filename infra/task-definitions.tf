@@ -40,12 +40,12 @@ resource "aws_ecs_task_definition" "frontend_task" {
       name      = "${var.resource_prefix}-web"
       image     = "${var.frontend_image}:${var.image_tag}"
       essential = true
-      secrets   = [
+      secrets = [
         { "name" : "AUTH0_CLIENT_SECRET", "valueFrom" : data.aws_secretsmanager_secret.auth0_client_secret.arn },
         { "name" : "AUTH0_SECRET", "valueFrom" : data.aws_secretsmanager_secret.auth0_secret.arn }
       ]
       environment = [
-        { "name": "AUTH0_DOMAIN", "value": data.aws_ssm_parameter.auth0_domain.value },
+        { "name" : "AUTH0_DOMAIN", "value" : data.aws_ssm_parameter.auth0_domain.value },
         { "name" : "AUTH0_CLIENT_ID", "value" : data.aws_ssm_parameter.auth0_client_id.value },
         { "name" : "AUTH0_AUDIENCE", "value" : data.aws_ssm_parameter.auth0_audience.value },
         { "name" : "API_BASE_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}:5000" },
@@ -101,7 +101,7 @@ resource "aws_ecs_task_definition" "api_task" {
         { "name" : "DATABASE_URL", "value" : local.database_url },
         { "name" : "ISSUER_BASE_URL", "value" : data.aws_ssm_parameter.auth0_domain.value },
         { "name" : "AUDIENCE", "value" : data.aws_ssm_parameter.auth0_audience.value },
-        { "name": "REDIS_ENDPOINT", "value": "redis://${aws_elasticache_replication_group.valkey_cluster.primary_endpoint_address}:6379" }
+        { "name" : "REDIS_ENDPOINT", "value" : "redis://${aws_elasticache_replication_group.valkey_cluster.primary_endpoint_address}:6379" }
       ]
       portMappings = [
         {

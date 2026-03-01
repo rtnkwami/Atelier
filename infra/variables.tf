@@ -1,16 +1,16 @@
 variable "s3_state_bucket" {
-  type = string
+  type    = string
   default = "cicd-terraformstatebucket-gi7czikfwicb"
 }
 
 variable "s3_state_file_key" {
-  type = string
+  type    = string
   default = "Atelier/terraform.tfstate"
 }
 
 variable "deployment_region" {
-type = string
-default = "us-east-1"
+  type    = string
+  default = "us-east-1"
 }
 
 variable "project_name" {
@@ -38,7 +38,7 @@ variable "frontend_image" {
 }
 
 variable "image_tag" {
-  type = string
+  type    = string
   default = "latest"
 }
 
