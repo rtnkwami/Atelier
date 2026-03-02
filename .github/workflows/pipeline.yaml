@@ -181,6 +181,9 @@ jobs:
     env:
       TF_VAR_S3_STATE_BUCKET: ${{ vars.TOFU_STATE_BUCKET }}
 
+    outputs:
+      cluster_name: ${{ steps.variables.outputs.cluster_name }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -203,6 +206,10 @@ jobs:
       - name: Deploy infrastructure
         working-directory: infra
         run: tofu apply --auto-approve
+
+      - id: variables
+        working-directory: infra
+        run: echo "cluster_name=$(tofu output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
 
   deploy:
     needs: [containerize, provision, detect-changes]
@@ -228,18 +235,9 @@ jobs:
           role-to-assume: ${{ secrets.CI_CD_ROLE }}
           aws-region: us-east-1
 
-      - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: 1.11
-
-      - name: Initialize OpenTofu
-        working-directory: infra
-        run: tofu init
-
       - run: |
-          CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
-          SERVICE_NAME=$(tofu output -raw ${{ matrix.app }}_service_name)
+          CLUSTER_NAME="${{ needs.provision.outputs.cluster_name }}"
+          SERVICE_NAME="${{ matrix.app }}_service_name"
           aws ecs update-service \
               --cluster $CLUSTER_NAME \
               --service $SERVICE_NAME \
