@@ -30,6 +30,12 @@ export default defineConfig({
             concurrent: true,
           },
           fileParallelism: true,
+          env: {
+            DATABASE_URL: 'postgres://localhost:5432/test',
+            ISSUER_BASE_URL: 'https://test.auth0.com',
+            AUDIENCE: 'test-api',
+            REDIS_ENDPOINT: 'redis://localhost:6379',
+          },
         },
       },
     ],
