@@ -29,7 +29,7 @@ response = ecs.run_task(
     overrides={
         'containerOverrides': [{
             'name': container_name,
-            'command': ['npx', 'prisma', 'migrate', 'deploy']
+            'command': ['node', 'dist/migrate.js']
         }]
     }
 )
