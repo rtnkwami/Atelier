@@ -1,25 +1,3 @@
-# ============================================================================
-#  In this file:
-#     - Database Security Group
-#     - Database Cluster
-# ============================================================================
-
-resource "aws_security_group" "database_cluster_security_group" {
-  name        = "${var.resource_prefix}-database-cluster-sg"
-  description = "Allow only traffic from the backend to the database cluster"
-  vpc_id      = aws_vpc.vpc.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "database_ingress_rule" {
-  security_group_id = aws_security_group.database_cluster_security_group.id
-
-  description                  = "Allow inbound connections from API to database cluster"
-  referenced_security_group_id = aws_security_group.api_security_group.id
-  ip_protocol                  = "tcp"
-  from_port                    = 5432
-  to_port                      = 5432
-}
-
 resource "aws_db_subnet_group" "db_cluster_subnet_group" {
   name       = "${var.resource_prefix}-db-subnet-group"
   subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
@@ -36,9 +14,9 @@ resource "aws_rds_cluster" "db_cluster" {
   engine                 = "aurora-postgresql"
   engine_version         = "17.7"
   engine_mode            = "provisioned"
-  database_name          = var.database_name
-  master_username        = var.database_user
-  master_password        = var.database_password
+  database_name          = data.aws_ssm_parameter.database_name.value
+  master_username        = data.aws_ssm_parameter.database_user.value
+  master_password        = data.aws_secretsmanager_secret_version.database_password.secret_string
   db_subnet_group_name   = aws_db_subnet_group.db_cluster_subnet_group.name
   vpc_security_group_ids = [aws_security_group.database_cluster_security_group.id]
   skip_final_snapshot    = true
@@ -67,5 +45,34 @@ resource "aws_rds_cluster_instance" "db_cluster_instance" {
     "Name"         = "${var.resource_prefix}-db-cluster instance"
     "Project"      = var.project_name
     "ResourceType" = "Database"
+  }
+}
+
+resource "aws_elasticache_subnet_group" "valkey_cluster_subnet_group" {
+  name       = "${var.resource_prefix}-cache-subnet-group"
+  subnet_ids = [for subnet in aws_subnet.db_subnets : subnet.id]
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-cache-subnet-group"
+    "Project"      = var.project_name
+    "ResourceType" = "Cache"
+  }
+}
+
+resource "aws_elasticache_replication_group" "valkey_cluster" {
+  replication_group_id = "${var.resource_prefix}-cache-cluster"
+  engine               = "valkey"
+  node_type            = "cache.t4g.small"
+  description          = "Cache cluster for Atelier"
+  num_cache_clusters   = 1
+  subnet_group_name    = aws_elasticache_subnet_group.valkey_cluster_subnet_group.name
+  security_group_ids   = [aws_security_group.valkey_cache_security_group.id]
+  # multi_az_enabled = true
+  # automatic_failover_enabled = true
+
+  tags = {
+    "Name"         = "${var.resource_prefix}-cache-cluster"
+    "Project"      = var.project_name
+    "ResourceType" = "Cache"
   }
 }

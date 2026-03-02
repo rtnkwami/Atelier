@@ -1,16 +1,16 @@
 variable "s3_state_bucket" {
-  type = string
-  default = "niovial-sandbox-terraform-state"
+  type    = string
+  default = "cicd-terraformstatebucket-gi7czikfwicb"
 }
 
 variable "s3_state_file_key" {
-  type = string
-  default = "Sandbox/Atelier/terraform.tfstate"
+  type    = string
+  default = "Atelier/terraform.tfstate"
 }
 
 variable "deployment_region" {
-type = string
-default = "us-east-1"
+  type    = string
+  default = "us-east-1"
 }
 
 variable "project_name" {
@@ -25,7 +25,7 @@ variable "resource_prefix" {
   default     = "atelier"
 }
 
-variable "api_image" {
+variable "backend_image" {
   type        = string
   description = "Container image URI for api service"
   default     = "docker.io/weaverofinfinity/atelier-api"
@@ -37,54 +37,12 @@ variable "frontend_image" {
   default     = "docker.io/weaverofinfinity/atelier-web"
 }
 
+variable "image_tag" {
+  type    = string
+  default = "latest"
+}
+
 variable "vpc_cidr_range" {
   type    = string
   default = "10.16.0.0/16"
-}
-
-#----------------- Sensitive Variables ------------------#
-
-variable "database_user" {
-  type      = string
-  sensitive = true
-}
-
-variable "database_name" {
-  type      = string
-  sensitive = true
-}
-
-variable "database_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "issuer_base_url" {
-  type      = string
-  sensitive = true
-}
-
-variable "audience" {
-  type      = string
-  sensitive = true
-}
-
-variable "auth0_domain" {
-  type = string
-}
-
-variable "auth0_client_id" {
-  type = string
-}
-
-variable "auth0_client_secret" {
-  type = string
-}
-
-variable "auth0_secret" {
-  type = string
-}
-
-variable "auth0_audience" {
-  type = string
 }
