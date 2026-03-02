@@ -14,4 +14,3 @@ void (async () => {
 
   await orm.close(true);
 })();
-// test
