@@ -118,6 +118,7 @@ jobs:
           filters: |
             migrations:
               - apps/api/src/migrations/**
+              - apps/api/src/migrate.ts
 
   containerize:
     needs: [test, detect-changes]
