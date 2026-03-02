@@ -1,0 +1,246 @@
+name: CI/CD Pipeline
+run-name: "CI/CD Run for ${{ github.event.head_commit.message }}"
+
+on:
+  push:
+    branches:
+      - main
+      - feat/*
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node runtime
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint project files
+        run: pnpm lint
+
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node runtime
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint project files
+        run: pnpm test
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.apps.outputs.changes }}
+      infra: ${{ steps.infra.outputs.infra }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: apps
+        with:
+          filters: |
+            api:
+              - apps/api/src/**
+              - apps/api/package.json
+              - packages/contracts/**
+            web:
+              - apps/web/**
+              - apps/web/package.json
+              - packages/contracts/**
+      
+      - uses: dorny/paths-filter@v3
+        id: infra
+        with:
+          filters: |
+            infra:
+              - infra/**
+
+  containerize:
+    needs: [test, detect-changes]
+    if: ${{ needs.detect-changes.outputs.changes != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        component: ${{ fromJson(needs.detect-changes.outputs.changes) }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node runtime
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prune dependencies
+        run: pnpm turbo prune ${{ matrix.component }} --docker
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.component }}/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-${{ matrix.component }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/atelier-${{ matrix.component }}:latest
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+          cache-from: type=gha,scope=${{ matrix.component }}
+
+  provision:
+    needs: [containerize, detect-changes]
+    if: |
+      always() &&
+      needs.containerize.result == 'success' || needs.detect-changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      TF_VAR_S3_STATE_BUCKET: ${{ vars.TOFU_STATE_BUCKET }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.CI_CD_ROLE }}
+          aws-region: us-east-1
+      
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11
+
+      - name: Initialize OpenTofu
+        working-directory: infra
+        run: tofu init
+
+      - name: Deploy infrastructure
+        working-directory: infra
+        run: tofu apply --auto-approve
+
+  deploy:
+    needs: [containerize, provision, detect-changes]
+    if: | 
+      always() &&
+      needs.containerize.result == 'success' && needs.provision.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.detect-changes.outputs.changes) }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.CI_CD_ROLE }}
+          aws-region: us-east-1
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11
+
+      - name: Initialize OpenTofu
+        working-directory: infra
+        run: tofu init
+
+      - run: |
+          CLUSTER_NAME=$(tofu output -raw ecs_cluster_name)
+          SERVICE_NAME=$(tofu output -raw ${{ matrix.app }}_service_name)
+          aws ecs update-service \
+              --cluster $CLUSTER_NAME \
+              --service $SERVICE_NAME \
+              --force-new-deployment
