@@ -260,6 +260,7 @@ jobs:
       id-token: write
 
     uses: ./.github/workflows/migrations.yaml
+    secrets: inherit
     with:
       cluster_name: ${{ needs.provision.outputs.cluster_name }}
       service_name: atelier-api-service
