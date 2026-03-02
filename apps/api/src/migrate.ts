@@ -7,6 +7,10 @@ void (async () => {
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
     entities: ['./dist/entities/*.js'],
+    migrations: {
+      path: './dist/migrations',
+      transactional: true,
+    },
   });
 
   const migrator = orm.getMigrator();

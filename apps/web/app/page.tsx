@@ -13,4 +13,4 @@ export default async function CatalogPage() {
       <Catalog catalog={ catalog }/>
     </div>
   );
-} //test
+}
