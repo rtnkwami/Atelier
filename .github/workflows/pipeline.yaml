@@ -83,6 +83,7 @@ jobs:
     outputs:
       changes: ${{ steps.apps.outputs.changes }}
       infra: ${{ steps.infra.outputs.infra }}
+      migrations: ${{ steps.migrations.outputs.migrations }}
     
     steps:
       - uses: actions/checkout@v4
@@ -107,6 +108,13 @@ jobs:
           filters: |
             infra:
               - infra/**
+      
+      - uses: dorny/paths-filter@v3
+        id: migrations
+        with:
+          filters: |
+            migrations:
+              - apps/api/src/migrations/**
 
   containerize:
     needs: [test, detect-changes]
@@ -236,3 +244,14 @@ jobs:
               --cluster $CLUSTER_NAME \
               --service $SERVICE_NAME \
               --force-new-deployment
+
+  migrate-db:
+    needs: [provision, containerize]
+    permissions:
+      contents: read
+      id-token: write
+
+    uses: ./.github/workflows/migrations.yaml
+    with:
+      cluster_name: ${{ needs.provision.outputs.cluster_name }}
+      service_name: atelier-api-service
