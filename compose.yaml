@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: atelier
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    networks:
+      - atelier
+
+  redis:
+    image: redis:latest
+    networks:
+      - atelier
+
+  api:
+    image: weaverofinfinity/atelier-api
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/atelier?sslmode=disable
+      REDIS_ENDPOINT: redis://redis:6379
+      ISSUER_BASE_URL: https://dev-bye13qem1fotz440.us.auth0.com
+      AUDIENCE: atelier-api
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - atelier
+
+networks:
+  atelier:
+    driver: bridge
