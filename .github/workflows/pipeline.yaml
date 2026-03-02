@@ -231,7 +231,7 @@ jobs:
 
       - run: |
           CLUSTER_NAME="${{ needs.provision.outputs.cluster_name }}"
-          SERVICE_NAME="${{ matrix.app }}_service_name"
+          SERVICE_NAME="atelier-${{ matrix.app }}-service"
           aws ecs update-service \
               --cluster $CLUSTER_NAME \
               --service $SERVICE_NAME \
