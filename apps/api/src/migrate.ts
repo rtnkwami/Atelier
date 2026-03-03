@@ -11,6 +11,9 @@ void (async () => {
       path: './dist/migrations',
       transactional: true,
     },
+    driverOptions: {
+      connection: { ssl: { rejectUnauthorized: false } },
+    },
   });
 
   const migrator = orm.getMigrator();
