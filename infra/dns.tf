@@ -1,11 +1,11 @@
 data "aws_route53_zone" "personal_hosted_zone" {
-  count = var.custom_domain ? 1 : 0
+  count = var.custom_domain != "" ? 1 : 0
   name = var.custom_domain
 }
 
 resource "aws_route53_record" "atelier_dns_record" {
-  count = var.custom_domain ? 1 : 0
-  zone_id = data.aws_route53_zone.personal_hosted_zone.zone_id
+  count = var.custom_domain != "" ? 1 : 0
+  zone_id = data.aws_route53_zone.personal_hosted_zone[0].zone_id
   name    = "atelier.${var.custom_domain}"
   type    = "A"
 
