@@ -25,6 +25,7 @@ This repository serves as a Personal DevOps Lab for experimenting with various A
   - [Prerequisites](#prerequisites)
   - [Bootstrap](#bootstrap)
   - [GitHub Actions Configuration](#github-actions-configuration)
+  - [Auth0 Integration \& Callback URLs](#auth0-integration--callback-urls)
   - [Deploy](#deploy)
   - [Destroy](#destroy)
 - [Observability](#observability)
@@ -167,6 +168,15 @@ Add the following to your repository's Actions secrets and variables:
 | `DOCKERHUB_TOKEN` | Secret | DockerHub |
 | `DOCKERHUB_USERNAME` | Variable | DockerHub |
 | `TOFU_STATE_BUCKET` | Variable | `TerraformStateBucketName` bootstrap output |
+
+### Auth0 Integration & Callback URLs
+Since this application uses Auth0 for identity management, the Allowed Callback URLs in your Auth0 Application settings must match your deployment endpoint.
+
+If using a Custom Domain: Set the callback to `https://atelier.yourdomain.com/api/auth/callback`.
+
+If using the Raw Endpoint: Retrieve the `app_endpoint` from the OpenTofu output and set the callback to `http://[ALB-DNS-NAME]/api/auth/callback`.
+
+> If you switch from the raw ALB endpoint to a custom domain later, you must update these values in the Auth0 Dashboard, or authentication requests will be rejected.
 
 ### Deploy
 Push to `main` to trigger the pipeline. The pipeline will provision the infrastructure and deploy the application automatically.

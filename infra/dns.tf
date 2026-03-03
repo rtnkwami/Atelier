@@ -1,10 +1,12 @@
 data "aws_route53_zone" "personal_hosted_zone" {
-  name = "niovial.com"
+  count = var.custom_domain ? 1 : 0
+  name = var.custom_domain
 }
 
 resource "aws_route53_record" "atelier_dns_record" {
+  count = var.custom_domain ? 1 : 0
   zone_id = data.aws_route53_zone.personal_hosted_zone.zone_id
-  name    = "atelier.niovial.com"
+  name    = "atelier.${var.custom_domain}"
   type    = "A"
 
   alias {

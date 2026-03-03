@@ -9,3 +9,7 @@ output "api_service_name" {
 output "web_service_name" {
   value = aws_ecs_service.frontend_service.name
 }
+
+output "app_endpoint" {
+  value = aws_lb.public_load_balancer.dns_name
+}

@@ -46,3 +46,8 @@ variable "vpc_cidr_range" {
   type    = string
   default = "10.16.0.0/16"
 }
+
+variable "custom_domain" {
+  type = string
+  default = "niovial.com"
+}
