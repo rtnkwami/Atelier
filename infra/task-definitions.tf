@@ -49,7 +49,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
         { "name" : "AUTH0_CLIENT_ID", "value" : data.aws_ssm_parameter.auth0_client_id.value },
         { "name" : "AUTH0_AUDIENCE", "value" : data.aws_ssm_parameter.auth0_audience.value },
         { "name" : "API_BASE_URL", "value" : "http://${aws_lb.private_load_balancer.dns_name}:5000" },
-        { "name" : "APP_BASE_URL",    "value" : "http://atelier.${var.custom_domain}" },
+        { "name" : "APP_BASE_URL",    "value" : "https://atelier.${var.custom_domain}" },
         { "name" : "HOSTNAME", "value" : "0.0.0.0" }
       ]
       portMappings = [
