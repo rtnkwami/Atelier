@@ -11,3 +11,4 @@ export class Migration20260221181230 extends Migration {
     this.addSql(`alter table "product" drop constraint "product_name_unique";`);
   }
 }
+// test
