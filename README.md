@@ -12,6 +12,10 @@ This repository serves as a Personal DevOps Lab for experimenting with various A
 - [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
 - [Design Principles \& Architecture](#design-principles--architecture)
+  - [Traffic Routing \& Load Balancing](#traffic-routing--load-balancing)
+  - [Network Segmentation (Subnet Strategy)](#network-segmentation-subnet-strategy)
+  - [Network Security (Least Privilege)](#network-security-least-privilege)
+  - [Service \& Data Design](#service--data-design)
 - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Deployment \& Usage](#deployment--usage)
@@ -33,7 +37,53 @@ As displayed in the diagram, Atelier is deployed on ECS Fargate and connects to 
 ---
 
 ## Design Principles & Architecture
-(Details regarding VPC design, Subnet strategy, Internal vs. External ALBs, and Security Group logic here.)
+### Traffic Routing & Load Balancing
+The architecture utilizes a dual-ALB strategy to decouple the presentation and application layers while maintaining internal network privacy.
+
+- **External ALB**: Acts as the entry point for all user traffic, listening on port 80. It handles public requests and routes them to the Frontend ECS service on port 3000.
+
+- **Internal ALB**: Facilitates service-to-service communication. It listens on port 5000, routing requests from the Frontend to the Backend API. This setup provides a simple, scalable alternative to Service Discovery while allowing for independent scaling of each tier.
+
+- **Port Strategy**: Services are standardized on port 5000 for internal traffic, ensuring consistency across the application logic.
+
+**Configuration**: [View Load Balancer Definitions](./infra/load-balancers.tf)
+
+### Network Segmentation (Subnet Strategy)
+The VPC is divided into three distinct functional layers across multiple Availability Zones to ensure resource isolation:
+
+- **Web Subnets (Public)**: Houses the External Application Load Balancer and the NAT Gateway. These are the only subnets with a direct route to the Internet Gateway (IGW).
+
+- **App Subnets (Private)**: Houses the Frontend and Backend ECS Fargate tasks, as well as the Internal ALB. These subnets route outbound traffic through the NAT Gateway in the Web tier.
+
+- **DB Subnets (Private)**: A dedicated, isolated layer for stateful resources, including Amazon Aurora Serverless and Valkey (ElastiCache). These subnets have no outbound internet route and no direct public access.
+
+**Configuration**: [View VPC & Subnet Networking](./infra/vpc.tf)
+
+### Network Security (Least Privilege)
+Isolation is strictly enforced through a "chained" Security Group architecture. Each layer only accepts traffic from the layer immediately preceding it:
+
+- **Web Tier**: The External ALB security group allows 80/443 from the internet. The Frontend security group only accepts traffic from the External ALB.
+
+- **App Tier**: The Internal ALB security group only accepts traffic from the Frontend security group. The Backend security group only accepts traffic from the Internal ALB.
+
+- **Data Tier**: Aurora RDS and Valkey (ElastiCache) security groups only accept traffic from the Backend security group and have no outbound internet access.
+
+- **Egress**: A NAT Gateway residing in a public subnet provides controlled outbound access for the Frontend and Backend tasks (required for external integrations like Auth0).
+
+**Configuration**: [View Security Group Rules](./infra/security-groups.tf)
+
+### Service & Data Design
+- **Compute**: The Frontend and Backend are deployed as separate ECS Services within a single ECS Cluster. This minimizes management overhead while allowing independent deployment cycles and auto-scaling policies for each microservice.
+
+- **Stateful Services**:
+  - **Aurora Serverless**: Provides the primary relational data store.
+
+  - **Valkey (ElastiCache)**: Currently utilized for high-performance session management (Carts), with a roadmap to expand into general query caching.
+
+**Configuration**:
+  - [View ECS Resources](./infra/ecs-cluster.tf)
+
+  - [View Database Resources](./infra/database.tf)
 
 ## Infrastructure as Code (IaC)
 (Details regarding the flattened OpenTofu structure and state management here.)
