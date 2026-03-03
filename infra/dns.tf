@@ -4,6 +4,7 @@ data "aws_route53_zone" "personal_hosted_zone" {
 }
 
 resource "aws_acm_certificate" "atelier_tls_certificate" {
+  count = var.custom_domain != "" ? 1 : 0
   domain_name = "atelier.${var.custom_domain}"
   validation_method = "DNS"
 
@@ -19,13 +20,13 @@ resource "aws_acm_certificate" "atelier_tls_certificate" {
 }
 
 resource "aws_route53_record" "atelier_cert_validation_records" {
-  for_each = {
-    for dvo in aws_acm_certificate.atelier_tls_certificate.domain_validation_options : dvo.domain_name => {
+  for_each = var.custom_domain != "" ? {
+    for dvo in aws_acm_certificate.atelier_tls_certificate[0].domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
-  }
+  } : {}
 
   allow_overwrite = true
   name            = each.value.name
@@ -36,7 +37,8 @@ resource "aws_route53_record" "atelier_cert_validation_records" {
 }
 
 resource "aws_acm_certificate_validation" "atelier_tls_cert_validation" {
-  certificate_arn = aws_acm_certificate.atelier_tls_certificate.arn
+  count = var.custom_domain != "" ? 1 : 0
+  certificate_arn = aws_acm_certificate.atelier_tls_certificate[0].arn
   validation_record_fqdns = [for record in aws_route53_record.atelier_cert_validation_records : record.fqdn]
 }
 

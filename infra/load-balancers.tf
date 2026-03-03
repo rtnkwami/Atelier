@@ -43,8 +43,9 @@ resource "aws_lb_listener" "frontend_http_listener" {
 }
 
 resource "aws_lb_listener" "frontend_https_listener" {
+  count = var.custom_domain != "" ? 1 : 0
   load_balancer_arn = aws_lb.public_load_balancer.arn
-  certificate_arn = aws_acm_certificate_validation.atelier_tls_cert_validation.certificate_arn
+  certificate_arn = aws_acm_certificate_validation.atelier_tls_cert_validation[0].certificate_arn
   port              = 443
   protocol          = "HTTPS"
 
