@@ -17,6 +17,7 @@ This repository serves as a Personal DevOps Lab for experimenting with various A
   - [Network Security (Least Privilege)](#network-security-least-privilege)
   - [Service \& Data Design](#service--data-design)
 - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
+  - [Remote State](#remote-state)
 - [CI/CD Pipeline](#cicd-pipeline)
   - [Smart Workflow Orchestration (Path Filtering)](#smart-workflow-orchestration-path-filtering)
   - [Container Lifecycle \& Optimization](#container-lifecycle--optimization)
@@ -97,7 +98,12 @@ Isolation is strictly enforced through a "chained" Security Group architecture. 
 ---
 
 ## Infrastructure as Code (IaC)
-(Details regarding the flattened OpenTofu structure and state management here.)
+Infrastructure is provisioned using OpenTofu, with all resources defined in the `infra/` directory.
+
+### Remote State
+State is managed remotely using an S3 backend, with encryption at rest enabled and state locking handled natively by S3. The state bucket is provisioned by `bootstrap.yaml` prior to any OpenTofu operations.
+
+**Configuration**: [View Backend Configuration](./infra/main.tf)
 
 ---
 
@@ -196,7 +202,18 @@ aws cloudformation delete-stack --stack-name atelier-bootstrap
 ---
 
 ## Observability
-(How to verify the deployment via endpoints and where to find logs/metrics here.)
+Application logs are available via Amazon CloudWatch. ECS is configured to stream container logs automatically to the following log groups:
+
+| Service | Log Group |
+|---------|-----------|
+| API | `/ecs/atelier-api` |
+| Frontend | `/ecs/atelier-web` |
+
+> Note: Log retention is set to 1 day. Frontend logs may be limited.
+
+Full observability tooling (metrics, tracing, alerting) is planned as part of Case Study 4.
+
+---
 
 ## Case Studies (Lab Roadmap)
 
