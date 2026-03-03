@@ -1,12 +1,6 @@
 data "aws_route53_zone" "personal_hosted_zone" {
   count = var.custom_domain != "" ? 1 : 0
   name  = var.custom_domain
-
-  tags = {
-    "Name"         = "${var.resource_prefix}-dns-record"
-    "Project"      = var.project_name
-    "ResourceType" = "DNS"
-  }
 }
 
 resource "aws_acm_certificate" "atelier_tls_certificate" {
