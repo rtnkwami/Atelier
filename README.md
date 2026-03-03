@@ -48,29 +48,27 @@ As displayed in the diagram, Atelier is deployed on ECS Fargate and connects to 
 
 ## Design Principles & Architecture
 ### Traffic Routing & Load Balancing
-The architecture utilizes a dual-ALB strategy to decouple the presentation and application layers while maintaining internal network privacy.
+Two ALBs are used to decouple the presentation and application layers while maintaining internal network privacy.
 
-- **External ALB**: Acts as the entry point for all user traffic, listening on port 80. It handles public requests and routes them to the Frontend ECS service on port 3000.
+- **External Application Load Balancer(ALB)**: Acts as the entry point for all user traffic, listening on port 80. It handles public requests and routes them to the Frontend ECS service on port 3000.
 
-- **Internal ALB**: Facilitates service-to-service communication. It listens on port 5000, routing requests from the Frontend to the Backend API. This setup provides a simple, scalable alternative to Service Discovery while allowing for independent scaling of each tier.
-
-- **Port Strategy**: Services are standardized on port 5000 for internal traffic, ensuring consistency across the application logic.
+- **Internal Application Load Balancer(ALB)**: Enables service-to-service communication. It listens on port 5000 and routes requests from the Frontend to the Backend API.
 
 **Configuration**: [View Load Balancer Definitions](./infra/load-balancers.tf)
 
 ### Network Segmentation (Subnet Strategy)
-The VPC is divided into three distinct functional layers across multiple Availability Zones to ensure resource isolation:
+The VPC is divided into three functional layers across multiple Availability Zones to ensure resource isolation:
 
-- **Web Subnets (Public)**: Houses the External Application Load Balancer and the NAT Gateway. These are the only subnets with a direct route to the Internet Gateway (IGW).
+- **Web Subnets (Public)**: Houses the External ALB and the NAT Gateway. These are the only subnets with a direct route to the Internet Gateway (IGW).
 
-- **App Subnets (Private)**: Houses the Frontend and Backend ECS Fargate tasks, as well as the Internal ALB. These subnets route outbound traffic through the NAT Gateway in the Web tier.
+- **App Subnets (Private)**: Houses Frontend and Backend ECS Fargate tasks, as well as the Internal ALB. These subnets route outbound traffic through the NAT Gateway in the Web tier.
 
-- **DB Subnets (Private)**: A dedicated, isolated layer for stateful resources, including Amazon Aurora Serverless and Valkey (ElastiCache). These subnets have no outbound internet route and no direct public access.
+- **DB Subnets (Private)**: A dedicated, isolated layer for stateful resources, including Amazon Aurora Serverless database and Valkey (ElastiCache). These subnets have no outbound internet route and no direct public access.
 
 **Configuration**: [View VPC & Subnet Networking](./infra/vpc.tf)
 
 ### Network Security (Least Privilege)
-Isolation is strictly enforced through a "chained" Security Group architecture. Each layer only accepts traffic from the layer immediately preceding it:
+Isolation is strictly enforced through security groups. Each security group layer only accepts traffic from the layer immediately preceding it:
 
 - **Web Tier**: The External ALB security group allows 80/443 from the internet. The Frontend security group only accepts traffic from the External ALB.
 
@@ -83,12 +81,12 @@ Isolation is strictly enforced through a "chained" Security Group architecture. 
 **Configuration**: [View Security Group Rules](./infra/security-groups.tf)
 
 ### Service & Data Design
-- **Compute**: The Frontend and Backend are deployed as separate ECS Services within a single ECS Cluster. This minimizes management overhead while allowing independent deployment cycles and auto-scaling policies for each microservice.
+- **Compute**: The Frontend and Backend are deployed as separate ECS Services within a single ECS Cluster. This allows for independent deployment cycles and auto-scaling policies for each service.
 
 - **Stateful Services**:
   - **Aurora Serverless**: Provides the primary relational data store.
 
-  - **Valkey (ElastiCache)**: Currently utilized for high-performance session management (Carts), with a roadmap to expand into general query caching.
+  - **Valkey (ElastiCache)**: Currently utilized for session management (Carts), with a plan to expand into general query caching.
 
 **Configuration**:
   - [View ECS Resources](./infra/ecs-cluster.tf)
@@ -98,40 +96,41 @@ Isolation is strictly enforced through a "chained" Security Group architecture. 
 ---
 
 ## Infrastructure as Code (IaC)
-Infrastructure is provisioned using OpenTofu, with all resources defined in the `infra/` directory.
+Pre-requisite resources in AWS are created by a CloudFormation template,[`bootstrap.yaml`](./bootstrap.yaml). Resources created are necessary secrets and configuration parameters stored in AWS SSM Parameter Store and Secrets Manager.
+Application infrastructure is provisioned using OpenTofu, with all resources defined in the `infra/` directory. Configuration parameters and secrets created by the CloudFormation template are pulled via data blocks, to reduce the number of variables needed ot deploy the ifnrastructure.
 
 ### Remote State
-State is managed remotely using an S3 backend, with encryption at rest enabled and state locking handled natively by S3. The state bucket is provisioned by `bootstrap.yaml` prior to any OpenTofu operations.
+State is managed remotely using an S3 backend, with encryption at rest enabled and state locking handled natively by S3. The state bucket is provisioned by [`bootstrap.yaml`](./bootstrap.yaml) prior to any OpenTofu operations.
 
 **Configuration**: [View Backend Configuration](./infra/main.tf)
 
 ---
 
 ## CI/CD Pipeline
-This project uses a monorepo pipeline powered by GitHub Actions and Turborepo. The pipeline is designed to be "change-aware," ensuring that only modified services are built and deployed, saving significant time and compute resources.
+This repository was built as a monorepo, and thus makes extensive use of Turborepo in the CI/CD pipeline. The pipeline is designed to detect changes, ensuring that only modified services are built and deployed, saving significant time and compute resources.
 
   ![Pipeline](./docs//pipeline.png)
 
   ### Smart Workflow Orchestration (Path Filtering)
-  The pipeline uses a `detect-changes` stage to analyze the commit. This stage determines if the api, web app, infrastructure, or database migrations require action.
+  The pipeline uses a `detect-changes` stage to analyze recently pushed commits. This stage determines if the api, web app, infrastructure, or database migration code require action.
 
   - **Matrix Strategy**: If both the `api` and `web` apps are changed, GitHub Actions launches parallel `containerize` and `deploy` jobs for each, significantly reducing the total runtime.
 
   - **Infrastructure Sync**: The `provision` job ensures the AWS environment matches the OpenTofu configuration before any application deployment occurs.
 
   ### Container Lifecycle & Optimization
-  - **Turborepo Pruning**: To keep Docker images lean, the pipeline uses `turbo prune --docker`. This extracts only the relevant workspace packages and local dependencies required for the specific component being built.
+  - **Turborepo Pruning**: To keep Docker images lean, the pipeline uses `turbo prune --docker`. This extracts only the relevant workspace packages and local dependencies required for the specific component being built. See [Turborepo docs](https://turborepo.dev/docs/reference/prune)
 
- - **Secure Authentication**: The pipeline uses AWS OIDC (OpenID Connect). This allows GitHub Actions to assume a specific IAM role via a short-lived token, eliminating the need for long-lived AWS Access Keys. See [Configuring OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+ - **Secure Authentication**: The pipeline uses AWS OIDC (OpenID Connect). This allows GitHub Actions to assume a specific IAM role via a short-lived token, eliminating the need for long-lived AWS Access Keys within the pipeline. See [Configuring OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
 
   - **Tagging Strategy**: Images are currently tagged with both the Git SHA (for traceability) and latest (for ECS deployment).
 
   ### Database Migration Strategy
-  Migrations are handled via a decoupled workflow to ensure data schema consistency before the new application code goes live.
+  Migrations are handled via a decoupled workflow to ensure data schema consistency before new application code goes live.
 
-  - **Mechanism**: The pipeline utilizes the existing API Docker image but overrides the Entrypoint.
+  - **Mechanism**: The container image for the `api` contains both the application code as well as the migration scripts to apply to the database. Any time that migrations change, the container image for `api` is rebuilt.
 
-  - **Execution**: A one-off ECS Task is spun up to execute the migration logic and is automatically terminated upon completion. This ensures migrations run in an environment identical to the production API.
+  - **Execution**: To run database migrations, a one-off ECS Task is spun up to execute the migration logic. The entrypoint of the `api` container is changed to run the migration scripts, and the container/task is automatically terminated upon completion. This ensures migrations run in an environment identical to the production API.
 
 ---
 
@@ -140,7 +139,7 @@ This project uses a monorepo pipeline powered by GitHub Actions and Turborepo. T
 
 ### Prerequisites
 - An AWS Account
-- A DockerHub account
+- A DockerHub account with a [personal access token](https://docs.docker.com/security/access-tokens/#create-a-personal-access-token)
 - An Auth0 account with a [Regular Web Application](https://auth0.com/docs/get-started/auth0-overview/create-applications/regular-web-apps) and [API](https://auth0.com/docs/get-started/apis) configured
 - A Route 53 Hosted Zone (optional, for custom domain; replace the default variable name in `infra/dns.tf`)
 
