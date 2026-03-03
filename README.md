@@ -18,6 +18,9 @@ This repository serves as a Personal DevOps Lab for experimenting with various A
   - [Service \& Data Design](#service--data-design)
 - [Infrastructure as Code (IaC)](#infrastructure-as-code-iac)
 - [CI/CD Pipeline](#cicd-pipeline)
+  - [Smart Workflow Orchestration (Path Filtering)](#smart-workflow-orchestration-path-filtering)
+  - [Container Lifecycle \& Optimization](#container-lifecycle--optimization)
+  - [Database Migration Strategy](#database-migration-strategy)
 - [Deployment \& Usage](#deployment--usage)
 - [Observability](#observability)
 - [Case Studies (Lab Roadmap)](#case-studies-lab-roadmap)
@@ -85,11 +88,40 @@ Isolation is strictly enforced through a "chained" Security Group architecture. 
 
   - [View Database Resources](./infra/database.tf)
 
+---
+
 ## Infrastructure as Code (IaC)
 (Details regarding the flattened OpenTofu structure and state management here.)
 
+---
+
 ## CI/CD Pipeline
-(Details regarding GitHub Actions, DockerHub integration, OIDC, and automated deployment steps here.)
+This project uses a monorepo pipeline powered by GitHub Actions and Turborepo. The pipeline is designed to be "change-aware," ensuring that only modified services are built and deployed, saving significant time and compute resources.
+
+  ![Pipeline](./docs//pipeline.png)
+
+  ### Smart Workflow Orchestration (Path Filtering)
+  The pipeline uses a `detect-changes` stage to analyze the commit. This stage determines if the api, web app, infrastructure, or database migrations require action.
+
+  - **Matrix Strategy**: If both the `api` and `web` apps are changed, GitHub Actions launches parallel `containerize` and `deploy` jobs for each, significantly reducing the total runtime.
+
+  - **Infrastructure Sync**: The `provision` job ensures the AWS environment matches the OpenTofu configuration before any application deployment occurs.
+
+  ### Container Lifecycle & Optimization
+  - **Turborepo Pruning**: To keep Docker images lean, the pipeline uses `turbo prune --docker`. This extracts only the relevant workspace packages and local dependencies required for the specific component being built.
+
+ - **Secure Authentication**: The pipeline uses AWS OIDC (OpenID Connect). This allows GitHub Actions to assume a specific IAM role via a short-lived token, eliminating the need for long-lived AWS Access Keys. See [Configuring OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+
+  - **Tagging Strategy**: Images are currently tagged with both the Git SHA (for traceability) and latest (for ECS deployment).
+
+  ### Database Migration Strategy
+  Migrations are handled via a decoupled workflow to ensure data schema consistency before the new application code goes live.
+
+  - **Mechanism**: The pipeline utilizes the existing API Docker image but overrides the Entrypoint.
+
+  - **Execution**: A one-off ECS Task is spun up to execute the migration logic and is automatically terminated upon completion. This ensures migrations run in an environment identical to the production API.
+
+---
 
 ## Deployment & Usage
 (Prerequisites, environment variables/secrets, and the commands required to deploy or destroy the stack here.)
