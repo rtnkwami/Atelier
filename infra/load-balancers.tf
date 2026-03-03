@@ -42,6 +42,18 @@ resource "aws_lb_listener" "frontend_http_listener" {
   }
 }
 
+resource "aws_lb_listener" "frontend_https_listener" {
+  load_balancer_arn = aws_lb.public_load_balancer.arn
+  certificate_arn = aws_acm_certificate_validation.atelier_tls_cert_validation.certificate_arn
+  port              = 443
+  protocol          = "HTTPS"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+  }
+}
+
 
 # Internal Load Balancer (ALB)
 
