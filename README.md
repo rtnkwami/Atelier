@@ -22,6 +22,11 @@ This repository serves as a Personal DevOps Lab for experimenting with various A
   - [Container Lifecycle \& Optimization](#container-lifecycle--optimization)
   - [Database Migration Strategy](#database-migration-strategy)
 - [Deployment \& Usage](#deployment--usage)
+  - [Prerequisites](#prerequisites)
+  - [Bootstrap](#bootstrap)
+  - [GitHub Actions Configuration](#github-actions-configuration)
+  - [Deploy](#deploy)
+  - [Destroy](#destroy)
 - [Observability](#observability)
 - [Case Studies (Lab Roadmap)](#case-studies-lab-roadmap)
 
@@ -124,7 +129,61 @@ This project uses a monorepo pipeline powered by GitHub Actions and Turborepo. T
 ---
 
 ## Deployment & Usage
-(Prerequisites, environment variables/secrets, and the commands required to deploy or destroy the stack here.)
+> This project is configured for a specific AWS environment and was not designed to run universally. However, if you wish to deploy it yourself, the following prerequisites are required.
+
+### Prerequisites
+- An AWS Account
+- A DockerHub account
+- An Auth0 account with a [Regular Web Application](https://auth0.com/docs/get-started/auth0-overview/create-applications/regular-web-apps) and [API](https://auth0.com/docs/get-started/apis) configured
+- A Route 53 Hosted Zone (optional, for custom domain; replace the default variable name in `infra/dns.tf`)
+
+### Bootstrap
+All secrets, IAM roles, and state management infrastructure are provisioned via `bootstrap.yaml`. Deploy it first via the AWS CloudFormation console or CLI, providing your Auth0 and database values as parameters.
+```bash
+aws cloudformation deploy \
+  --template-file bootstrap.yaml \
+  --stack-name atelier-bootstrap \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides \
+    Auth0ClientIdValue= \
+    Auth0ClientSecretValue= \
+    Auth0DomainValue= \
+    Auth0AudienceValue=
+```
+
+Once deployed, retrieve the outputs:
+```bash
+aws cloudformation describe-stacks \
+  --stack-name atelier-bootstrap \
+  --query "Stacks[0].Outputs"
+```
+
+### GitHub Actions Configuration
+Add the following to your repository's Actions secrets and variables:
+
+| Name | Type | Source |
+|------|------|--------|
+| `CI_CD_ROLE` | Secret | `CICDRoleArn` bootstrap output |
+| `DOCKERHUB_TOKEN` | Secret | DockerHub |
+| `DOCKERHUB_USERNAME` | Variable | DockerHub |
+| `TOFU_STATE_BUCKET` | Variable | `TerraformStateBucketName` bootstrap output |
+
+### Deploy
+Push to `main` to trigger the pipeline. The pipeline will provision the infrastructure and deploy the application automatically.
+
+### Destroy
+To tear down the infrastructure, run the following locally:
+```bash
+cd infra
+tofu destroy
+```
+
+Then delete the bootstrap stack:
+```bash
+aws cloudformation delete-stack --stack-name atelier-bootstrap
+```
+
+---
 
 ## Observability
 (How to verify the deployment via endpoints and where to find logs/metrics here.)
