@@ -15,4 +15,5 @@ export default defineConfig({
     // RDS without hiccups.
     connection: { ssl: { rejectUnauthorized: false } },
   },
+  //
 });
