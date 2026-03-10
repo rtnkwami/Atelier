@@ -9,6 +9,8 @@ import dbConfig from './mikro-orm.config';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { OrdersModule } from './orders/orders.module';
 import { UsersModule } from './users/users.module';
+import { LoggerModule } from 'nestjs-pino';
+import { Request, Response } from 'express';
 
 @Module({
   imports: [
@@ -16,6 +18,23 @@ import { UsersModule } from './users/users.module';
     MikroOrmModule.forRoot({
       ...dbConfig,
       autoLoadEntities: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        serializers: {
+          res: (res: Response) => ({
+            statusCode: res.statusCode,
+          }),
+          req: (req: Request) => ({
+            id: req.id,
+            method: req.method,
+            url: req.url,
+            query: req.query,
+            params: req.params,
+            userAgent: req.headers['user-agent'],
+          }),
+        },
+      },
     }),
     InventoryModule,
     CartModule,
