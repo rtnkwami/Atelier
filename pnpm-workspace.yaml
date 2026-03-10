@@ -5,7 +5,13 @@ packages:
 injectWorkspacePackages: true
 
 onlyBuiltDependencies:
+  - '@nestjs/core'
   - '@swc/core'
   - esbuild
+  - msw
   - sharp
   - unrs-resolver
+
+syncInjectedDepsAfterScripts:
+  - build
+  - test
