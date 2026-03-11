@@ -1,0 +1,287 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"acm:RequestCertificate",
+				"ec2:CreateTags",
+				"ec2:DescribeAccountAttributes",
+				"ec2:DescribeAddresses",
+				"ec2:DescribeAddressesAttribute",
+				"ec2:DescribeAvailabilityZones",
+				"ec2:DescribeInternetGateways",
+				"ec2:DescribeNatGateways",
+				"ec2:DescribeNetworkAcls",
+				"ec2:DescribeNetworkInterfaces",
+				"ec2:DescribeRouteTables",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeSubnets",
+				"ec2:DescribeVpcs",
+				"ecs:DescribeTaskDefinition",
+				"elasticache:AddTagsToResource",
+				"elasticache:ListTagsForResource",
+				"elasticloadbalancing:CreateListener",
+				"elasticloadbalancing:CreateLoadBalancer",
+				"elasticloadbalancing:DescribeCapacityReservation",
+				"elasticloadbalancing:DescribeListenerAttributes",
+				"elasticloadbalancing:DescribeListeners",
+				"elasticloadbalancing:DescribeLoadBalancerAttributes",
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"elasticloadbalancing:DescribeTags",
+				"elasticloadbalancing:DescribeTargetGroupAttributes",
+				"elasticloadbalancing:DescribeTargetGroups",
+				"logs:DescribeLogGroups",
+				"logs:ListTagsForResource",
+				"rds:AddTagsToResource",
+				"rds:DescribeDBClusters",
+				"rds:DescribeDBInstances",
+				"rds:DescribeDBSubnetGroups",
+				"rds:DescribeGlobalClusters",
+				"rds:ListTagsForResource",
+				"route53:ListHostedZones",
+				"route53:ListTagsForResource",
+				"s3:GetObject",
+				"sts:GetCallerIdentity"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"acm:DescribeCertificate",
+				"acm:ListTagsForCertificate"
+			],
+			"Resource": "arn:aws:acm:${Region}:${Account}:certificate/${CertificateId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "autoscaling:PutScalingPolicy",
+			"Resource": "arn:aws:autoscaling:${Region}:${Account}:autoScalingGroup:${GroupId}:autoScalingGroupName/${GroupFriendlyName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"cloudwatch:DescribeAlarms",
+				"cloudwatch:PutMetricAlarm"
+			],
+			"Resource": "arn:aws:cloudwatch:${Region}:${Account}:alarm:${AlarmName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ec2:AllocateAddress",
+			"Resource": "arn:aws:ec2:${Region}:${Account}:elastic-ip/${AllocationId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AttachInternetGateway",
+				"ec2:CreateInternetGateway"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:internet-gateway/${InternetGatewayId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ec2:CreateNatGateway",
+			"Resource": "arn:aws:ec2:${Region}:${Account}:natgateway/${NatGatewayId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateNetworkInterface",
+				"ec2:DeleteNetworkInterface"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:network-interface/${NetworkInterfaceId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AssociateRouteTable",
+				"ec2:CreateRoute",
+				"ec2:CreateRouteTable"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:route-table/${RouteTableId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:CreateSecurityGroup",
+				"ec2:RevokeSecurityGroupEgress"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:security-group/${SecurityGroupId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateNetworkInterface",
+				"ec2:CreateSubnet",
+				"ec2:ModifySubnetAttribute"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:subnet/${SubnetId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:AttachInternetGateway",
+				"ec2:CreateRouteTable",
+				"ec2:CreateSubnet",
+				"ec2:CreateVpc",
+				"ec2:DescribeVpcAttribute",
+				"ec2:GetSecurityGroupsForVpc"
+			],
+			"Resource": "arn:aws:ec2:${Region}:${Account}:vpc/${VpcId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ecs:CreateCluster",
+				"ecs:DescribeClusters"
+			],
+			"Resource": "arn:aws:ecs:${Region}:${Account}:cluster/${ClusterName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ecs:CreateService",
+				"ecs:DescribeServices",
+				"ecs:UpdateService"
+			],
+			"Resource": "arn:aws:ecs:${Region}:${Account}:service/${ClusterName}/${ServiceName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ecs:RegisterTaskDefinition",
+			"Resource": "arn:aws:ecs:${Region}:${Account}:task-definition/${TaskDefinitionFamilyName}:${TaskDefinitionRevisionNumber}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "elasticache:DescribeCacheClusters",
+			"Resource": "arn:aws:elasticache:${Region}:${Account}:cluster:${CacheClusterId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "elasticache:CreateReplicationGroup",
+			"Resource": "arn:aws:elasticache:${Region}:${Account}:parametergroup:${CacheParameterGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "elasticache:DescribeReplicationGroups",
+			"Resource": "arn:aws:elasticache:${Region}:${Account}:replicationgroup:${ReplicationGroupId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticache:CreateCacheSubnetGroup",
+				"elasticache:DescribeCacheSubnetGroups"
+			],
+			"Resource": "arn:aws:elasticache:${Region}:${Account}:subnetgroup:${CacheSubnetGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticloadbalancing:AddTags",
+				"elasticloadbalancing:ModifyLoadBalancerAttributes"
+			],
+			"Resource": "arn:aws:elasticloadbalancing:${Region}:${Account}:loadbalancer/${LoadBalancerName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"elasticloadbalancing:CreateTargetGroup",
+				"elasticloadbalancing:ModifyTargetGroupAttributes"
+			],
+			"Resource": "arn:aws:elasticloadbalancing:${Region}:${Account}:targetgroup/${TargetGroupName}/${TargetGroupId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "iam:GetRole",
+			"Resource": "arn:aws:iam::${Account}:role/${RoleNameWithPath}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"kms:CreateGrant",
+				"kms:Decrypt",
+				"kms:DescribeKey",
+				"kms:GenerateDataKey"
+			],
+			"Resource": "arn:aws:kms:${Region}:${Account}:key/${KeyId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:PutRetentionPolicy"
+			],
+			"Resource": "arn:aws:logs:${Region}:${Account}:log-group:${LogGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateDBCluster",
+			"Resource": "arn:aws:rds:${Region}:${Account}:cluster-pg:${ClusterParameterGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateDBCluster",
+			"Resource": "arn:aws:rds:${Region}:${Account}:cluster:${DbClusterInstanceName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"rds:CreateDBInstance",
+				"rds:CreateTenantDatabase"
+			],
+			"Resource": "arn:aws:rds:${Region}:${Account}:db:${DbInstanceName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateDBCluster",
+			"Resource": "arn:aws:rds:${Region}:${Account}:og:${OptionGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"rds:CreateDBCluster",
+				"rds:CreateDBSubnetGroup"
+			],
+			"Resource": "arn:aws:rds:${Region}:${Account}:subgrp:${SubnetGroupName}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "rds:CreateTenantDatabase",
+			"Resource": "arn:aws:rds:${Region}:${Account}:tenant-database:${TenantResourceId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "route53:GetChange",
+			"Resource": "arn:aws:route53:::change/${Id}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"route53:ChangeResourceRecordSets",
+				"route53:GetHostedZone",
+				"route53:ListResourceRecordSets"
+			],
+			"Resource": "arn:aws:route53:::hostedzone/${Id}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:CreateSecret",
+				"secretsmanager:DescribeSecret",
+				"secretsmanager:GetResourcePolicy",
+				"secretsmanager:GetSecretValue",
+				"secretsmanager:TagResource"
+			],
+			"Resource": "arn:aws:secretsmanager:${Region}:${Account}:secret:${SecretId}"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ssm:GetParameter",
+			"Resource": "arn:aws:ssm:${Region}:${Account}:parameter/${ParameterNameWithoutLeadingSlash}"
+		}
+	]
+}
