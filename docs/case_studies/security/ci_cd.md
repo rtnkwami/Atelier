@@ -101,3 +101,41 @@ Well, that's the idea anyway. I'm not necessarily going to stick to the exact st
 ### Step 6: Refine and Segregate the Generated Policy
 
 For historical reasons, I'll keep the full generated policy within my repo, so that you can see where we started, and where we ended. You can access the policy [here](/CI_CD_Role_Policy.json).
+
+Now, let's move on to segregating the policy. I'll start first by separating network permissions. There are quite a number of networking permissions. Some of them are related to network discover, and some of them are related to network resource creation. These seem like logical segregations, so I'm going to keep those segregations and implement them as polcies.
+
+So for our **Network Discovery Policy**, we are going to have the following:
+
+```yaml
+NetworkDiscoveryPolicy:
+  Type: AWS::IAM::ManagedPolicy
+  Properties:
+    ManagedPolicyName: NetworkDiscoveryPolicy
+    PolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Action:
+            - "ec2:DescribeAccountAttributes"
+            - "ec2:DescribeAvailabilityZones"
+            - "ec2:DescribeVpcs"
+            - "ec2:DescribeVpcAttribute"
+            - "ec2:DescribeInternetGateways"
+            - "ec2:DescribeSubnets"
+            - "ec2:DescribeRouteTables"
+            - "ec2:DescribeNetworkAcls"
+            - "ec2:DescribeAddresses"
+            - "ec2:DescribeAddressesAttribute"
+            - "ec2:DescribeNetworkInterfaces"
+            - "ec2:DescribeNatGateways"
+            - "ec2:DescribeSecurityGroups"
+          Resource: "*"
+```
+
+These permissions will allow out Terraform/OpenTofu code to get the IDs and ARNs of our VPC, subnets, Gateways, etc to place resources within them.
+
+Now let's move on to our **Network Management Policy**:
+
+```yaml
+
+```
