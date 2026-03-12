@@ -65,6 +65,45 @@ Resources:
               - "ec2:DescribeSecurityGroups"
             Resource: "*"
 
+  NetworkManagementPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: NetworkManagementPolicy
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Sid: VpcCreationAndModification
+            Effect: Allow
+            Action:
+              - "ec2:CreateTags"
+              - "ec2:CreateVpc"
+              - "ec2:CreateSubnet"
+              - "ec2:ModifySubnetAttribute"
+              - "ec2:CreateRouteTable"
+              - "ec2:CreateNetworkInterface"
+              - "ec2:GetSecurityGroupsForVpc"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
+          
+          - Sid: SecurityGroupCreation
+            Effect: Allow
+            Action:
+              - "ec2:CreateSecurityGroup"
+              - "ec2:AuthorizeSecurityGroupIngress"
+              - "ec2:AuthorizeSecurityGroupEgress"
+              - "ec2:RevokeSecurityGroupEgress"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*"
+          
+          - Sid: GatewaysAndRouting
+            Effect: Allow
+            Action:
+              - "ec2:CreateRouteTable"
+              - "ec2:CreateRoute"
+              - "ec2:AssociateRouteTable"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*"
+
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
