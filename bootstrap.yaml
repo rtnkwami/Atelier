@@ -235,6 +235,57 @@ Resources:
               - "elasticloadbalancing:ModifyTargetGroupAttributes"
             Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/*/*"
   
+  SecurityAndIdentityPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: SecurityAndIdentityPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: CertificateRequestManagement
+            Effect: Allow
+            Action:
+              - "acm:RequestCertificate"
+            Resource: "*"
+          
+          - Sid: CertificateManagement
+            Effect: Allow
+            Action:
+              - "acm:DescribeCertificate"
+              - "acm:ListTagsForCertificate"
+            Resource: !Sub "arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/*"
+          
+          - Sid: IamDiscovery
+            Effect: Allow
+            Action:
+              - "iam:GetRole"
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
+          
+          - Sid: KmsManagement
+            Effect: Allow
+            Action:
+              - "kms:CreateGrant"
+              - "kms:Decrypt"
+              - "kms:DescribeKey"
+              - "kms:GenerateDataKey"
+            Resource: !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*"
+          
+          - Sid: SecretsManagement
+            Effect: Allow
+            Action:
+              - "secretsmanager:CreateSecret"
+              - "secretsmanager:DescribeSecret"
+              - "secretsmanager:GetResourcePolicy"
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:TagResource"
+            Resource: !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
+          
+          - Sid: SsmParameterAccess
+            Effect: Allow
+            Action:
+              - "ssm:GetParameter"
+            Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+  
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
@@ -256,6 +307,7 @@ Resources:
         - !Ref NetworkPolicy
         - !Ref ComputePolicy
         - !Ref LoadBalancerPolicy
+        - !Ref SecurityAndIdentityPolicy
         
 
   TaskExecutionRole:
