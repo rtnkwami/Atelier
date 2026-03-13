@@ -133,7 +133,66 @@ Resources:
               - "ec2:GetSecurityGroupsForVpc"
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
 
-  
+  ComputePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: ComputePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ComputeDiscovery
+            Effect: Allow
+            Action:
+              - "ecs:DescribeTaskDefinition"
+            Resource: "*"
+          
+          - Sid: LogGroupDiscovery
+            Effect: Allow
+            Action:
+              - "logs:DescribeLogGroups"
+              - "logs:ListTagsForResource"
+            Resource: "*"
+          
+          - Sid: AutoScalingManagement
+            Effect: Allow
+            Action:
+              - "autoscaling:PutScalingPolicy"
+            Resource: !Sub "arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
+          
+          - Sid: CloudWatchAlarmManagement
+            Effect: Allow
+            Action:
+              - "cloudwatch:DescribeAlarms"
+              - "cloudwatch:PutMetricAlarm"
+            Resource: !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*"
+          
+          - Sid: EcsClusterManagement
+            Effect: Allow
+            Action:
+              - "ecs:CreateCluster"
+              - "ecs:DescribeClusters"
+            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/*"
+          
+          - Sid: EcsServiceManagement
+            Effect: Allow
+            Action:
+              - "ecs:CreateService"
+              - "ecs:DescribeServices"
+              - "ecs:UpdateService"
+            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/*/*"
+          
+          - Sid: EcsTaskDefinitionManagement
+            Effect: Allow
+            Action:
+              - "ecs:RegisterTaskDefinition"
+            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/*:*"
+          
+          - Sid: LogGroupManagement
+            Effect: Allow
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:PutRetentionPolicy"
+            Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
   
   CICDRole:
     Type: AWS::IAM::Role
@@ -154,6 +213,7 @@ Resources:
                   "token.actions.githubusercontent.com:sub": !Sub "repo:${GitHubRepository}:*"
       ManagedPolicyArns:
         - !Ref NetworkPolicy
+        - !Ref ComputePolicy
         
 
   TaskExecutionRole:
