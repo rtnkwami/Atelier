@@ -110,6 +110,48 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*"
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
 
+  SecurityConfigurationPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: SecurityAndConfigurationPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: KmsKeyPermissions
+            Effect: Allow
+            Action:
+              - "kms:CreateGrant"
+              - "kms:Decrypt"
+              - "kms:DescribeKey"
+              - "kms:GenerateDataKey"
+            Resource: !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*"
+          
+          - Sid: SecretsAndParameterPermissions
+            Effect: Allow
+            Action:
+              - "secretsmanager:CreateSecret"
+              - "secretsmanager:DescribeSecret"
+              - "secretsmanager:GetResourcePolicy"
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:TagResource"
+              - "ssm:GetParameter"
+            Resource: 
+              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
+              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+          
+          - Sid: RequestAcmCertificate
+            Effect: Allow
+            Action:
+              - "acm:RequestCertificate"
+            Resource: "*"
+          
+          - Sid: TlsCertificateManagement
+            Effect: Allow
+            Action:
+              - "acm:DescribeCertificate"
+              - "acm:ListTagsForCertificate"
+            Resource: !Sub "arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/*"
+
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
@@ -129,6 +171,8 @@ Resources:
                   "token.actions.githubusercontent.com:sub": !Sub "repo:${GitHubRepository}:*"
       ManagedPolicyArns:
         - !Ref NetworkDiscoveryPolicy
+        - !Ref NetworkManagementPolicy
+        - !Ref SecurityConfigurationPolicy
         
 
   TaskExecutionRole:
