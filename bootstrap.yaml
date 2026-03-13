@@ -101,8 +101,14 @@ Resources:
               - "ec2:CreateRouteTable"
               - "ec2:CreateRoute"
               - "ec2:AssociateRouteTable"
+              - "ec2:CreateInternetGateway"
+              - "ec2:AttachInternetGateway"
+              - "ec2:CreateNatGateway"
             Resource:
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*"
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*"
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*"
+              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
 
   CICDRole:
     Type: AWS::IAM::Role
