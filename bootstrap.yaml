@@ -41,117 +41,100 @@ Resources:
       ClientIdList:
         - "sts.amazonaws.com"
 
-  NetworkDiscoveryPolicy:
+  NetworkPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      ManagedPolicyName: NetworkDiscoveryPolicy
+      ManagedPolicyName: NetworkPolicy
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
+          - Sid: NetworkDiscovery
+            Effect: Allow
             Action:
               - "ec2:DescribeAccountAttributes"
-              - "ec2:DescribeAvailabilityZones"
-              - "ec2:DescribeVpcs"
-              - "ec2:DescribeVpcAttribute"
-              - "ec2:DescribeInternetGateways"
-              - "ec2:DescribeSubnets"
-              - "ec2:DescribeRouteTables"
-              - "ec2:DescribeNetworkAcls"
               - "ec2:DescribeAddresses"
               - "ec2:DescribeAddressesAttribute"
-              - "ec2:DescribeNetworkInterfaces"
+              - "ec2:DescribeAvailabilityZones"
+              - "ec2:DescribeInternetGateways"
               - "ec2:DescribeNatGateways"
+              - "ec2:DescribeNetworkAcls"
+              - "ec2:DescribeNetworkInterfaces"
+              - "ec2:DescribeRouteTables"
               - "ec2:DescribeSecurityGroups"
+              - "ec2:DescribeSubnets"
+              - "ec2:DescribeVpcs"
             Resource: "*"
-
-  NetworkManagementPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      ManagedPolicyName: NetworkManagementPolicy
-      PolicyDocument: 
-        Version: "2012-10-17"
-        Statement:
-          - Sid: VpcCreationAndModification
+          
+          - Sid: NetworkTagging
             Effect: Allow
             Action:
               - "ec2:CreateTags"
-              - "ec2:CreateVpc"
-              - "ec2:CreateSubnet"
-              - "ec2:ModifySubnetAttribute"
-              - "ec2:CreateRouteTable"
-              - "ec2:CreateNetworkInterface"
-              - "ec2:GetSecurityGroupsForVpc"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
+            Resource: "*"
           
-          - Sid: SecurityGroupCreation
+          - Sid: EIPManagement
             Effect: Allow
             Action:
-              - "ec2:CreateSecurityGroup"
-              - "ec2:AuthorizeSecurityGroupIngress"
+              - "ec2:AllocateAddress"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*"
+          
+          - Sid: IgwManagement
+            Effect: Allow
+            Action:
+              - "ec2:AttachInternetGateway"
+              - "ec2:CreateInternetGateway"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*"
+          
+          - Sid: NatGwManagement
+            Effect: Allow
+            Action:
+              - "ec2:CreateNatGateway"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*"
+          
+          - Sid: EniManagement
+            Effect: Allow
+            Action:
+              - "ec2:CreateNetworkInterface"
+              - "ec2:DeleteNetworkInterface"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+          
+          - Sid: RouteTableManagement
+            Effect: Allow
+            Action:
+              - "ec2:AssociateRouteTable"
+              - "ec2:CreateRoute"
+              - "ec2:CreateRouteTable"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*"
+          
+          - Sid: SecurityGroupManagement
+            Effect: Allow
+            Action:
               - "ec2:AuthorizeSecurityGroupEgress"
+              - "ec2:AuthorizeSecurityGroupIngress"
+              - "ec2:CreateSecurityGroup"
               - "ec2:RevokeSecurityGroupEgress"
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*"
           
-          - Sid: GatewaysAndRouting
+          - Sid: SubnetManagement
             Effect: Allow
             Action:
-              - "ec2:CreateRouteTable"
-              - "ec2:CreateRoute"
-              - "ec2:AssociateRouteTable"
-              - "ec2:CreateInternetGateway"
+              - "ec2:CreateNetworkInterface"
+              - "ec2:CreateSubnet"
+              - "ec2:ModifySubnetAttribute"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
+          
+          - Sid: VpcManagement
+            Effect: Allow
+            Action:
               - "ec2:AttachInternetGateway"
-              - "ec2:CreateNatGateway"
-            Resource:
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*"
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*"
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*"
-              - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
+              - "ec2:CreateRouteTable"
+              - "ec2:CreateSubnet"
+              - "ec2:CreateVpc"
+              - "ec2:DescribeVpcAttribute"
+              - "ec2:GetSecurityGroupsForVpc"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
 
-  SecurityConfigurationPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      ManagedPolicyName: SecurityAndConfigurationPolicy
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: KmsKeyPermissions
-            Effect: Allow
-            Action:
-              - "kms:CreateGrant"
-              - "kms:Decrypt"
-              - "kms:DescribeKey"
-              - "kms:GenerateDataKey"
-            Resource: !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*"
-          
-          - Sid: SecretsAndParameterPermissions
-            Effect: Allow
-            Action:
-              - "secretsmanager:CreateSecret"
-              - "secretsmanager:DescribeSecret"
-              - "secretsmanager:GetResourcePolicy"
-              - "secretsmanager:GetSecretValue"
-              - "secretsmanager:TagResource"
-              - "ssm:GetParameter"
-            Resource: 
-              - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
-              - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
-          
-          - Sid: RequestAcmCertificate
-            Effect: Allow
-            Action:
-              - "acm:RequestCertificate"
-            Resource: "*"
-          
-          - Sid: TlsCertificateManagement
-            Effect: Allow
-            Action:
-              - "acm:DescribeCertificate"
-              - "acm:ListTagsForCertificate"
-            Resource: !Sub "arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/*"
-
+  
+  
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
@@ -170,9 +153,7 @@ Resources:
                 StringLike:
                   "token.actions.githubusercontent.com:sub": !Sub "repo:${GitHubRepository}:*"
       ManagedPolicyArns:
-        - !Ref NetworkDiscoveryPolicy
-        - !Ref NetworkManagementPolicy
-        - !Ref SecurityConfigurationPolicy
+        - !Ref NetworkPolicy
         
 
   TaskExecutionRole:
