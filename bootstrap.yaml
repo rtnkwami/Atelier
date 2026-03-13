@@ -194,6 +194,47 @@ Resources:
               - "logs:PutRetentionPolicy"
             Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
   
+  LoadBalancerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: LoadBalancerPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: LoadBalancerDiscovery
+            Effect: Allow
+            Action:
+              - "elasticloadbalancing:DescribeCapacityReservation"
+              - "elasticloadbalancing:DescribeListenerAttributes"
+              - "elasticloadbalancing:DescribeListeners"
+              - "elasticloadbalancing:DescribeLoadBalancerAttributes"
+              - "elasticloadbalancing:DescribeLoadBalancers"
+              - "elasticloadbalancing:DescribeTags"
+              - "elasticloadbalancing:DescribeTargetGroupAttributes"
+              - "elasticloadbalancing:DescribeTargetGroups"
+            Resource: "*"
+          
+          - Sid: LoadBalancerCreation
+            Effect: Allow
+            Action:
+              - "elasticloadbalancing:CreateListener"
+              - "elasticloadbalancing:CreateLoadBalancer"
+            Resource: "*"
+          
+          - Sid: LoadBalancerManagement
+            Effect: Allow
+            Action:
+              - "elasticloadbalancing:AddTags"
+              - "elasticloadbalancing:ModifyLoadBalancerAttributes"
+            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/*"
+          
+          - Sid: TargetGroupManagement
+            Effect: Allow
+            Action:
+              - "elasticloadbalancing:CreateTargetGroup"
+              - "elasticloadbalancing:ModifyTargetGroupAttributes"
+            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/*/*"
+  
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
@@ -214,6 +255,7 @@ Resources:
       ManagedPolicyArns:
         - !Ref NetworkPolicy
         - !Ref ComputePolicy
+        - !Ref LoadBalancerPolicy
         
 
   TaskExecutionRole:
