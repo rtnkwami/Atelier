@@ -216,10 +216,12 @@ Full observability tooling (metrics, tracing, alerting) is planned as part of Ca
 
 ## Case Studies (Lab Roadmap)
 
-- Case Study 1: High Availability & Multi-AZ Failover (Planned)
+- [Case Study 1: GitHub Actions OIDC Least Privilege](./docs/case_studies/security/ci_cd.md)
 
-- Case Study 2: Redis Performance & Failover (Planned)
+- Case Study 2: High Availability & Multi-AZ Failover (Planned)
 
-- Case Study 3: S3 & CloudFront Integration (Planned)
+- Case Study 3: Redis Performance & Failover (Planned)
 
-- Case Study 4: Security Hardening & Observability (Planned)
+- Case Study 4: S3 & CloudFront Integration (Planned)
+
+- Case Study 5: Security Hardening & Observability (Planned)

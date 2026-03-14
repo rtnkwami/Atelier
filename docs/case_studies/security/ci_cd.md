@@ -182,3 +182,15 @@ The result is a policy that is still significantly more restrictive than the ori
 And finally, the pipeline is working after many, many failures:
 
 ![Pipeline Success](./_images/pipline-success.png)
+
+## Closing Thoughts
+
+This was an interesting exercise / experiment. I expected the IAM Policy Generator to do much of the heavy lifting, which it did, but I had to do much more work than I expected, and it did give me a false sense of confidence that much of my work was complete.
+
+My CI/CD pipeline failed 13 times over about 9 hours. This is a good reminder to me that while least privilege is important, it isn't something you arrive at in one shot. It's iterative, and when you are working with a tool like OpenTofu / Terraform that has a wide API surface, it's not always obvious where the gaps are going to be until you get an `Access Denied` error.
+
+The thing I'm most satisfied with coming out of this is that I separated concerns at the very beginning of the project (the actual lab, and not this case study) by keeping sensitive resource lifecycle management (secrets, parameters, KMS keys, etc.) in the bootstrap layer instead of being managed by OpenTofu. It meant I could be restrictive about what the CI/CD pipeline is allowed to do with those resources.
+
+If I were starting this case study again from scratch, I'd go straight to using wildcards rather than trying to be surgical with every individual permission from the start. The generator is useful, but treating its output as the launchpad rather than the destination would have saved me several hours.
+
+Lastly, I understand that the permissions I've assigned my CI/CD role are not the absolute least privilege permissions I could have assigned. However, I strongly believe that would require a team to identify all the AWS permissions needed to exact minimum. Since I'm going solo, this is what I'll be satisfied with.
