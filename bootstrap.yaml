@@ -63,6 +63,7 @@ Resources:
               - "ec2:DescribeSecurityGroups"
               - "ec2:DescribeSubnets"
               - "ec2:DescribeVpcs"
+              - "ec2:DescribeSecurityGroupRules"
             Resource: "*"
           
           - Sid: NetworkTagging
@@ -75,6 +76,7 @@ Resources:
             Effect: Allow
             Action:
               - "ec2:AllocateAddress"
+              - "ec2:CreateNatGateway"
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*"
           
           - Sid: IgwManagement
@@ -120,6 +122,8 @@ Resources:
               - "ec2:CreateNetworkInterface"
               - "ec2:CreateSubnet"
               - "ec2:ModifySubnetAttribute"
+              - "ec2:AssociateRouteTable"
+              - "ec2:CreateNatGateway"
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
           
           - Sid: VpcManagement
@@ -131,6 +135,7 @@ Resources:
               - "ec2:CreateVpc"
               - "ec2:DescribeVpcAttribute"
               - "ec2:GetSecurityGroupsForVpc"
+              - "ec2:CreateSecurityGroup"
             Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
 
   ComputePolicy:
@@ -157,7 +162,15 @@ Resources:
             Effect: Allow
             Action:
               - "autoscaling:PutScalingPolicy"
-            Resource: !Sub "arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
+              - "application-autoscaling:PutScalingPolicy"
+              - "application-autoscaling:RegisterScalableTarget"
+              - "application-autoscaling:TagResource"
+              - "application-autoscaling:DescribeScalableTargets"
+              - "application-autoscaling:ListTagsForResource"
+              - "application-autoscaling:DeregisterScalableTarget"
+            Resource: 
+              - !Sub "arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
+              - !Sub "arn:${AWS::Partition}:application-autoscaling:${AWS::Region}:${AWS::AccountId}:scalable-target/*"
           
           - Sid: CloudWatchAlarmManagement
             Effect: Allow
@@ -171,6 +184,7 @@ Resources:
             Action:
               - "ecs:CreateCluster"
               - "ecs:DescribeClusters"
+              - "ecs:TagResource"
             Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/*"
           
           - Sid: EcsServiceManagement
@@ -179,12 +193,14 @@ Resources:
               - "ecs:CreateService"
               - "ecs:DescribeServices"
               - "ecs:UpdateService"
+              - "ecs:TagResource"
             Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/*/*"
           
           - Sid: EcsTaskDefinitionManagement
             Effect: Allow
             Action:
               - "ecs:RegisterTaskDefinition"
+              - "ecs:TagResource"
             Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/*:*"
           
           - Sid: LogGroupManagement
@@ -233,6 +249,7 @@ Resources:
             Action:
               - "elasticloadbalancing:CreateTargetGroup"
               - "elasticloadbalancing:ModifyTargetGroupAttributes"
+              - "elasticloadbalancing:AddTags"
             Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/*/*"
   
   SecurityAndIdentityPolicy:
@@ -253,6 +270,7 @@ Resources:
             Action:
               - "acm:DescribeCertificate"
               - "acm:ListTagsForCertificate"
+              - "acm:AddTagsToCertificate"
             Resource: !Sub "arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/*"
           
           - Sid: IamDiscovery
@@ -366,6 +384,7 @@ Resources:
             Effect: Allow
             Action:
               - "rds:CreateDBCluster"
+              - "rds:CreateDBInstance"
             Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster:*"
           
           - Sid: RdsDbInstanceManagement
@@ -410,6 +429,7 @@ Resources:
             Effect: Allow
             Action:
               - "elasticache:DescribeReplicationGroups"
+              - "elasticache:CreateReplicationGroup"
             Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:replicationgroup:*"
           
           - Sid: ElastiCacheSubnetGroupManagement
@@ -417,6 +437,7 @@ Resources:
             Action:
               - "elasticache:CreateCacheSubnetGroup"
               - "elasticache:DescribeCacheSubnetGroups"
+              - "elasticache:CreateReplicationGroup"
             Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:subnetgroup:*"
 
   CICDRole:
@@ -443,6 +464,14 @@ Resources:
         - !Ref SecurityAndIdentityPolicy
         - !Ref DnsAndStoragePolicy
         - !Ref DatabasePolicy
+      Policies:
+        - PolicyName: PassRoleToTaskExecRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "iam:PassRole"
+                Resource: !Sub "${TaskExecutionRole.Arn}"
 
   TaskExecutionRole:
     Type: AWS::IAM::Role
