@@ -8,7 +8,7 @@ resource "aws_db_subnet_group" "db_cluster_subnet_group" {
     "ResourceType" = "Database"
   }
 }
-/* some test comment */
+
 resource "aws_rds_cluster" "db_cluster" {
   cluster_identifier     = "${var.resource_prefix}-db-cluster"
   engine                 = "aurora-postgresql"
