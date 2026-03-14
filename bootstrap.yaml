@@ -137,38 +137,26 @@ Resources:
           - Sid: LoadBalancerDiscovery
             Effect: Allow
             Action:
-              - "elasticloadbalancing:DescribeCapacityReservation"
-              - "elasticloadbalancing:DescribeListenerAttributes"
-              - "elasticloadbalancing:DescribeListeners"
-              - "elasticloadbalancing:DescribeLoadBalancerAttributes"
-              - "elasticloadbalancing:DescribeLoadBalancers"
-              - "elasticloadbalancing:DescribeTags"
-              - "elasticloadbalancing:DescribeTargetGroupAttributes"
-              - "elasticloadbalancing:DescribeTargetGroups"
+              - "elasticloadbalancing:Describe*"
             Resource: "*"
           
           - Sid: LoadBalancerCreation
             Effect: Allow
             Action:
-              - "elasticloadbalancing:CreateListener"
               - "elasticloadbalancing:CreateLoadBalancer"
+              - "elasticloadbalancing:CreateListener"
+              - "elasticloadbalancing:CreateTargetGroup"
             Resource: "*"
           
-          - Sid: LoadBalancerManagement
+          - Sid: LoadBalancerMutations
             Effect: Allow
             Action:
-              - "elasticloadbalancing:AddTags"
-              - "elasticloadbalancing:ModifyLoadBalancerAttributes"
-            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/*"
-          
-          - Sid: TargetGroupManagement
-            Effect: Allow
-            Action:
-              - "elasticloadbalancing:CreateTargetGroup"
-              - "elasticloadbalancing:ModifyTargetGroupAttributes"
-              - "elasticloadbalancing:AddTags"
-            Resource: !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/*/*"
-  
+              - "elasticloadbalancing:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/*"
+              - !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/*/*"
+              - !Sub "arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/*/*/*/*"
+
   SecurityAndIdentityPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
