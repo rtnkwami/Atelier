@@ -108,20 +108,77 @@ The first thing I want to establish is that I'm not restructuring what AWS gener
 
 #### Network Policy
 
-The network policy is the largest of the bunch, which makes sense given that networking is the foundation everything else sits on. I split the statements into read-only discovery actions and mutating management actions, further broken down by resource type — VPCs, subnets, route tables, security groups, internet gateways, NAT gateways, network interfaces, and elastic IPs. You'll also notice that some actions like `ec2:CreateRouteTable` and `ec2:CreateSubnet` appear across multiple resource statements. This is intentional and reflects how AWS itself scoped them in the generated policy.
+Discovery actions are collapsed into `ec2:Describe*` and `ec2:Get*` on `Resource: "*"`, which covers the full surface area of read operations OpenTofu needs during its plan phase. Mutating actions are wildcarded as `ec2:*` but scoped to specific resource type ARNs: VPCs, subnets, route tables, security groups, internet gateways, NAT gateways, network interfaces, and elastic IPs.
+
+There is also a dedicated tagging statement using `ec2:CreateTags` scoped to `arn:...:ec2:region:account:*/*`, covering all EC2 resource types within the account since tagging happens across resource types, not just networking ones.
 
 #### Compute Policy
 
-The compute policy covers ECS, CloudWatch, Auto Scaling, and CloudWatch Logs. The split here follows the same read vs. write pattern, discovery actions against `Resource: "*"` and management actions scoped to specific resource ARNs.
+The compute policy follows the same pattern as the network policy. Discovery actions for ECS, CloudWatch, Auto Scaling, and CloudWatch Logs are collapsed into `Describe*` and `List*` wildcards on `Resource: "*"`. Mutating actions are wildcarded per service, `ecs:*`, `logs:*`, `application-autoscaling:*`, `autoscaling:*`, and `cloudwatch:*`, each scoped to their respective resource ARNs.
 
 #### Load Balancer Policy
 
-The load balancer policy covers all `elasticloadbalancing:*` actions. Over here I placed `CreateListener` and `CreateLoadBalancer` both under `Resource: "*"` in the generated policy. Rather than bundling them with the discovery actions, I gave them their own LoadBalancerCreation statement to make it clear these are mutating actions, not reads.
+Discovery actions are collapsed into `elasticloadbalancing:Describe*` on `Resource: "*"`. Creation actions (`CreateLoadBalancer`, `CreateListener`, `CreateTargetGroup`) were kept explicit on `Resource: "*"` since load balancer ARNs don't exist prior to creation. All other mutating actions were wildcarded as `elasticloadbalancing:*` scoped to load balancer, target group, and listener ARNs.
 
 #### Security And Identity Policy
 
-This policy covers ACM, IAM, KMS, Secrets Manager, and SSM. One extra tightening step was applied here: since the secrets and parameters used by this application are all defined in bootstrap.yaml under the `/atelier/` path, I was able to scope the `SecretsManagement` and `SsmParameterAccess` statements to `arn:...:secret:/atelier/*` and `arn:...:parameter/atelier/*` respectively, rather than leaving them open to all secrets and parameters in the account.
+This is the one policy that I deliberately kept conservative. Because it covers ACM, IAM, KMS, Secrets Manager, and SSM, all sensitive services, i made sure that mutating actions were kept explicitly listed rather than wildcarded. Discovery actions were alse scoped as tightly as AWS allows: some services like ACM and KMS require `Resource: "*"` for their list/describe calls, while Secrets Manager and SSM parameters are scoped to the `/atelier/` path prefix. The one addition beyond the original generated policy is `acm:DeleteCertificate`, which is needed for destroy operations.
+
+One important note: secrets, SSM parameters, and KMS keys are all managed by CloudFormation via `bootstrap.yaml`, not by OpenTofu. So OpenTofu only needs read access to these resources, not the ability to create or delete them. I reflected this in the policy.
 
 #### DNS And Storage Policy
 
-The final policy covers Route 53, S3, and STS. Route 53 ARNs don't include partition, region, or account segments, so these statements use plain `arn:aws:route53:::` rather than the `!Sub` with CloudFormation pseudo-parameters used elsewhere.
+S3 access is consolidated to the Terraform state bucket only — the original generated policy had a broad `s3:GetObject` on `Resource: "*"` which has been tightened here. Route 53 discovery is collapsed into `List*` and `Get*` wildcards on `Resource: "*"`. Since OpenTofu only manages records within an existing hosted zone and never creates or destroys zones themselves, `ChangeResourceRecordSets` is the only mutating action I needed to add.
+
+### Step 7: Testing the Policy
+
+Okay. Now that we have "narrowed" down the actions my CI/CD role can make, it's time to test the pipeline to see if it succeeds or fails in deployment.
+
+First, we need to create a change set in CloudFormation to update the current permissions.
+
+![Create Permissions Change Set](./_images/create-permissions-change-set.png)
+
+![Permission Creation Complete](./_images/permission-creation-complete.png)
+
+Next, we need to actually run the pipeline to see if it will be able to successfully provision the resources.
+
+![First Pipeline Failure](./_images/first-pipeline-permissions-failure.png)
+
+As shown in the picture above, the pipeline failed. Now we need to diagnose the reason why. Thankfully, it gives us a very helpful error message:
+
+`api error AccessDenied: User: arn:aws:sts::[redacted]:assumed-role/CICD-CICDRole-j6mP55zGXwW8/GitHubActions is not authorized to perform: s3:ListBucket on resource: "arn:aws:s3:::generic-s3bucket-name" because no identity-based policy allows the s3:ListBucket action`
+
+So, I made a mistake! I forgot to include the permissions to access to Terraform state bucket. Let's add that and retry the pipeline.
+
+```yaml
+- Sid: TerraformStateBucketAccess
+  Effect: Allow
+  Action:
+    - "s3:GetObject"
+    - "s3:PutObject"
+    - "s3:DeleteObject"
+    - "s3:ListBucket"
+  Resource:
+    - !Sub "${TerraformStateBucket.Arn}"
+    - !Sub "${TerraformStateBucket.Arn}/*"
+```
+
+That should have been straightforward enough. But it wasn't. This is where things got frustrating.
+Over the next several hours, the pipeline failed 13 more times. Each failure meant reading the error message, identifying the missing permission, updating the policy, deploying the change set, and running the pipeline again — only to hit a different missing permission. Rinse and repeat.
+
+The core problem was that the IAM Policy Generator could only capture permissions that were actually called during the observation window. OpenTofu, however, calls a much wider surface area of AWS APIs than what any single pipeline run exposes — especially during the plan phase, where it issues a large number of `Describe` and `List` calls to reconcile desired state with actual state. Some of these were never exercised during the window I used for generation, so they never made it into the policy.
+
+After 13 failures and several hours of iteration, it became clear that continuing to chase individual missing permissions was not a viable strategy. The generated policy was a good starting point, but it was too rigid and too granular to hold up against the full breadth of what OpenTofu needs.
+So I stepped back and reconsidered my approach entirely. Rather than writing down every individual action, I settled on a strategy using wildcards:
+
+- Discovery actions (Describe, List, Get) should be wildcarded at the action level (e.g.  `ec2:Describe* `) on `Resource: "*"`. These are read-only and carry minimal security risk.
+
+- Mutating actions (Create, Modify, Delete, etc.) should be wildcarded at the service level (e.g. `ec2:*`) but scoped to specific resource type ARNs within my account and region. This covers any action OpenTofu might need without granting complete access across all of AWS.
+
+- Sensitive services (IAM, KMS, Secrets Manager, SSM) should have their permissions kept explicitly listed with no wildcarding, since these are the areas where overly broad permissions carry real risk.
+
+The result is a policy that is still significantly more restrictive than the original AdministratorAccess, but resilient enough that OpenTofu can do its job without hitting a wall every time it makes an API call that wasn't captured during policy generation.
+
+And finally, the pipeline is working after many, many failures:
+
+![Pipeline Success](./_images/pipline-success.png)
