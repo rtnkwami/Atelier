@@ -68,6 +68,12 @@ Resources:
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*"
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*"
               - !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*"
+          
+          - Sid: Ec2Tagging
+            Effect: Allow
+            Action:
+              - "ec2:CreateTags"
+            Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*/*"
 
   ComputePolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -79,67 +85,47 @@ Resources:
           - Sid: ComputeDiscovery
             Effect: Allow
             Action:
-              - "ecs:DescribeTaskDefinition"
+              - "ecs:Describe*"
+              - "ecs:List*"
+              - "logs:Describe*"
+              - "logs:List*"
+              - "cloudwatch:Describe*"
+              - "application-autoscaling:Describe*"
+              - "autoscaling:Describe*"
             Resource: "*"
           
-          - Sid: LogGroupDiscovery
+          - Sid: EcsMutations
             Effect: Allow
             Action:
-              - "logs:DescribeLogGroups"
-              - "logs:ListTagsForResource"
-            Resource: "*"
+              - "ecs:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/*/*"
+              - !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/*:*"
           
-          - Sid: AutoScalingManagement
+          - Sid: LogsMutations
             Effect: Allow
             Action:
-              - "autoscaling:PutScalingPolicy"
-              - "application-autoscaling:PutScalingPolicy"
-              - "application-autoscaling:RegisterScalableTarget"
-              - "application-autoscaling:TagResource"
-              - "application-autoscaling:DescribeScalableTargets"
-              - "application-autoscaling:ListTagsForResource"
-              - "application-autoscaling:DeregisterScalableTarget"
-            Resource: 
-              - !Sub "arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
-              - !Sub "arn:${AWS::Partition}:application-autoscaling:${AWS::Region}:${AWS::AccountId}:scalable-target/*"
-          
-          - Sid: CloudWatchAlarmManagement
-            Effect: Allow
-            Action:
-              - "cloudwatch:DescribeAlarms"
-              - "cloudwatch:PutMetricAlarm"
-            Resource: !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*"
-          
-          - Sid: EcsClusterManagement
-            Effect: Allow
-            Action:
-              - "ecs:CreateCluster"
-              - "ecs:DescribeClusters"
-              - "ecs:TagResource"
-            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/*"
-          
-          - Sid: EcsServiceManagement
-            Effect: Allow
-            Action:
-              - "ecs:CreateService"
-              - "ecs:DescribeServices"
-              - "ecs:UpdateService"
-              - "ecs:TagResource"
-            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/*/*"
-          
-          - Sid: EcsTaskDefinitionManagement
-            Effect: Allow
-            Action:
-              - "ecs:RegisterTaskDefinition"
-              - "ecs:TagResource"
-            Resource: !Sub "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/*:*"
-          
-          - Sid: LogGroupManagement
-            Effect: Allow
-            Action:
-              - "logs:CreateLogGroup"
-              - "logs:PutRetentionPolicy"
+              - "logs:*"
             Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
+          
+          - Sid: ApplicationAutoScalingMutations
+            Effect: Allow
+            Action:
+              - "application-autoscaling:*"
+            Resource: !Sub "arn:${AWS::Partition}:application-autoscaling:${AWS::Region}:${AWS::AccountId}:scalable-target/*"
+          
+          - Sid: AutoScalingMutations
+            Effect: Allow
+            Action:
+              - "autoscaling:*"
+            Resource: !Sub "arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*"
+          
+          - Sid: CloudWatchAlarmMutations
+            Effect: Allow
+            Action:
+              - "cloudwatch:*"
+            Resource: !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*"
   
   LoadBalancerPolicy:
     Type: AWS::IAM::ManagedPolicy
