@@ -13,7 +13,7 @@ resource "aws_acm_certificate" "atelier_tls_certificate" {
     "Project"      = var.project_name
     "ResourceType" = "DNS"
   }
-
+# hi test
   lifecycle {
     create_before_destroy = true
   }
