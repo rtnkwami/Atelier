@@ -257,81 +257,42 @@ Resources:
           - Sid: DatabaseDiscovery
             Effect: Allow
             Action:
-              - "rds:AddTagsToResource"
-              - "rds:DescribeDBClusters"
-              - "rds:DescribeDBInstances"
-              - "rds:DescribeDBSubnetGroups"
-              - "rds:DescribeGlobalClusters"
-              - "rds:ListTagsForResource"
-              - "elasticache:AddTagsToResource"
-              - "elasticache:ListTagsForResource"
+              - "rds:Describe*"
+              - "rds:List*"
+              - "elasticache:Describe*"
+              - "elasticache:List*"
             Resource: "*"
           
-          - Sid: RdsClusterParameterGroupAccess
+          - Sid: RdsMutations
             Effect: Allow
             Action:
-              - "rds:CreateDBCluster"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster-pg:*"
+              - "rds:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster:*"
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster-pg:*"
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:db:*"
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:og:*"
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:subgrp:*"
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:tenant-database:*"
           
-          - Sid: RdsClusterManagement
+          - Sid: ElastiCacheMutations
             Effect: Allow
             Action:
-              - "rds:CreateDBCluster"
-              - "rds:CreateDBInstance"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster:*"
+              - "elasticache:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:cluster:*"
+              - !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:parametergroup:*"
+              - !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:replicationgroup:*"
+              - !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:subnetgroup:*"
           
-          - Sid: RdsDbInstanceManagement
+          - Sid: DatabaseTagging
             Effect: Allow
             Action:
-              - "rds:CreateDBInstance"
-              - "rds:CreateTenantDatabase"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:db:*"
-          
-          - Sid: RdsOptionGroupAccess
-            Effect: Allow
-            Action:
-              - "rds:CreateDBCluster"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:og:*"
-          
-          - Sid: RdsSubnetGroupManagement
-            Effect: Allow
-            Action:
-              - "rds:CreateDBCluster"
-              - "rds:CreateDBSubnetGroup"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:subgrp:*"
-          
-          - Sid: RdsTenantDatabaseManagement
-            Effect: Allow
-            Action:
-              - "rds:CreateTenantDatabase"
-            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:tenant-database:*"
-          
-          - Sid: ElastiCacheClusterManagement
-            Effect: Allow
-            Action:
-              - "elasticache:DescribeCacheClusters"
-            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:cluster:*"
-          
-          - Sid: ElastiCacheParameterGroupAccess
-            Effect: Allow
-            Action:
-              - "elasticache:CreateReplicationGroup"
-            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:parametergroup:*"
-          
-          - Sid: ElastiCacheReplicationGroupManagement
-            Effect: Allow
-            Action:
-              - "elasticache:DescribeReplicationGroups"
-              - "elasticache:CreateReplicationGroup"
-            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:replicationgroup:*"
-          
-          - Sid: ElastiCacheSubnetGroupManagement
-            Effect: Allow
-            Action:
-              - "elasticache:CreateCacheSubnetGroup"
-              - "elasticache:DescribeCacheSubnetGroups"
-              - "elasticache:CreateReplicationGroup"
-            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:subnetgroup:*"
+              - "rds:AddTagsToResource"
+              - "elasticache:AddTagsToResource"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:*:*"
+              - !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:*:*"
 
   CICDRole:
     Type: AWS::IAM::Role
