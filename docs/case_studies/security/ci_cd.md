@@ -102,40 +102,26 @@ Well, that's the idea anyway. I'm not necessarily going to stick to the exact st
 
 For historical reasons, I'll keep the full generated policy within my repo, so that you can see where we started, and where we ended. You can access the policy [here](/CI_CD_Role_Policy.json).
 
-Now, let's move on to segregating the policy. I'll start first by separating network permissions. There are quite a number of networking permissions. Some of them are related to network discover, and some of them are related to network resource creation. These seem like logical segregations, so I'm going to keep those segregations and implement them as polcies.
+Now, let's move on to segregating the policy. Rather than reproducing the full policy here in CloudFormation , youc can find the complete implementation in [`bootstrap.yaml`](/bootstrap.yaml). Let's walk through the decisions made during the segregation process.
 
-So for our **Network Discovery Policy**, we are going to have the following:
+The first thing I want to establish is that I'm not restructuring what AWS generated. The policy generator already did the hard work of scoping actions to the correct resource types. My job here is purely organization — grouping statements into logical managed policies that are easier to read, audit, and maintain.
 
-```yaml
-NetworkDiscoveryPolicy:
-  Type: AWS::IAM::ManagedPolicy
-  Properties:
-    ManagedPolicyName: NetworkDiscoveryPolicy
-    PolicyDocument:
-      Version: "2012-10-17"
-      Statement:
-        - Effect: Allow
-          Action:
-            - "ec2:DescribeAccountAttributes"
-            - "ec2:DescribeAvailabilityZones"
-            - "ec2:DescribeVpcs"
-            - "ec2:DescribeVpcAttribute"
-            - "ec2:DescribeInternetGateways"
-            - "ec2:DescribeSubnets"
-            - "ec2:DescribeRouteTables"
-            - "ec2:DescribeNetworkAcls"
-            - "ec2:DescribeAddresses"
-            - "ec2:DescribeAddressesAttribute"
-            - "ec2:DescribeNetworkInterfaces"
-            - "ec2:DescribeNatGateways"
-            - "ec2:DescribeSecurityGroups"
-          Resource: "*"
-```
+#### Network Policy
 
-These permissions will allow out Terraform/OpenTofu code to get the IDs and ARNs of our VPC, subnets, Gateways, etc to place resources within them.
+The network policy is the largest of the bunch, which makes sense given that networking is the foundation everything else sits on. I split the statements into read-only discovery actions and mutating management actions, further broken down by resource type — VPCs, subnets, route tables, security groups, internet gateways, NAT gateways, network interfaces, and elastic IPs. You'll also notice that some actions like `ec2:CreateRouteTable` and `ec2:CreateSubnet` appear across multiple resource statements. This is intentional and reflects how AWS itself scoped them in the generated policy.
 
-Now let's move on to our **Network Management Policy**:
+#### Compute Policy
 
-```yaml
+The compute policy covers ECS, CloudWatch, Auto Scaling, and CloudWatch Logs. The split here follows the same read vs. write pattern, discovery actions against `Resource: "*"` and management actions scoped to specific resource ARNs.
 
-```
+#### Load Balancer Policy
+
+The load balancer policy covers all `elasticloadbalancing:*` actions. Over here I placed `CreateListener` and `CreateLoadBalancer` both under `Resource: "*"` in the generated policy. Rather than bundling them with the discovery actions, I gave them their own LoadBalancerCreation statement to make it clear these are mutating actions, not reads.
+
+#### Security And Identity Policy
+
+This policy covers ACM, IAM, KMS, Secrets Manager, and SSM. One extra tightening step was applied here: since the secrets and parameters used by this application are all defined in bootstrap.yaml under the `/atelier/` path, I was able to scope the `SecretsManagement` and `SsmParameterAccess` statements to `arn:...:secret:/atelier/*` and `arn:...:parameter/atelier/*` respectively, rather than leaving them open to all secrets and parameters in the account.
+
+#### DNS And Storage Policy
+
+The final policy covers Route 53, S3, and STS. Route 53 ARNs don't include partition, region, or account segments, so these statements use plain `arn:aws:route53:::` rather than the `!Sub` with CloudFormation pseudo-parameters used elsewhere.
