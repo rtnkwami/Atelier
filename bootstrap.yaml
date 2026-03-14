@@ -336,6 +336,89 @@ Resources:
               - "route53:GetChange"
             Resource: "arn:aws:route53:::change/*"
   
+  DatabasePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: DatabasePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DatabaseDiscovery
+            Effect: Allow
+            Action:
+              - "rds:AddTagsToResource"
+              - "rds:DescribeDBClusters"
+              - "rds:DescribeDBInstances"
+              - "rds:DescribeDBSubnetGroups"
+              - "rds:DescribeGlobalClusters"
+              - "rds:ListTagsForResource"
+              - "elasticache:AddTagsToResource"
+              - "elasticache:ListTagsForResource"
+            Resource: "*"
+          
+          - Sid: RdsClusterParameterGroupAccess
+            Effect: Allow
+            Action:
+              - "rds:CreateDBCluster"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster-pg:*"
+          
+          - Sid: RdsClusterManagement
+            Effect: Allow
+            Action:
+              - "rds:CreateDBCluster"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:cluster:*"
+          
+          - Sid: RdsDbInstanceManagement
+            Effect: Allow
+            Action:
+              - "rds:CreateDBInstance"
+              - "rds:CreateTenantDatabase"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:db:*"
+          
+          - Sid: RdsOptionGroupAccess
+            Effect: Allow
+            Action:
+              - "rds:CreateDBCluster"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:og:*"
+          
+          - Sid: RdsSubnetGroupManagement
+            Effect: Allow
+            Action:
+              - "rds:CreateDBCluster"
+              - "rds:CreateDBSubnetGroup"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:subgrp:*"
+          
+          - Sid: RdsTenantDatabaseManagement
+            Effect: Allow
+            Action:
+              - "rds:CreateTenantDatabase"
+            Resource: !Sub "arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:tenant-database:*"
+          
+          - Sid: ElastiCacheClusterManagement
+            Effect: Allow
+            Action:
+              - "elasticache:DescribeCacheClusters"
+            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:cluster:*"
+          
+          - Sid: ElastiCacheParameterGroupAccess
+            Effect: Allow
+            Action:
+              - "elasticache:CreateReplicationGroup"
+            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:parametergroup:*"
+          
+          - Sid: ElastiCacheReplicationGroupManagement
+            Effect: Allow
+            Action:
+              - "elasticache:DescribeReplicationGroups"
+            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:replicationgroup:*"
+          
+          - Sid: ElastiCacheSubnetGroupManagement
+            Effect: Allow
+            Action:
+              - "elasticache:CreateCacheSubnetGroup"
+              - "elasticache:DescribeCacheSubnetGroups"
+            Resource: !Sub "arn:${AWS::Partition}:elasticache:${AWS::Region}:${AWS::AccountId}:subnetgroup:*"
+
   CICDRole:
     Type: AWS::IAM::Role
     Properties:
@@ -359,7 +442,7 @@ Resources:
         - !Ref LoadBalancerPolicy
         - !Ref SecurityAndIdentityPolicy
         - !Ref DnsAndStoragePolicy
-        
+        - !Ref DatabasePolicy
 
   TaskExecutionRole:
     Type: AWS::IAM::Role
