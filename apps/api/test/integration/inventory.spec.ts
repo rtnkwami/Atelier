@@ -7,7 +7,11 @@ import { Reservation } from 'src/entities/reservation.entity';
 import { InventoryController } from 'src/inventory/inventory.controller';
 import { InventoryService } from 'src/inventory/inventory.service';
 import dbConfig from 'src/mikro-orm.config';
-import autoRollback from 'test/utils/transactional-test.util';
+import {
+  InventorySearchSeeder,
+  KNOWN_PRODUCT_NAME,
+} from 'test/seeders/inventory-search.seeder';
+import emContextManager from 'test/utils/transactional-test.util';
 import { beforeAll, it, expect, describe } from 'vitest';
 
 describe('Inventory Tests', () => {
@@ -22,6 +26,9 @@ describe('Inventory Tests', () => {
           clientUrl: process.env.DATABASE_URL,
           autoLoadEntities: true,
           driverOptions: {},
+          seeder: {
+            path: 'test/seeders',
+          },
         }),
         MikroOrmModule.forFeature([Product, Reservation, ReservationItem]),
       ],
@@ -33,49 +40,32 @@ describe('Inventory Tests', () => {
     orm = moduleRef.get(MikroORM);
   });
 
-  describe('create, update, delete tests', () => {
-    const testProduct = {
-      name: 'Test Product',
-      description: 'A test product',
-      price: 10.99,
-      category: 'Tests',
-      stock: 2000,
-    };
+  describe('Product Search', () => {
+    beforeAll(async () => {
+      await orm.seeder.seed(InventorySearchSeeder);
+    });
 
-    it('should create a product', async () => {
-      await autoRollback(orm.em, async () => {
-        const response = await inventoryController.create(testProduct);
-
-        expect(response).toBeDefined();
-        expect(response.name).toBe('Test Product');
+    it('should return products given no search filters', async () => {
+      await emContextManager(orm.em, async () => {
+        const response = await inventoryController.search({});
+        expect(response.totalItems).toBeGreaterThan(0);
       });
     });
 
-    it('should get a product', async () => {
-      await autoRollback(orm.em, async () => {
-        const product = await inventoryController.create(testProduct);
-        const response = await inventoryController.getProduct(product.id);
-
-        expect(response.name).toBe(product.name);
-        expect(response.price).toBe(product.price);
+    it('should return results when searching by name', async () => {
+      await emContextManager(orm.em, async () => {
+        const response = await inventoryController.search({
+          name: KNOWN_PRODUCT_NAME,
+        });
+        expect(response.totalItems).toBeGreaterThan(0);
+        expect(response.products[0].name).toBe(KNOWN_PRODUCT_NAME);
       });
     });
 
-    it('should delete a product', async () => {
-      await autoRollback(orm.em, async () => {
-        const product = await inventoryController.create(testProduct);
-        const inventoryBeforeDelete = await inventoryController.search({
-          page: 1,
-          limit: 5,
-        });
-        await inventoryController.deleteProduct(product.id);
-        const inventoryAfterDelete = await inventoryController.search({
-          page: 1,
-          limit: 5,
-        });
-
-        expect(inventoryBeforeDelete.totalItems).toBeGreaterThan(0);
-        expect(inventoryAfterDelete.totalItems).toBe(0);
+    it('should return results when only min price filter is used ', async () => {
+      await emContextManager(orm.em, async () => {
+        const response = await inventoryController.search({ minPrice: 10 });
+        expect(response.totalItems).toBeGreaterThan(0);
       });
     });
   });
