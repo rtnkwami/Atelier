@@ -7,6 +7,9 @@ export default defineConfig({
     globals: true,
     root: './',
     exclude: [...defaultExclude, '**/dist/**'],
+    sequence: {
+      concurrent: true,
+    },
     projects: [
       {
         extends: true,
@@ -18,6 +21,18 @@ export default defineConfig({
             concurrent: true,
           },
           fileParallelism: true,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['**/integration/*.spec.ts'],
+          sequence: {
+            shuffle: { tests: true },
+          },
+          fileParallelism: true,
+          setupFiles: ['./vitest.setup.ts'],
         },
       },
       {
