@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OrderStatus } from "../orders";
+import { OrderStatus } from "../orders.js";
 
 export const CreateOrderResponseSchema = z.object({
   id: z.uuid(),
