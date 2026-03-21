@@ -12,7 +12,7 @@ import {
   KNOWN_PRODUCT_NAME,
 } from 'test/seeders/inventory-search.seeder';
 import emContextManager from 'test/utils/transactional-test.util';
-import { beforeAll, it, expect, describe } from 'vitest';
+import { beforeAll, it, expect, describe, afterAll } from 'vitest';
 
 describe('Inventory Tests', () => {
   let inventoryController: InventoryController;
@@ -43,6 +43,10 @@ describe('Inventory Tests', () => {
   describe('Product Search', () => {
     beforeAll(async () => {
       await orm.seeder.seed(InventorySearchSeeder);
+    });
+
+    afterAll(async () => {
+      await orm.schema.refreshDatabase();
     });
 
     it('should return products given no search filters', async () => {
