@@ -62,10 +62,40 @@ describe('Inventory Tests', () => {
       });
     });
 
-    it('should return results when only min price filter is used ', async () => {
+    it('should return accurate results when only min price filter is used ', async () => {
       await emContextManager(orm.em, async () => {
         const response = await inventoryController.search({ minPrice: 10 });
         expect(response.totalItems).toBeGreaterThan(0);
+
+        const productToVerify = response.products[0];
+        expect(productToVerify.price).toBeGreaterThanOrEqual(10);
+      });
+    });
+
+    it('should return accurate results when only max price filter is used ', async () => {
+      await emContextManager(orm.em, async () => {
+        const response = await inventoryController.search({ maxPrice: 250 });
+        expect(response.totalItems).toBeGreaterThan(0);
+
+        const productToVerify = response.products[0];
+        expect(productToVerify.price).toBeLessThanOrEqual(250);
+      });
+    });
+
+    it('should return accurate results when both max and min price filters are used', async () => {
+      const maxPrice = 200;
+      const minPrice = 10;
+
+      await emContextManager(orm.em, async () => {
+        const response = await inventoryController.search({
+          minPrice,
+          maxPrice,
+        });
+        expect(response.totalItems).toBeGreaterThan(0);
+
+        const productToVerify = response.products[0];
+        expect(productToVerify.price).toBeGreaterThanOrEqual(minPrice);
+        expect(productToVerify.price).toBeLessThanOrEqual(maxPrice);
       });
     });
   });
