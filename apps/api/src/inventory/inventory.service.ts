@@ -77,7 +77,14 @@ export class InventoryService {
   }
 
   public async search(filters: SearchProducts): Promise<SearchProductResponse> {
-    const { page, limit, name, category, minPrice, maxPrice } = filters;
+    const {
+      page = 1,
+      limit = 20,
+      name,
+      category,
+      minPrice,
+      maxPrice,
+    } = filters;
     const offset = (page - 1) * limit;
     const search: FilterQuery<Product> = {};
 

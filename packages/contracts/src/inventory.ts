@@ -21,8 +21,8 @@ export const SearchProductSchema = z
     category: z.string().optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),
-    page: z.coerce.number().min(1).optional().default(1),
-    limit: z.coerce.number().min(1).max(100).optional().default(20),
+    page: z.coerce.number().min(1).optional(),
+    limit: z.coerce.number().min(1).max(100).optional(),
   })
   .strict();
 export type SearchProducts = z.infer<typeof SearchProductSchema>;
