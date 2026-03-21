@@ -45,7 +45,9 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.3.0",
     "@mikro-orm/cli": "^6.6.7",
+    "@mikro-orm/seeder": "^6.6.9",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",

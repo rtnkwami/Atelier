@@ -88,9 +88,15 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.4
+      '@faker-js/faker':
+        specifier: ^10.3.0
+        version: 10.3.0
       '@mikro-orm/cli':
         specifier: ^6.6.7
         version: 6.6.9(pg@8.19.0)
+      '@mikro-orm/seeder':
+        specifier: ^6.6.9
+        version: 6.6.9(@mikro-orm/core@6.6.9)
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.16(@swc/cli@0.8.0(@swc/core@1.15.18)(chokidar@4.0.3))(@swc/core@1.15.18)(@types/node@22.19.15)
@@ -656,6 +662,10 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@faker-js/faker@10.3.0':
+    resolution: {integrity: sha512-It0Sne6P3szg7JIi6CgKbvTZoMjxBZhcv91ZrqrNuaZQfB5WoqYYbzCUOq89YR+VY8juY9M1vDWmDDa2TzfXCw==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
+
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
 
@@ -1092,6 +1102,12 @@ packages:
 
   '@mikro-orm/postgresql@6.6.9':
     resolution: {integrity: sha512-1HYURnRIi5QIOLhifbL0KLMFlNxvZYAEPgWl16AKAElzJqnYzE493fp+P5mrZvG2vE+hudUL3lYVGqakg4Lq+A==}
+    engines: {node: '>= 18.12.0'}
+    peerDependencies:
+      '@mikro-orm/core': ^6.0.0
+
+  '@mikro-orm/seeder@6.6.9':
+    resolution: {integrity: sha512-TcZt1o2c5bcQ51sh60AEWwwVgje5YBTdrXoZ66Tab3MDRbGmnC+B8f/RR/K/ENVOkwqaltCsmzUts4BXWkg7ow==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       '@mikro-orm/core': ^6.0.0
@@ -7154,6 +7170,8 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
+  '@faker-js/faker@10.3.0': {}
+
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
@@ -7619,6 +7637,12 @@ snapshots:
       - sqlite3
       - supports-color
       - tedious
+
+  '@mikro-orm/seeder@6.6.9(@mikro-orm/core@6.6.9)':
+    dependencies:
+      '@mikro-orm/core': 6.6.9
+      fs-extra: 11.3.3
+      globby: 11.1.0
 
   '@modelcontextprotocol/sdk@1.27.1(zod@3.25.76)':
     dependencies:
@@ -8795,7 +8819,7 @@ snapshots:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
       ajv-formats: 3.0.1(ajv@8.13.0)
-      fs-extra: 11.3.3
+      fs-extra: 11.3.4
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.22.11
