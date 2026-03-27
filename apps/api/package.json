@@ -19,6 +19,7 @@
     "test:debug": "vitest --inspect-brk --no-file-parallelism"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@keyv/redis": "^5.1.6",
     "@mikro-orm/core": "^6.6.7",
     "@mikro-orm/migrations": "^6.6.7",
@@ -45,7 +46,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^10.3.0",
     "@mikro-orm/cli": "^6.6.7",
     "@mikro-orm/seeder": "^6.6.9",
     "@nestjs/cli": "^11.0.0",
