@@ -4,8 +4,8 @@ data "aws_route53_zone" "personal_hosted_zone" {
 }
 
 resource "aws_acm_certificate" "atelier_tls_certificate" {
-  count = var.custom_domain != "" ? 1 : 0
-  domain_name = "atelier.${var.custom_domain}"
+  count             = var.custom_domain != "" ? 1 : 0
+  domain_name       = "atelier.${var.custom_domain}"
   validation_method = "DNS"
 
   tags = {
@@ -37,8 +37,8 @@ resource "aws_route53_record" "atelier_cert_validation_records" {
 }
 
 resource "aws_acm_certificate_validation" "atelier_tls_cert_validation" {
-  count = var.custom_domain != "" ? 1 : 0
-  certificate_arn = aws_acm_certificate.atelier_tls_certificate[0].arn
+  count                   = var.custom_domain != "" ? 1 : 0
+  certificate_arn         = aws_acm_certificate.atelier_tls_certificate[0].arn
   validation_record_fqdns = [for record in aws_route53_record.atelier_cert_validation_records : record.fqdn]
 }
 
@@ -52,5 +52,5 @@ resource "aws_route53_record" "atelier_dns_record" {
     name                   = aws_lb.public_load_balancer.dns_name
     zone_id                = aws_lb.public_load_balancer.zone_id
     evaluate_target_health = true
-  }  
+  }
 }
