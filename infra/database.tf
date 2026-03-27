@@ -14,7 +14,7 @@ resource "aws_db_instance" "db_primary" {
 
   allocated_storage    = 20
   instance_class       = "db.t4g.medium"
-  engine               = "postgresql"
+  engine               = "postgres"
   engine_version       = "17.1"
   db_name              = data.aws_ssm_parameter.database_name.value
   username             = data.aws_ssm_parameter.database_user.value
