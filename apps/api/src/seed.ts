@@ -16,3 +16,4 @@ void (async () => {
   await orm.seeder.seed(InventoryProductSeeder);
   await orm.close(true);
 })();
+// hello test
