@@ -7,17 +7,20 @@ ecs = boto3.client('ecs')
 cluster_name = os.environ['CLUSTER_NAME']
 service_name = os.environ['SERVICE_NAME']
 
+# Get service details
 service = ecs.describe_services(
     cluster=cluster_name,
     services=[service_name]
 )['services'][0]
 
+# Get container name from task definition
 task_def = ecs.describe_task_definition(
     taskDefinition=service['taskDefinition']
 )['taskDefinition']
 
 container_name = task_def['containerDefinitions'][0]['name']
 
+# Run migration task
 response = ecs.run_task(
     cluster=cluster_name,
     taskDefinition=service['taskDefinition'],
@@ -32,12 +35,18 @@ response = ecs.run_task(
 )
 
 task_arn = response['tasks'][0]['taskArn']
+print(f"Seed task started: {task_arn}")
 
+# Wait for completion
 waiter = ecs.get_waiter('tasks_stopped')
 waiter.wait(cluster=cluster_name, tasks=[task_arn])
 
+# Check result
 task = ecs.describe_tasks(cluster=cluster_name, tasks=[task_arn])['tasks'][0]
 exit_code = task['containers'][0]['exitCode']
 
 if exit_code != 0:
+    print(f"Seeding failed with exit code {exit_code}")
     sys.exit(1)
+
+print("Seeding completed successfully")
