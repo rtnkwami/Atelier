@@ -122,6 +122,8 @@ jobs:
             migrations:
               - apps/api/src/migrations/**
               - apps/api/src/migrate.ts
+              - apps/api/src/seeders/**
+              - apps/api/src/seed.ts
 
   containerize:
     needs: [test, detect-changes]
