@@ -11,3 +11,4 @@ export class Migration20260216215431 extends Migration {
     this.addSql(`drop table if exists "product" cascade;`);
   }
 }
+// hi

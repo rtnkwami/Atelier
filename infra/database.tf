@@ -11,15 +11,15 @@ resource "aws_db_subnet_group" "db_cluster_subnet_group" {
 
 resource "aws_db_instance" "db_primary" {
   multi_az = true
-# test
+
   allocated_storage    = 20
   instance_class       = "db.t4g.medium"
   engine               = "postgres"
-  engine_version       = "17.1"
   db_name              = data.aws_ssm_parameter.database_name.value
   username             = data.aws_ssm_parameter.database_user.value
   password             = data.aws_secretsmanager_secret_version.database_password.secret_string
   db_subnet_group_name = aws_db_subnet_group.db_cluster_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.database_cluster_security_group.id]
   skip_final_snapshot  = true
 
   tags = {
