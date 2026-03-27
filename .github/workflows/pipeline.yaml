@@ -72,6 +72,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Pre-pull PostgreSQL Image
+        run: docker pull postgres:18
+
       - name: Install dependencies
         run: pnpm install
 
