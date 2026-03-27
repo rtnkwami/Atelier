@@ -17,6 +17,7 @@ resource "aws_db_instance" "db_primary" {
   engine               = "postgresql"
   engine_version       = "17.1"
   db_name              = data.aws_ssm_parameter.database_name.value
+  username             = data.aws_ssm_parameter.database_user.value
   password             = data.aws_secretsmanager_secret_version.database_password.secret_string
   db_subnet_group_name = aws_db_subnet_group.db_cluster_subnet_group.name
   skip_final_snapshot  = true
