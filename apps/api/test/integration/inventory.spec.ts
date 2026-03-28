@@ -4,8 +4,8 @@ import { Test } from '@nestjs/testing';
 import { Product } from 'src/entities/product.entity';
 import { ReservationItem } from 'src/entities/reservation-item.entity';
 import { Reservation } from 'src/entities/reservation.entity';
-import { InventoryController } from 'src/inventory/inventory.controller';
-import { InventoryService } from 'src/inventory/inventory.service';
+import { InventoryController } from 'src/modules/inventory/inventory.controller';
+import { InventoryService } from 'src/modules/inventory/inventory.service';
 import dbConfig from 'src/mikro-orm.config';
 import {
   InventorySearchSeeder,
