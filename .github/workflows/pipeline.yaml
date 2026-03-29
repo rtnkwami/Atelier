@@ -120,9 +120,8 @@ jobs:
           base: ${{ github.event.before }}
           filters: |
             migrations:
-              - apps/api/src/migrations/**
+              - apps/api/src/database/**
               - apps/api/src/migrate.ts
-              - apps/api/src/seeders/**
               - apps/api/src/seed.ts
 
   containerize:
