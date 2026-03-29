@@ -15,7 +15,7 @@ beforeAll(async () => {
   const orm = await MikroORM.init({
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
-    entities: ['./dist/database/entities'],
+    entities: ['./dist/database/entities/*.js'],
     entitiesTs: ['./dist/database/entities'],
     migrations: {
       path: './dist/database/migrations',
