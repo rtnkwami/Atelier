@@ -23,6 +23,8 @@ describe('Inventory Tests', () => {
       imports: [
         MikroOrmModule.forRoot({
           ...dbConfig,
+          entities: [],
+          entitiesTs: [],
           clientUrl: process.env.DATABASE_URL,
           autoLoadEntities: true,
           driverOptions: {},

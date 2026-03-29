@@ -17,6 +17,8 @@ import { Request, Response } from 'express';
     ConfigModule.forRoot({ isGlobal: true, validate }),
     MikroOrmModule.forRoot({
       ...dbConfig,
+      entities: [],
+      entitiesTs: [],
       autoLoadEntities: true,
     }),
     LoggerModule.forRoot({

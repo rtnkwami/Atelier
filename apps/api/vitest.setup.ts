@@ -4,10 +4,6 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
-import { OrderItem } from 'src/database/entities/order-item.entity';
-import { Order } from 'src/database/entities/order.entity';
-import { Product } from 'src/database/entities/product.entity';
-import { User } from 'src/database/entities/user.entity';
 import { afterAll, beforeAll } from 'vitest';
 
 let container: StartedPostgreSqlContainer;
@@ -19,7 +15,8 @@ beforeAll(async () => {
   const orm = await MikroORM.init({
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
-    entities: [Product, Order, OrderItem, User],
+    entities: ['./dist/database/entities'],
+    entitiesTs: ['./dist/database/entities'],
     migrations: {
       path: './dist/database/migrations',
       pathTs: './src/database/migrations',
