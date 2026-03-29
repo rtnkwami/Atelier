@@ -23,9 +23,9 @@ import type {
   SearchProducts,
   UpdateProduct,
 } from 'contracts';
-import { Product } from 'src/entities/product.entity';
-import { ReservationItem } from 'src/entities/reservation-item.entity';
-import { Reservation } from 'src/entities/reservation.entity';
+import { Product } from 'src/database/entities/product.entity';
+import { ReservationItem } from 'src/database/entities/reservation-item.entity';
+import { Reservation } from 'src/database/entities/reservation.entity';
 
 @Injectable()
 export class InventoryService {

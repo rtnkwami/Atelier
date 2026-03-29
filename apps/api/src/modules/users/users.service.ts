@@ -1,7 +1,7 @@
 import { EntityManager, Transactional, wrap } from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateUser, UpdateUserProfile } from 'contracts';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/database/entities/user.entity';
 
 @Injectable()
 export class UsersService {

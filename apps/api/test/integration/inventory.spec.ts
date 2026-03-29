@@ -1,9 +1,9 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { Test } from '@nestjs/testing';
-import { Product } from 'src/entities/product.entity';
-import { ReservationItem } from 'src/entities/reservation-item.entity';
-import { Reservation } from 'src/entities/reservation.entity';
+import { Product } from 'src/database/entities/product.entity';
+import { ReservationItem } from 'src/database/entities/reservation-item.entity';
+import { Reservation } from 'src/database/entities/reservation.entity';
 import { InventoryController } from 'src/modules/inventory/inventory.controller';
 import { InventoryService } from 'src/modules/inventory/inventory.service';
 import dbConfig from 'src/mikro-orm.config';

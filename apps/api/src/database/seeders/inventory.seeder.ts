@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Seeder } from '@mikro-orm/seeder';
-import { Product } from 'src/entities/product.entity';
+import { Product } from 'src/database/entities/product.entity';
 
 export class InventoryProductSeeder extends Seeder {
   run(em: EntityManager) {

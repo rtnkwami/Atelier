@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Seeder } from '@mikro-orm/seeder';
-import { Product } from 'src/entities/product.entity';
+import { Product } from 'src/database/entities/product.entity';
 import { faker } from '@faker-js/faker';
 
 export const KNOWN_PRODUCT_NAME = "Niovial's Test Product";

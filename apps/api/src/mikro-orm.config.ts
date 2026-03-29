@@ -4,8 +4,8 @@ import 'dotenv/config';
 
 export default defineConfig({
   migrations: {
-    path: './dist/migrations',
-    pathTs: './src/migrations',
+    path: './dist/database/migrations',
+    pathTs: './src/database/migrations',
   },
   extensions: [Migrator],
   clientUrl: process.env.DATABASE_URL,

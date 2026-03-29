@@ -6,9 +6,9 @@ void (async () => {
   const orm = await MikroORM.init({
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
-    entities: ['./dist/entities/*.js'],
+    entities: ['./dist/database/entities/*.js'],
     migrations: {
-      path: './dist/migrations',
+      path: './dist/database/migrations',
       transactional: true,
     },
     driverOptions: {
