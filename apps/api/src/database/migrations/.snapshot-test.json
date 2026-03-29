@@ -295,7 +295,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "unique": true,
+          "unique": false,
           "length": 255,
           "precision": null,
           "scale": null,
@@ -420,16 +420,6 @@
       "name": "product",
       "schema": "public",
       "indexes": [
-        {
-          "columnNames": [
-            "name"
-          ],
-          "composite": false,
-          "constraint": true,
-          "keyName": "product_name_unique",
-          "unique": true,
-          "primary": false
-        },
         {
           "columnNames": [
             "id"
