@@ -16,7 +16,7 @@ beforeAll(async () => {
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
     entities: ['./dist/database/entities/*.js'],
-    entitiesTs: ['./dist/database/entities'],
+    entitiesTs: ['./src/database/entities'],
     migrations: {
       path: './dist/database/migrations',
       pathTs: './src/database/migrations',
@@ -26,7 +26,7 @@ beforeAll(async () => {
   const migrator = orm.getMigrator();
   await migrator.up();
   await orm.close();
-});
+}, 20000);
 
 afterAll(async () => {
   await container.stop();
