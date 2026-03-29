@@ -19,12 +19,13 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "api#build"],
       "inputs": [
         "src/**/*.ts",
         "test/**/*.ts",
         "tsconfig.json",
-        "vitest.config.ts"
+        "vitest.config.ts",
+        "dist/**"
       ]
     }
   },

@@ -16,7 +16,6 @@ beforeAll(async () => {
     extensions: [Migrator],
     clientUrl: process.env.DATABASE_URL,
     entities: ['./dist/database/entities/*.js'],
-    entitiesTs: ['./src/database/entities'],
     migrations: {
       path: './dist/database/migrations',
       pathTs: './src/database/migrations',
