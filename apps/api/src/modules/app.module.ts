@@ -1,14 +1,14 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
-import { validate } from './env.validation';
+import { validate } from '../env.validation';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { InventoryModule } from './modules/inventory/inventory.module';
-import { CartModule } from './modules/cart/cart.module';
-import dbConfig from './mikro-orm.config';
-import { AuthMiddleware } from './middleware/auth.middleware';
-import { OrdersModule } from './modules/orders/orders.module';
-import { UsersModule } from './modules/users/users.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { CartModule } from './cart/cart.module';
+import dbConfig from '../mikro-orm.config';
+import { AuthMiddleware } from '../middleware/auth.middleware';
+import { OrdersModule } from './orders/orders.module';
+import { UsersModule } from './users/users.module';
 import { LoggerModule } from 'nestjs-pino';
 import { Request, Response } from 'express';
 
