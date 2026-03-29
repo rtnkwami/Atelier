@@ -17,7 +17,7 @@ export class Product extends BaseEntity<'description' | 'images'> {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ unique: true })
+  @Property()
   name: string;
 
   @Property()
