@@ -12,7 +12,7 @@ resource "aws_db_subnet_group" "db_cluster_subnet_group" {
 resource "aws_db_instance" "db_primary" {
   multi_az = true
 
-  identifier = "${var.project_name}-db-primary"
+  identifier = "db-primary"
   allocated_storage    = 20
   instance_class       = "db.t4g.medium"
   engine               = "postgres"

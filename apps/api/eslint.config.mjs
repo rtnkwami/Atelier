@@ -36,6 +36,6 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/require-await': 'off'
     },
-    files: ['./src/migrations/**']
+    files: ['./src/database/migrations/**']
   }
 );
