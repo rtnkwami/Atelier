@@ -14,15 +14,19 @@ RUN pnpm build
 
 RUN pnpm --filter=api --prod deploy ./prod
 
-FROM node:24-alpine AS runner
+FROM node:24-alpine
+
+RUN apk add --no-cache curl
+
+RUN adduser -D -H nestjs
 
 WORKDIR /app
 
-RUN apk add curl
-
-COPY --from=base /app/prod/dist/ ./dist
-COPY --from=base /app/prod/node_modules ./node_modules
+COPY --chown=nestjs:nestjs --from=base /app/prod/dist/ ./dist
+COPY --chown=nestjs:nestjs --from=base /app/prod/node_modules ./node_modules
 
 EXPOSE 5000
+
+USER nestjs
 
 CMD [ "node", "dist/main.js" ]
