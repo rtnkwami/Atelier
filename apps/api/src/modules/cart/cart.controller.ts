@@ -1,6 +1,6 @@
 import { Controller, Body, Put, Get, Delete, Patch } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { User } from 'src/auth/user.decorator';
+import { User } from 'src/decorators/user.decorator';
 import { CreateCartSchema, type Cart } from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 

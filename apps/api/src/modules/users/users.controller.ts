@@ -6,7 +6,7 @@ import {
   CreateUserSchema,
   type UpdateUserProfile,
 } from 'contracts';
-import { User } from 'src/auth/user.decorator';
+import { User } from 'src/decorators/user.decorator';
 
 @Controller('users')
 export class UsersController {

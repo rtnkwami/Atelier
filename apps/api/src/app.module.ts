@@ -6,7 +6,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { CartModule } from './modules/cart/cart.module';
 import dbConfig from './mikro-orm.config';
-import { AuthMiddleware } from './auth/auth.middleware';
+import { AuthMiddleware } from './middleware/auth.middleware';
 import { OrdersModule } from './modules/orders/orders.module';
 import { UsersModule } from './modules/users/users.module';
 import { LoggerModule } from 'nestjs-pino';

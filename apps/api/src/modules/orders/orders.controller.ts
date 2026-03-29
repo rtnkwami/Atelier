@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 // import { UpdateOrderDto } from './dto/update-order.dto';
-import { User } from 'src/auth/user.decorator';
+import { User } from 'src/decorators/user.decorator';
 import { OrdersSearchSchema, type SearchOrders } from 'contracts';
 import { ZodValidationPipe } from 'src/pipes/request.validation.pipe';
 import z from 'zod';
